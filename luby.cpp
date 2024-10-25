@@ -11,11 +11,9 @@ public:
 
     Graph(int V) : V(V), adj("adj", V, V) {
         // Initialize adjacency matrix to 0
-        Kokkos::parallel_for("init_adj", V, KOKKOS_LAMBDA(int i) {
-            for (int j = 0; j < V; ++j) {
-                adj(i, j) = 0;
-            }
-        });
+        for (int j = 0; j < V; ++j) {
+            adj(i, j) = 0;
+        }  
     }
 
     void addEdge(int u, int v) {
@@ -67,7 +65,7 @@ KOKKOS_FUNCTION Kokkos::View<int*> lubysAlgorithm(Graph &graph) {
 
         // Step 3: Add selected vertices to MIS and remove them and their neighbors
         changes = false;
-        Kokkos::parallel_for("update_sets", graph.V, KOKKOS_LAMBDA(int u) {
+        Kokkos::parallel_reduce("update_sets", graph.V, KOKKOS_LAMBDA(int u, bool &local_changes) {
             if (inMIS(u) == 1) {
                 removed(u) = 1;
                 for (int v = 0; v < graph.V; ++v) {
@@ -75,9 +73,9 @@ KOKKOS_FUNCTION Kokkos::View<int*> lubysAlgorithm(Graph &graph) {
                         removed(v) = 1;
                     }
                 }
-                changes = true;
+                local_changes = true; // If any vertex is added, flag a change
             }
-        });
+        }, changes);
 
     } while (changes);
 
