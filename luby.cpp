@@ -7,20 +7,25 @@
 class Graph {
 public:
     int V; // number of vertices
-    Kokkos::View<int**> adj; // adjacency matrix
+    Kokkos::View<int**> adj("adj"); // adjacency matrix
+    auto host_adj = Kokkos::create_mirror_view(adj);
 
     Graph(int V) : V(V){
         // Initialize adjacency matrix to 0
         for(int i = 0; i < V; ++i){
             for (int j = 0; j < V; ++j) {
-                adj(i, j) = 0;
+                host_adj(i, j) = 0;
             }  
         }  
     }
 
     void addEdge(int u, int v) {
-        adj(u, v) = 1;
-        adj(v, u) = 1;
+        host_adj(u, v) = 1;
+        host_adj(v, u) = 1;
+    }
+
+    void toGPU(){
+        Kokkos::deep_copy(adj,host_adj);
     }
 };
 // Function to initialize random priorities on the GPU
@@ -83,9 +88,8 @@ KOKKOS_INLINE_FUNCTION Kokkos::View<int*> lubysAlgorithm(Graph &graph) {
 
 int main(int argc, char* argv[]) {
     Kokkos::initialize(argc, argv);
-
     {
-        // Create a sample graph with 6 nodes
+        //Initialize graph
         int V = 6;
         Graph graph(V);
         graph.addEdge(0, 1);
@@ -94,7 +98,7 @@ int main(int argc, char* argv[]) {
         graph.addEdge(2, 3);
         graph.addEdge(3, 4);
         graph.addEdge(3, 5);
-
+        graph.toGPU();
         // Run Luby's algorithm with Kokkos
         Kokkos::View<int*> independentSet = lubysAlgorithm(graph);
 
