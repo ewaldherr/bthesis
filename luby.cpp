@@ -9,7 +9,7 @@ public:
     int V; // number of vertices
     Kokkos::View<int**> adj; // adjacency matrix
 
-    Graph(int V) : V(V), adj("adj", V, V) {
+    Graph(int V) : V(V){
         // Initialize adjacency matrix to 0
         for(int i = 0; i < V; ++i){
             for (int j = 0; j < V; ++j) {
