@@ -11,7 +11,7 @@ public:
 
     Graph(int V) : V(V), adj("adj", V, V) {
         // Initialize adjacency matrix to 0
-        for(in i = 0; i < V; ++i){
+        for(int i = 0; i < V; ++i){
             for (int j = 0; j < V; ++j) {
                 adj(i, j) = 0;
             }  
