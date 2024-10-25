@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.16)
+project(Example CXX)
+find_package(Kokkos REQUIRED)
+add_executable(VecAdd vecadd.cpp)
+target_link_libraries(VecAdd Kokkos::kokkos)
