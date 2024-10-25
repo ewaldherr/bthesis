@@ -23,22 +23,19 @@ public:
         adj(v, u) = 1;
     }
 };
-
 // Function to initialize random priorities on the GPU
-KOKKOS_FUNCTION Kokkos::View<int*> initializePriorities(int V) {
-    Kokkos::View<int*> priorities("priorities", V);
-    Kokkos::parallel_for("init_priorities", V, KOKKOS_LAMBDA(int i) {
+KOKKOS_INLINE_FUNCTION void initializePriorities(Kokkos::View<int*> priorities) {
+    Kokkos::parallel_for("init_priorities", priorities.extent(0), KOKKOS_LAMBDA(int i) {
         unsigned seed = 1234 + i; // Seed for random number generator
         priorities(i) = rand_r(&seed);
     });
-    return priorities;
 }
 
 // Luby's Algorithm with Kokkos
-KOKKOS_FUNCTION Kokkos::View<int*> lubysAlgorithm(Graph &graph) {
+KOKKOS_INLINE_FUNCTION Kokkos::View<int*> lubysAlgorithm(Graph &graph) {
     Kokkos::View<int*> inMIS("inMIS", graph.V);
     Kokkos::View<int*> removed("removed", graph.V);
-    Kokkos::View<int*> priorities;
+    Kokkos::View<int*> priorities("priorities", graph.V);
 
     Kokkos::deep_copy(inMIS, 0);
     Kokkos::deep_copy(removed, 0);
@@ -46,7 +43,7 @@ KOKKOS_FUNCTION Kokkos::View<int*> lubysAlgorithm(Graph &graph) {
     bool changes;
     do {
         // Step 1: Assign random priorities to remaining vertices
-        priorities = initializePriorities(graph.V);
+        initializePriorities(priorities);
 
         // Step 2: Select vertices with highest priority in their neighborhood
         Kokkos::parallel_for("select_max_priority", graph.V, KOKKOS_LAMBDA(int u) {
