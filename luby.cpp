@@ -90,7 +90,9 @@ int main(int argc, char* argv[]) {
         //Initialize graph
         int V = 6;
         Graph graph(V);
-        auto h_graph = Kokkos::create_mirror_view(graph); 
+        Graph h_graph(V);
+        h_graph.adj = Kokkos::create_mirror_view(graph.adj);
+        h_graph.init();
         h_graph.addEdge(0, 1);
         h_graph.addEdge(0, 2);
         h_graph.addEdge(1, 3);
