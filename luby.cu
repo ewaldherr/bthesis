@@ -10,7 +10,7 @@ __global__ void checkMax(int* removed, int** graph,int* priorities,int* inMIS, i
     if (removed[threadIdx.x] == 1) return;
     bool isMaxPriority = true;
         for (int j = 0; j < n; ++j) {
-            if (graph[threadIdx.x][j] == 1 && removed[j] == 0 && priorities[j] >= priorities[threadIdx]) {
+            if (graph[threadIdx.x][j] == 1 && removed[j] == 0 && priorities[j] >= priorities[threadIdx.x]) {
                 isMaxPriority = false;
                 break;
             }
@@ -35,8 +35,8 @@ __global__ void removeVertices(int* removed, int** graph,int* inMIS,bool& change
 
 
 // Luby's Algorithm with Kokkos
-int* lubysAlgorithm(int* removed, int* graph,int* priorities,int* inMIS, int n) {
-    int* independentSet(n);
+int* lubysAlgorithm(int* removed, int** graph,int* priorities,int* inMIS, int n) {
+    int* independentSet;
     bool changes;
     do {
         // Step 1: Assign random priorities to remaining vertices
@@ -57,7 +57,7 @@ int main(int argc, char* argv[]) {
         int** adj;
         for(int i = 0;i < n; ++i){
             for(int j = 0;j < n; ++j){
-                adj[i].push_back(0);
+                adj[i][j] = 0;
             }
         }
         adj[0][1] = 1;
