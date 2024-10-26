@@ -77,7 +77,7 @@ int main(int argc, char* argv[]) {
         cudaMalloc(&priorities,n*sizeof(int));
         cudaMalloc(&d_adj,n*n*sizeof(int));
         cudaMemcpy(d_adj,adj,n*n*sizeof(int),cudaMemcpyHostToDevice);
-        int* independentSet = lubysAlgorithm(removed,adj,priorities,inMIS,n);
+        independentSet = lubysAlgorithm(removed,adj,priorities,inMIS,n);
         cudaFree(inMIS);
         cudaFree(removed);
         cudaFree(priorities);
