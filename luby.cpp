@@ -4,28 +4,6 @@
 #include <random>
 #include <unordered_set>
 
-class Graph {
-public:
-    int V; // number of vertices
-    Kokkos::View<int**> adj; // adjacency matrix
-
-    Graph(int V) : V(V), adj("adj", V, V){
-    }
-
-    void init(){
-        // Initialize adjacency matrix to 0
-        for(int i = 0; i < V; ++i){
-            for (int j = 0; j < V; ++j) {
-                adj(i, j) = 0;
-            }  
-        }  
-    }
-
-    void addEdge(int u, int v) {
-        adj(u, v) = 1;
-        adj(v, u) = 1;
-    }
-};
 // Function to initialize random priorities on the GPU
 KOKKOS_INLINE_FUNCTION void initializePriorities(Kokkos::View<int*> priorities) {
     Kokkos::parallel_for("init_priorities", priorities.extent(0), KOKKOS_LAMBDA(int i) {
@@ -35,10 +13,10 @@ KOKKOS_INLINE_FUNCTION void initializePriorities(Kokkos::View<int*> priorities) 
 }
 
 // Luby's Algorithm with Kokkos
-KOKKOS_INLINE_FUNCTION Kokkos::View<int*> lubysAlgorithm(Graph &graph) {
-    Kokkos::View<int*> inMIS("inMIS", graph.V);
-    Kokkos::View<int*> removed("removed", graph.V);
-    Kokkos::View<int*> priorities("priorities", graph.V);
+KOKKOS_INLINE_FUNCTION Kokkos::View<int*> lubysAlgorithm(Kokkos::view<int**> graph) {
+    Kokkos::View<int*> inMIS("inMIS", graph.extend(0));
+    Kokkos::View<int*> removed("removed", graph.extend(0));
+    Kokkos::View<int*> priorities("priorities", graph.extend(0));
 
     Kokkos::deep_copy(inMIS, 0);
     Kokkos::deep_copy(removed, 0);
@@ -89,19 +67,17 @@ int main(int argc, char* argv[]) {
     {
         //Initialize graph
         int V = 6;
-        Graph graph(V);
-        Graph h_graph(V);
-        h_graph.adj = Kokkos::create_mirror_view(graph.adj);
-        h_graph.init();
-        h_graph.addEdge(0, 1);
-        h_graph.addEdge(0, 2);
-        h_graph.addEdge(1, 3);
-        h_graph.addEdge(2, 3);
-        h_graph.addEdge(3, 4);
-        h_graph.addEdge(3, 5);
-        Kokkos::deep_copy(graph.adj,h_graph.adj);
+        Kokkos::View<int**> adj ("adj",V,V);
+        auto h_graph = Kokkos::create_mirror_view(graph.adj);
+        h_graph(0, 1) = 1;
+        h_graph(0, 2) = 1;
+        h_graph(1, 3) = 1;
+        h_graph(2, 3) = 1;
+        h_graph(3, 4) = 1;
+        h_graph(3, 5) = 1;
+        Kokkos::deep_copy(adj,h_graph);
         // Run Luby's algorithm with Kokkos
-        Kokkos::View<int*> independentSet = lubysAlgorithm(graph);
+        Kokkos::View<int*> independentSet = lubysAlgorithm(adj);
         // Print the result
         std::cout << "Maximum Independent Set (MIS) nodes:" << std::endl;
         Kokkos::parallel_for("print_results", V, KOKKOS_LAMBDA(int i) {
