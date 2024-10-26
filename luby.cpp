@@ -7,25 +7,23 @@
 class Graph {
 public:
     int V; // number of vertices
-    Kokkos::View<int**> adj("adj"); // adjacency matrix
-    auto host_adj = Kokkos::create_mirror_view(adj);
+    Kokkos::View<int**> adj; // adjacency matrix
 
-    Graph(int V) : V(V){
+    Graph(int V) : V(V), adj("adj", V, V){
+    }
+
+    void init(){
         // Initialize adjacency matrix to 0
         for(int i = 0; i < V; ++i){
             for (int j = 0; j < V; ++j) {
-                host_adj(i, j) = 0;
+                adj(i, j) = 0;
             }  
         }  
     }
 
     void addEdge(int u, int v) {
-        host_adj(u, v) = 1;
-        host_adj(v, u) = 1;
-    }
-
-    void toGPU(){
-        Kokkos::deep_copy(adj,host_adj);
+        adj(u, v) = 1;
+        adj(v, u) = 1;
     }
 };
 // Function to initialize random priorities on the GPU
@@ -92,16 +90,16 @@ int main(int argc, char* argv[]) {
         //Initialize graph
         int V = 6;
         Graph graph(V);
-        graph.addEdge(0, 1);
-        graph.addEdge(0, 2);
-        graph.addEdge(1, 3);
-        graph.addEdge(2, 3);
-        graph.addEdge(3, 4);
-        graph.addEdge(3, 5);
-        graph.toGPU();
+        auto h_graph = Kokkos::create_mirror_view(graph); 
+        h_graph.addEdge(0, 1);
+        h_graph.addEdge(0, 2);
+        h_graph.addEdge(1, 3);
+        h_graph.addEdge(2, 3);
+        h_graph.addEdge(3, 4);
+        h_graph.addEdge(3, 5);
+        Kokkos::deep_copy(graph,h_graph);
         // Run Luby's algorithm with Kokkos
         Kokkos::View<int*> independentSet = lubysAlgorithm(graph);
-
         // Print the result
         std::cout << "Maximum Independent Set (MIS) nodes:" << std::endl;
         Kokkos::parallel_for("print_results", V, KOKKOS_LAMBDA(int i) {
