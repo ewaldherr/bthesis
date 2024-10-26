@@ -3,30 +3,30 @@
 
 __global__ void initializePriorities(std::vector<int>& priorities) {
     unsigned seed = 1234 + threadIdx.x; // Seed for random number generator
-    priorities(threadIdx.x) = rand_r(&seed);
+    priorities[threadIdx.x] = rand_r(&seed);
 }
 
 __global__ void checkMax(std::vector<int>& removed, std::vector<std::vector<int>>& graph,std::vector<int>& priorities,std::vector<int>& inMIS){
-    if (removed(threadIdx.x) == 1) return;
+    if (removed[threadIdx.x] == 1) return;
     bool isMaxPriority = true;
         for (int j = 0; j < graph.size(); ++j) {
-            if (graph[threadIdx.x][j] == 1 && removed(j) == 0 && priorities(j) >= priorities(threadIdx)) {
+            if (graph[threadIdx.x][j] == 1 && removed[j] == 0 && priorities[j] >= priorities[threadIdx]) {
                 isMaxPriority = false;
                 break;
             }
         }
 
         if (isMaxPriority) {
-                inMIS(threadIdx.x) = 1;
+                inMIS[threadIdx.x] = 1;
         }
 }
 
 __global__ void removeVertices(std::vector<int>& removed, std::vector<std::vector<int>>& graph,std::vector<int>& inMIS,bool& changes){
-    if (inMIS(threadIdx.x) == 1) {
-        removed(threadIdx.x) = 1;
+    if (inMIS[threadIdx.x] == 1) {
+        removed[threadIdx.x] = 1;
         for (int j = 0; j < graph.size(); ++j) {
-            if (graph(threadIdx.x, j) == 1) {
-                removed(j) = 1;
+            if (graph[threadIdx.x][j] == 1) {
+                removed[j] = 1;
             }
         }
         changes = true; // If any vertex is added, flag a change
@@ -71,7 +71,7 @@ int main(int argc, char* argv[]) {
         std::vector<int> inMIS(graph.size());
         std::vector<int> removed(graph.size());
         std::vector<int> priorities(graph.size());
-        std::vector<int> independentSet;
+        std::vector<int> independentSet(graph.size());
         cudaMalloc(&inMIS,n*sizeof(int));
         cudaMalloc(&removed,n*sizeof(int));
         cudaMalloc(&priorities,n*sizeof(int));
