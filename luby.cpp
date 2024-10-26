@@ -99,7 +99,7 @@ int main(int argc, char* argv[]) {
         h_graph.addEdge(2, 3);
         h_graph.addEdge(3, 4);
         h_graph.addEdge(3, 5);
-        Kokkos::deep_copy(graph,h_graph);
+        Kokkos::deep_copy(graph.adj,h_graph.adj);
         // Run Luby's algorithm with Kokkos
         Kokkos::View<int*> independentSet = lubysAlgorithm(graph);
         // Print the result
