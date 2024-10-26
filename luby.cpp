@@ -14,9 +14,9 @@ KOKKOS_FUNCTION void initializePriorities(Kokkos::View<int*> priorities) {
 
 // Luby's Algorithm with Kokkos
 KOKKOS_FUNCTION Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int**> graph) {
-    Kokkos::View<int*> inMIS("inMIS", graph.extend(0));
-    Kokkos::View<int*> removed("removed", graph.extend(0));
-    Kokkos::View<int*> priorities("priorities", graph.extend(0));
+    Kokkos::View<int*> inMIS("inMIS", graph.extent(1));
+    Kokkos::View<int*> removed("removed", graph.extent(1));
+    Kokkos::View<int*> priorities("priorities", graph.extent(1));
 
     Kokkos::deep_copy(inMIS, 0);
     Kokkos::deep_copy(removed, 0);
@@ -27,11 +27,11 @@ KOKKOS_FUNCTION Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int**> graph) {
         initializePriorities(priorities);
 
         // Step 2: Select vertices with highest priority in their neighborhood
-        Kokkos::parallel_for("select_max_priority", graph.extend(0), KOKKOS_LAMBDA(int u) {
+        Kokkos::parallel_for("select_max_priority", graph.extent(1), KOKKOS_LAMBDA(int u) {
             if (removed(u) == 1) return;
 
             bool isMaxPriority = true;
-            for (int v = 0; v < graph.extend(0); ++v) {
+            for (int v = 0; v < graph.extent(1); ++v) {
                 if (graph(u, v) == 1 && removed(v) == 0 && priorities(v) >= priorities(u)) {
                     isMaxPriority = false;
                     break;
@@ -45,10 +45,10 @@ KOKKOS_FUNCTION Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int**> graph) {
 
         // Step 3: Add selected vertices to MIS and remove them and their neighbors
         changes = false;
-        Kokkos::parallel_reduce("update_sets", graph.extend(0), KOKKOS_LAMBDA(int u, bool &local_changes) {
+        Kokkos::parallel_reduce("update_sets", graph.extent(1), KOKKOS_LAMBDA(int u, bool &local_changes) {
             if (inMIS(u) == 1) {
                 removed(u) = 1;
-                for (int v = 0; v < graph.extend(0); ++v) {
+                for (int v = 0; v < graph.extent(1); ++v) {
                     if (graph(u, v) == 1) {
                         removed(v) = 1;
                     }
@@ -68,7 +68,7 @@ int main(int argc, char* argv[]) {
         //Initialize graph
         int V = 6;
         Kokkos::View<int**> adj ("adj",V,V);
-        auto h_graph = Kokkos::create_mirror_view(graph.adj);
+        auto h_graph = Kokkos::create_mirror_view(adj);
         h_graph(0, 1) = 1;
         h_graph(0, 2) = 1;
         h_graph(1, 3) = 1;
