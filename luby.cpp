@@ -13,7 +13,7 @@ KOKKOS_FUNCTION void initializePriorities(Kokkos::View<int*> priorities) {
 }
 
 // Luby's Algorithm with Kokkos
-KOKKOS_FUNCTION Kokkos::View<int*> lubysAlgorithm(Kokkos::view<int**> graph) {
+KOKKOS_FUNCTION Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int**> graph) {
     Kokkos::View<int*> inMIS("inMIS", graph.extend(0));
     Kokkos::View<int*> removed("removed", graph.extend(0));
     Kokkos::View<int*> priorities("priorities", graph.extend(0));
