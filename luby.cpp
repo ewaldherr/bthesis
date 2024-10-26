@@ -5,7 +5,7 @@
 #include <unordered_set>
 
 // Function to initialize random priorities on the GPU
-KOKKOS_INLINE_FUNCTION void initializePriorities(Kokkos::View<int*> priorities) {
+KOKKOS_FUNCTION void initializePriorities(Kokkos::View<int*> priorities) {
     Kokkos::parallel_for("init_priorities", priorities.extent(0), KOKKOS_LAMBDA(int i) {
         unsigned seed = 1234 + i; // Seed for random number generator
         priorities(i) = rand_r(&seed);
@@ -13,7 +13,7 @@ KOKKOS_INLINE_FUNCTION void initializePriorities(Kokkos::View<int*> priorities) 
 }
 
 // Luby's Algorithm with Kokkos
-KOKKOS_INLINE_FUNCTION Kokkos::View<int*> lubysAlgorithm(Kokkos::view<int**> graph) {
+KOKKOS_FUNCTION Kokkos::View<int*> lubysAlgorithm(Kokkos::view<int**> graph) {
     Kokkos::View<int*> inMIS("inMIS", graph.extend(0));
     Kokkos::View<int*> removed("removed", graph.extend(0));
     Kokkos::View<int*> priorities("priorities", graph.extend(0));
@@ -27,12 +27,12 @@ KOKKOS_INLINE_FUNCTION Kokkos::View<int*> lubysAlgorithm(Kokkos::view<int**> gra
         initializePriorities(priorities);
 
         // Step 2: Select vertices with highest priority in their neighborhood
-        Kokkos::parallel_for("select_max_priority", graph.V, KOKKOS_LAMBDA(int u) {
+        Kokkos::parallel_for("select_max_priority", graph.extend(0), KOKKOS_LAMBDA(int u) {
             if (removed(u) == 1) return;
 
             bool isMaxPriority = true;
-            for (int v = 0; v < graph.V; ++v) {
-                if (graph.adj(u, v) == 1 && removed(v) == 0 && priorities(v) >= priorities(u)) {
+            for (int v = 0; v < graph.extend(0); ++v) {
+                if (graph(u, v) == 1 && removed(v) == 0 && priorities(v) >= priorities(u)) {
                     isMaxPriority = false;
                     break;
                 }
@@ -45,11 +45,11 @@ KOKKOS_INLINE_FUNCTION Kokkos::View<int*> lubysAlgorithm(Kokkos::view<int**> gra
 
         // Step 3: Add selected vertices to MIS and remove them and their neighbors
         changes = false;
-        Kokkos::parallel_reduce("update_sets", graph.V, KOKKOS_LAMBDA(int u, bool &local_changes) {
+        Kokkos::parallel_reduce("update_sets", graph.extend(0), KOKKOS_LAMBDA(int u, bool &local_changes) {
             if (inMIS(u) == 1) {
                 removed(u) = 1;
-                for (int v = 0; v < graph.V; ++v) {
-                    if (graph.adj(u, v) == 1) {
+                for (int v = 0; v < graph.extend(0); ++v) {
+                    if (graph(u, v) == 1) {
                         removed(v) = 1;
                     }
                 }
