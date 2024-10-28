@@ -51,6 +51,7 @@ Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int**> graph) {
     auto h_priorities = Kokkos::create_mirror_view(priorities);
     Kokkos::deep_copy(state, 0);
     int iter = 0;
+    bool changes;
     do {
         // Step 1: Assign random priorities to remaining vertices
         initializePriorities(priorities);
@@ -79,8 +80,14 @@ Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int**> graph) {
         for(int i = 0; i < state.extent(0);++i){
             std::cout << h_priorities(i) << " " << h_state(i) << " ";
         }
+        for(int i = 0; i < state.extent(0);++i){
+            if(state(i)==1){
+                changes = true;
+                break;
+            }
+        }
         std::cout << std::endl;
-        Kokkos::deep_copy(h_priorities,priorities)        
+        Kokkos::deep_copy(h_priorities,priorities);        
         Kokkos::deep_copy(h_state,state);
         for(int i = 0; i < state.extent(0);++i){
             std::cout << h_priorities(i);
