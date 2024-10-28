@@ -23,7 +23,7 @@ __global__ void checkMax(int* graph,float* priorities,int* state, int n){
         }
 }
 
-__global__ void removeVertices(int* graph,int* state,bool* changes, int n){
+__global__ void removeVertices(int* graph,int* state, int n){
     if (state[threadIdx.x] == 1) {
         state[threadIdx.x] = 2;
         for (int j = 0; j < n; ++j) {
@@ -31,7 +31,6 @@ __global__ void removeVertices(int* graph,int* state,bool* changes, int n){
                 state[j] = -1;
             }
         }
-        //changes[0] = true; // If any vertex is added, flag a change
     }
 }
 
@@ -41,51 +40,35 @@ int* lubysAlgorithm(int* host_graph,int* host_state, int n) {
     int* graph;
     int* state;
     float* priorities;
+    int* independentSet = new int[n];
+    bool changes;
+    int iters = 0;
+    int* host_state = new int[n];
 
     cudaMalloc(&state,n*sizeof(int));
     cudaMalloc(&priorities,n*sizeof(float));
     cudaMalloc(&graph,n*n*sizeof(int));
+
     cudaMemcpy(state,host_state,n*sizeof(int),cudaMemcpyHostToDevice);
     cudaMemcpy(graph,host_graph,n*n*sizeof(int),cudaMemcpyHostToDevice);
 
-    float* host_prios = new float[n];
-    int* independentSet = new int[n];
-
-    bool* changes = new bool[1];
-    bool* d_changes;
-    cudaMalloc(&d_changes, sizeof(bool));
-    curandState *d_state;
-    cudaMalloc(&d_state, sizeof(curandState));
-
-    int iters = 0;
-
     do {
-        // Step 1: Assign random priorities to remaining vertices
         initializePriorities<<<1,n>>>(priorities,d_state);
-        cudaMemcpy(host_prios,priorities,n*sizeof(float),cudaMemcpyDeviceToHost);
-        cudaMemcpy(host_state,state,n*sizeof(int),cudaMemcpyDeviceToHost);
-        for (int i = 0; i< n; ++i){
-            std::cout << host_prios[i] << " " << host_state[i] << "  ";
-        }
-        std::cout << std::endl;
         checkMax<<<1,n>>>(graph,priorities,state,n);
+
+        changes = false;
         cudaMemcpy(host_state,state,n*sizeof(int),cudaMemcpyDeviceToHost);
-        for (int i = 0; i< n; ++i){
-            	std::cout << host_prios[i] << " " << host_state[i] << "  ";
+        for(int i = 0; i < n; ++i){
+            if(host_state[i] == 1){
+                changes = true;
+                break;
+            }
         }
-        std::cout << std::endl;
-        // Step 3: Add selected vertices to MIS and remove them and their neighbors
-        changes[0] = false;
-        cudaMemcpy(d_changes,changes,sizeof(bool),cudaMemcpyHostToDevice);
+
         removeVertices<<<1,n>>>(graph,state,changes,n);
-        cudaMemcpy(host_state,state,n*sizeof(int),cudaMemcpyDeviceToHost);
-        for (int i = 0; i< n; ++i){
-            	std::cout << host_prios[i] << " " << host_state[i] << "  ";
-        }
-        std::cout << std::endl;
-        cudaMemcpy(changes,d_changes,sizeof(bool),cudaMemcpyDeviceToHost);
+
         ++ iters;
-    } while (changes[0]);
+    } while (changes);
     std::cout << iters << std::endl;
     cudaMemcpy(independentSet,state, n*sizeof(int), cudaMemcpyDeviceToHost);
     cudaFree(state);
