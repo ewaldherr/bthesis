@@ -88,7 +88,7 @@ int main(int argc, char* argv[]) {
         int** d_adj;
         int* host_state = new int[n];
         for(int i = 0; i < n; ++i){
-            state[i] = 0;
+            host_state[i] = 0;
         }
         int* state = new int[n];
         float* priorities = new float[n];
