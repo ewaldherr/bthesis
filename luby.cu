@@ -8,7 +8,7 @@ __global__ void initializePriorities(float* priorities,curandState * d_state) {
     priorities[threadIdx.x] = curand_uniform(d_state + threadIdx.x);
 }
 
-__global__ void checkMax(int graph[][],float* priorities,int* state, int n){
+__global__ void checkMax(int graph[][n],float* priorities,int* state, int n){
     if (state[threadIdx.x] != 0) return;
     bool isMaxPriority = true;
         for (int j = 0; j < n; ++j) {
@@ -23,7 +23,7 @@ __global__ void checkMax(int graph[][],float* priorities,int* state, int n){
         }
 }
 
-__global__ void removeVertices(int graph[][],int* state,bool* changes, int n){
+__global__ void removeVertices(int graph[][n],int* state,bool* changes, int n){
     if (state[threadIdx.x] == 1) {
         state[threadIdx.x] = 2;
         for (int j = 0; j < n; ++j) {
@@ -37,7 +37,7 @@ __global__ void removeVertices(int graph[][],int* state,bool* changes, int n){
 
 
 // Luby's Algorithm with Kokkos
-int* lubysAlgorithm(int graph[][],float* priorities,int* state, int n) {
+int* lubysAlgorithm(int graph[][n],float* priorities,int* state, int n) {
     int* host_adj[n];
     cudaMemcpy(host_adj,graph,n*n*sizeof(int),cudaMemcpyDeviceToHost);
     for (int i=0;i<n;++i){
