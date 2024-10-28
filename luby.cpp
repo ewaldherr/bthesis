@@ -60,7 +60,7 @@ Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int**> graph) {
         Kokkos::deep_copy(h_priorities,priorities);
         Kokkos::deep_copy(h_state,state);
         for(int i = 0; i < state.extent(0);++i){
-            std::cout << h_priorities(i) << " ";
+            std::cout << h_priorities(i) << " " << h_state(i) << " ";
         }
         std::cout << std::endl;
         // Step 2: Select vertices with highest priority in their neighborhood
@@ -83,12 +83,6 @@ Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int**> graph) {
                 changes = true;
                 break;
             }
-        }
-        std::cout << std::endl;
-        Kokkos::deep_copy(h_priorities,priorities);        
-        Kokkos::deep_copy(h_state,state);
-        for(int i = 0; i < state.extent(0);++i){
-            std::cout << h_priorities(i);
         }
         std::cout << std::endl;
         ++iter;
