@@ -51,7 +51,7 @@ int* lubysAlgorithm(int* graph,float* priorities,int* state, int n) {
     int* host_state = new int[n];
     int* independentSet = new int[n];
     bool* changes = new bool[1];
-    bool* d_changes = new bool[1];
+    bool* d_changes;
     cudaMalloc(&d_changes, sizeof(bool));
     curandState *d_state;
     cudaMalloc(&d_state, sizeof(curandState));
@@ -114,13 +114,13 @@ int main(int argc, char* argv[]) {
         adj[4 + 3 * 6] = 1;
         adj[5 + 3 * 6] = 1;
         // Run Luby's algorithm with Kokkos
-        int* d_adj = new int[n*n];
+        int* d_adj;
         int* host_state = new int[n];
         for(int i = 0; i < n; ++i){
             host_state[i] = 0;
         }
-        int* state = new int[n];
-        float* priorities = new float[n];
+        int* state;
+        float* priorities;
         int* independentSet = new int[n];
         cudaMalloc(&state,n*sizeof(int));
         cudaMalloc(&priorities,n*sizeof(float));
