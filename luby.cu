@@ -112,14 +112,9 @@ int main(int argc, char* argv[]) {
         adj[3 + 2 * 6] = 1;
         adj[4 + 3 * 6] = 1;
         adj[5 + 3 * 6] = 1;
-        for (int i=0;i<n;++i){
-        std::cout << std::endl;
-        for(int j=0;j<n;++j){
-            std::cout << adj [i+j*n] << " ";
-        }
     }
         // Run Luby's algorithm with Kokkos
-        int (*d_adj)[n];
+        int* d_adj = new int[n*n];
         int* host_state = new int[n];
         for(int i = 0; i < n; ++i){
             host_state[i] = 0;
@@ -129,7 +124,7 @@ int main(int argc, char* argv[]) {
         int* independentSet = new int[n];
         cudaMalloc(&state,n*sizeof(int));
         cudaMalloc(&priorities,n*sizeof(float));
-        cudaMalloc((void**)&d_adj,n*n*sizeof(int));
+        cudaMalloc(&d_adj,n*n*sizeof(int));
         cudaMemcpy(state,host_state,n*sizeof(int),cudaMemcpyHostToDevice);
         cudaMemcpy(d_adj,adj,n*n*sizeof(int),cudaMemcpyHostToDevice);
         independentSet = lubysAlgorithm(adj,priorities,state,n);
