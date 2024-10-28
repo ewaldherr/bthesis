@@ -120,7 +120,7 @@ int main(int argc, char* argv[]) {
         Kokkos::deep_copy(h_set,independentSet);
         std::cout << "Maximum Independent Set (MIS) nodes:" << std::endl;
         for (int i = 0; i < h_set.extent(0); ++i){
-            if (h_set(i) == 1) {
+            if (h_set(i) == 2) {
                 std::cout << i << " ";
             }
         }
