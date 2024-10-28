@@ -88,10 +88,10 @@ int main(int argc, char* argv[]) {
         cudaFree(priorities);
         cudaFree(d_adj);
         // Print the result
-        std::cout << "Maximum Independent Set (MIS) nodes:" << std::endl;
+        std::cout << "Maximum Independent Set (MIS) nodes: " << std::endl;
         for(int i = 0; i < n; ++i){
             if (independentSet[i] == 1) {
-                printf("%d ", i);
+                std::cout << i << " ";
             }
         }
         std::cout << std::endl;
