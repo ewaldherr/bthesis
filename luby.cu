@@ -31,7 +31,7 @@ __global__ void removeVertices(int* graph,int* state,bool* changes, int n){
                 state[j] = -1;
             }
         }
-        changes[0] = true; // If any vertex is added, flag a change
+        //changes[0] = true; // If any vertex is added, flag a change
     }
 }
 
@@ -41,36 +41,31 @@ int* lubysAlgorithm(int* host_graph,int* host_state, int n) {
     int* graph;
     int* state;
     float* priorities;
+
     cudaMalloc(&state,n*sizeof(int));
     cudaMalloc(&priorities,n*sizeof(float));
     cudaMalloc(&graph,n*n*sizeof(int));
     cudaMemcpy(state,host_state,n*sizeof(int),cudaMemcpyHostToDevice);
     cudaMemcpy(graph,host_graph,n*n*sizeof(int),cudaMemcpyHostToDevice);
 
-    int* host_adj = new int [n*n];
-    cudaMemcpy(host_adj,graph,n*n*sizeof(int),cudaMemcpyDeviceToHost);
-    for (int i=0;i<n;++i){
-        std::cout << std::endl;
-        for(int j=0;j<n;++j){
-            std::cout << host_adj [i+j*n] << " ";
-        }
-    }
-    std::cout << std::endl;
     float* host_prios = new float[n];
     int* independentSet = new int[n];
+
     bool* changes = new bool[1];
     bool* d_changes;
     cudaMalloc(&d_changes, sizeof(bool));
     curandState *d_state;
     cudaMalloc(&d_state, sizeof(curandState));
+
     int iters = 0;
+
     do {
         // Step 1: Assign random priorities to remaining vertices
         initializePriorities<<<1,n>>>(priorities,d_state);
         cudaMemcpy(host_prios,priorities,n*sizeof(float),cudaMemcpyDeviceToHost);
         cudaMemcpy(host_state,state,n*sizeof(int),cudaMemcpyDeviceToHost);
         for (int i = 0; i< n; ++i){
-            	std::cout << host_prios[i] << " " << host_state[i] << "  ";
+            std::cout << host_prios[i] << " " << host_state[i] << "  ";
         }
         std::cout << std::endl;
         checkMax<<<1,n>>>(graph,priorities,state,n);
