@@ -8,27 +8,27 @@ __global__ void initializePriorities(float* priorities,curandState * d_state) {
     priorities[threadIdx.x] = curand_uniform(d_state + threadIdx.x);
 }
 
-__global__ void checkMax(int* removed, int** graph,float* priorities,int* inMIS, int n){
-    if (removed[threadIdx.x] == 1) return;
+__global__ void checkMax(int** graph,float* priorities,int* state, int n){
+    if (state[threadIdx.x] != 0) return;
     bool isMaxPriority = true;
         for (int j = 0; j < n; ++j) {
-            if (graph[threadIdx.x][j] == 1 && removed[j] == 0 && priorities[j] >= priorities[threadIdx.x]) {
+            if (graph[threadIdx.x][j] == 1 && state[j] == 0 && priorities[j] >= priorities[threadIdx.x]) {
                 isMaxPriority = false;
                 break;
             }
         }
 
         if (isMaxPriority) {
-                inMIS[threadIdx.x] = 1;
+                state[threadIdx.x] = 1;
         }
 }
 
-__global__ void removeVertices(int* removed, int** graph,int* inMIS,bool* changes, int n){
-    if (inMIS[threadIdx.x] == 1) {
-        removed[threadIdx.x] = 1;
+__global__ void removeVertices( int** graph,int* state,bool* changes, int n){
+    if (state[threadIdx.x] == 1) {
+        state[threadIdx.x] = 2;
         for (int j = 0; j < n; ++j) {
             if (graph[threadIdx.x][j] == 1) {
-                removed[j] = 1;
+                state[j] = -1;
             }
         }
         changes[0] = true; // If any vertex is added, flag a change
@@ -37,7 +37,7 @@ __global__ void removeVertices(int* removed, int** graph,int* inMIS,bool* change
 
 
 // Luby's Algorithm with Kokkos
-int* lubysAlgorithm(int* removed, int** graph,float* priorities,int* inMIS, int n) {
+int* lubysAlgorithm(int** graph,float* priorities,int* state, int n) {
     int* independentSet = new int[n];
     bool* changes = new bool[1];
     bool* d_changes = new bool[1];
@@ -48,16 +48,16 @@ int* lubysAlgorithm(int* removed, int** graph,float* priorities,int* inMIS, int 
     do {
         // Step 1: Assign random priorities to remaining vertices
         initializePriorities<<<1,n>>>(priorities,d_state);
-        checkMax<<<1,n>>>(removed,graph,priorities,inMIS,n);
+        checkMax<<<1,n>>>(graph,priorities,state,n);
         // Step 3: Add selected vertices to MIS and remove them and their neighbors
         changes[0] = false;
         cudaMemcpy(d_changes,changes,sizeof(bool),cudaMemcpyHostToDevice);
-        removeVertices<<<1,n>>>(removed,graph,inMIS,changes,n);
+        removeVertices<<<1,n>>>(graph,state,changes,n);
         cudaMemcpy(changes,d_changes,sizeof(bool),cudaMemcpyDeviceToHost);
         ++ iters;
     } while (changes[0]);
     std::cout << iters << std::endl;
-    cudaMemcpy(independentSet,inMIS, n*sizeof(int), cudaMemcpyDeviceToHost);
+    cudaMemcpy(independentSet,state, n*sizeof(int), cudaMemcpyDeviceToHost);
     return independentSet;
 }
 
@@ -80,24 +80,22 @@ int main(int argc, char* argv[]) {
         adj[3][5] = 1;
         // Run Luby's algorithm with Kokkos
         int** d_adj;
-        int* inMIS = new int[n];
-        int* removed = new int[n];
+        int* state = new int[n];
         float* priorities = new float[n];
         int* independentSet = new int[n];
-        cudaMalloc(&inMIS,n*sizeof(int));
-        cudaMalloc(&removed,n*sizeof(int));
+        cudaMalloc(&state,n*sizeof(int));
+        cudaMalloc(&state,n*sizeof(int));
         cudaMalloc(&priorities,n*sizeof(float));
         cudaMalloc(&d_adj,n*n*sizeof(int));
         cudaMemcpy(d_adj,adj,n*n*sizeof(int),cudaMemcpyHostToDevice);
-        independentSet = lubysAlgorithm(removed,adj,priorities,inMIS,n);
-        cudaFree(inMIS);
-        cudaFree(removed);
+        independentSet = lubysAlgorithm(state,adj,priorities,state,n);
+        cudaFree(state);
         cudaFree(priorities);
         cudaFree(d_adj);
         // Print the result
         std::cout << "Maximum Independent Set (MIS) nodes: " << std::endl;
         for(int i = 0; i < n; ++i){
-            if (independentSet[i] == 1) {
+            if (independentSet[i] == 2) {
                 std::cout << i << " ";
             }
         }
