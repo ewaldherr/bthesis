@@ -115,7 +115,7 @@ int main(int argc, char* argv[]) {
         for (int i=0;i<n;++i){
             std::cout << std::endl;
             for(int j=0;j<n;++j){
-                std::cout << host_adj [i][j] << " ";
+                std::cout << adj [i][j] << " ";
             }
         }
     std::cout << std::endl;
