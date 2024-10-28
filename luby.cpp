@@ -100,7 +100,7 @@ int main(int argc, char* argv[]) {
         auto h_graph = Kokkos::create_mirror_view(adj);
         for(int i=0; i<h_graph.extent(0);++i){
             std::cout << std::endl;
-            for(int i=0; i<h_graph.extent(0);++i){
+            for(int j=0; j<h_graph.extent(0);++j){
                 std::cout<< h_graph(i,j) << " ";
             }
         }
