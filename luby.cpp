@@ -47,6 +47,15 @@ KOKKOS_FUNCTION void removeVertices(Kokkos::View<int**> graph, Kokkos::View<int*
 
 // Luby's Algorithm with Kokkos
 Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int**> graph) {
+    auto h_graph = Kokkos::create_mirror_view(graph);
+    Kokkos::deep_copy(h_graph,graph);
+    for(int i=0; i<h_graph.extent(0);++i){
+            std::cout << std::endl;
+            for(int j=0; j<h_graph.extent(0);++j){
+                std::cout<< h_graph(i,j) << " ";
+            }
+        }
+        std::cout << std::endl;
     Kokkos::View<int*> state("state", graph.extent(1));
     Kokkos::View<double*> priorities("priorities", graph.extent(1));
     auto h_state = Kokkos::create_mirror_view(state);
@@ -98,13 +107,6 @@ int main(int argc, char* argv[]) {
         int V = 6;
         Kokkos::View<int**> adj ("adj",V,V);
         auto h_graph = Kokkos::create_mirror_view(adj);
-        for(int i=0; i<h_graph.extent(0);++i){
-            std::cout << std::endl;
-            for(int j=0; j<h_graph.extent(0);++j){
-                std::cout<< h_graph(i,j) << " ";
-            }
-        }
-        std::cout << std::endl;
         h_graph(0, 1) = 1;
         h_graph(0, 2) = 1;
         h_graph(1, 3) = 1;
@@ -118,6 +120,13 @@ int main(int argc, char* argv[]) {
         h_graph(3, 2) = 1;
         h_graph(4, 3) = 1;
         h_graph(5, 3) = 1;
+        for(int i=0; i<h_graph.extent(0);++i){
+            std::cout << std::endl;
+            for(int j=0; j<h_graph.extent(0);++j){
+                std::cout<< h_graph(i,j) << " ";
+            }
+        }
+        std::cout << std::endl;
         Kokkos::deep_copy(adj,h_graph);
         // Run Luby's algorithm with Kokkos
         Kokkos::View<int*> independentSet = lubysAlgorithm(adj);
