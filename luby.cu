@@ -44,6 +44,7 @@ int* lubysAlgorithm(int* removed, int** graph,float* priorities,int* inMIS, int 
     cudaMalloc(&d_changes, sizeof(bool));
     curandState *d_state;
     cudaMalloc(&d_state, sizeof(curandState));
+    int iters = 0;
     do {
         // Step 1: Assign random priorities to remaining vertices
         initializePriorities<<<1,n>>>(priorities,d_state);
@@ -53,7 +54,9 @@ int* lubysAlgorithm(int* removed, int** graph,float* priorities,int* inMIS, int 
         cudaMemcpy(d_changes,changes,sizeof(bool),cudaMemcpyHostToDevice);
         removeVertices<<<1,n>>>(removed,graph,inMIS,changes,n);
         cudaMemcpy(changes,d_changes,sizeof(bool),cudaMemcpyDeviceToHost);
+        ++ iters
     } while (changes[0]);
+    std::cout << iters << std::endl;
     cudaMemcpy(independentSet,inMIS, n*sizeof(int), cudaMemcpyDeviceToHost);
     return independentSet;
 }
