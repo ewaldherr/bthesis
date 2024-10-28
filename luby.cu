@@ -54,7 +54,7 @@ int* lubysAlgorithm(int* removed, int** graph,float* priorities,int* inMIS, int 
         cudaMemcpy(d_changes,changes,sizeof(bool),cudaMemcpyHostToDevice);
         removeVertices<<<1,n>>>(removed,graph,inMIS,changes,n);
         cudaMemcpy(changes,d_changes,sizeof(bool),cudaMemcpyDeviceToHost);
-        ++ iters
+        ++ iters;
     } while (changes[0]);
     std::cout << iters << std::endl;
     cudaMemcpy(independentSet,inMIS, n*sizeof(int), cudaMemcpyDeviceToHost);
