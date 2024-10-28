@@ -39,6 +39,7 @@ __global__ void removeVertices( int** graph,int* state,bool* changes, int n){
 // Luby's Algorithm with Kokkos
 int* lubysAlgorithm(int** graph,float* priorities,int* state, int n) {
     float* host_prios = new float[n];
+    int* host_state = new int[n];
     int* independentSet = new int[n];
     bool* changes = new bool[1];
     bool* d_changes = new bool[1];
@@ -50,8 +51,9 @@ int* lubysAlgorithm(int** graph,float* priorities,int* state, int n) {
         // Step 1: Assign random priorities to remaining vertices
         initializePriorities<<<1,n>>>(priorities,d_state);
         cudaMemcpy(host_prios,priorities,n*sizeof(float),cudaMemcpyDeviceToHost);
+        cudaMemcpy(host_state,state,n*sizeof(int),cudaMemcpyDeviceToHost);
         for (int i = 0; i< n; ++i){
-            	std::cout << host_prios[i] << " ";
+            	std::cout << host_prios[i] << " " << host_state[i] << "  ";
         }
         std::cout << std::endl;
         checkMax<<<1,n>>>(graph,priorities,state,n);
