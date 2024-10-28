@@ -3,9 +3,9 @@
 #include <curand.h>
 #include <curand_kernel.h>
 
-__global__ void initializePriorities(float* priorities) {
-    
-    priorities[threadIdx.x] = curand_uniform(1234 + threadIdx.x);
+__global__ void initializePriorities(float* priorities,curandState * d_state) {
+    curand_init(1234, threadIdx.x, 0, &d_state[threadIdx.x]);
+    priorities[threadIdx.x] = curand_uniform(d_state + threadIdx.x);
 }
 
 __global__ void checkMax(int* removed, int** graph,float* priorities,int* inMIS, int n){
@@ -40,9 +40,11 @@ __global__ void removeVertices(int* removed, int** graph,int* inMIS,bool& change
 int* lubysAlgorithm(int* removed, int** graph,float* priorities,int* inMIS, int n) {
     int* independentSet;
     bool changes;
+    curandState *d_state;
+    cudaMalloc(&d_state, sizeof(curandState));
     do {
         // Step 1: Assign random priorities to remaining vertices
-        initializePriorities<<<1,n>>>(priorities);
+        initializePriorities<<<1,n>>>(priorities,d_state);
         checkMax<<<1,n>>>(removed,graph,priorities,inMIS,n);
         // Step 3: Add selected vertices to MIS and remove them and their neighbors
         changes = false;
