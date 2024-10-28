@@ -43,7 +43,6 @@ int* lubysAlgorithm(int* host_graph,int* host_state, int n) {
     int* independentSet = new int[n];
     bool changes;
     int iters = 0;
-    int* host_state = new int[n];
     curandState *d_state;
 
     cudaMalloc(&d_state, sizeof(curandState));
@@ -77,7 +76,7 @@ int* lubysAlgorithm(int* host_graph,int* host_state, int n) {
     cudaFree(priorities);
     cudaFree(graph);
     cudaFree(d_state);
-    
+
     cudaMemcpy(independentSet,state, n*sizeof(int), cudaMemcpyDeviceToHost);
     return independentSet;
 }
