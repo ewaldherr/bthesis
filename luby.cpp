@@ -71,6 +71,7 @@ Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int**> graph) {
             std::cout << h_priorities(i) << " " << h_state(i) << " ";
         }
         std::cout << std::endl;
+        changes = false;
         for(int i = 0; i < state.extent(0);++i){
             if(h_state(i)==1){
                 changes = true;
