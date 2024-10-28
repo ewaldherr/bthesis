@@ -99,19 +99,19 @@ int main(int argc, char* argv[]) {
                 adj[i+j*n] = 0;
             }
         }
-        adj[0][1] = 1;
-        adj[0][2] = 1;
-        adj[1][3] = 1;
-        adj[2][3] = 1;
-        adj[3][4] = 1;
-        adj[3][5] = 1;
+        adj[0 + 1 * 6] = 1;
+        adj[0 + 2 * 6] = 1;
+        adj[1 + 3 * 6] = 1;
+        adj[2 + 3 * 6] = 1;
+        adj[3 + 4 * 6] = 1;
+        adj[3 + 5 * 6] = 1;
         //backward edges
-        adj[1][0] = 1;
-        adj[2][0] = 1;
-        adj[3][1] = 1;
-        adj[3][2] = 1;
-        adj[4][3] = 1;
-        adj[5][3] = 1;
+        adj[1 + 0 * 6] = 1;
+        adj[2 + 0 * 6] = 1;
+        adj[3 + 1 * 6] = 1;
+        adj[3 + 2 * 6] = 1;
+        adj[4 + 3 * 6] = 1;
+        adj[5 + 3 * 6] = 1;
         // Run Luby's algorithm with Kokkos
         int (*d_adj)[n];
         int* host_state = new int[n];
