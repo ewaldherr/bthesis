@@ -88,7 +88,7 @@ int main(int argc, char* argv[]) {
         cudaMalloc(&priorities,n*sizeof(float));
         cudaMalloc(&d_adj,n*n*sizeof(int));
         cudaMemcpy(d_adj,adj,n*n*sizeof(int),cudaMemcpyHostToDevice);
-        independentSet = lubysAlgorithm(state,adj,priorities,state,n);
+        independentSet = lubysAlgorithm(adj,priorities,state,n);
         cudaFree(state);
         cudaFree(priorities);
         cudaFree(d_adj);
