@@ -112,7 +112,6 @@ int main(int argc, char* argv[]) {
         adj[3 + 2 * 6] = 1;
         adj[4 + 3 * 6] = 1;
         adj[5 + 3 * 6] = 1;
-    }
         // Run Luby's algorithm with Kokkos
         int* d_adj = new int[n*n];
         int* host_state = new int[n];
