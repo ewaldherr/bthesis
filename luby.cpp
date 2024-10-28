@@ -46,7 +46,7 @@ KOKKOS_FUNCTION Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int**> graph) {
                 state(u) = 1;
             }
         });
-        Kokkos::deep_copy(h_priorities,priorities)
+        Kokkos::deep_copy(h_priorities,priorities);
         Kokkos::deep_copy(h_state,state);
         for(int i = 0; i < state.extent(0);++i){
             std::cout << h_priorities(i) << " " << h_state(i) << " ";
@@ -69,7 +69,7 @@ KOKKOS_FUNCTION Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int**> graph) {
                 local_changes = true; // If any vertex is added, flag a change
             }
         }, changes);
-        Kokkos::deep_copy(h_priorities,priorities)
+        Kokkos::deep_copy(h_priorities,priorities);
         Kokkos::deep_copy(h_state,state);
         for(int i = 0; i < state.extent(0);++i){
             std::cout << h_priorities(i) << " " << h_state(i) << " ";
