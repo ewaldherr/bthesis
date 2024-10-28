@@ -8,7 +8,7 @@ __global__ void initializePriorities(float* priorities,curandState * d_state) {
     priorities[threadIdx.x] = curand_uniform(d_state + threadIdx.x);
 }
 
-__global__ void checkMax(int** graph,float* priorities,int* state, int n){
+__global__ void checkMax(int graph[n][n],float* priorities,int* state, int n){
     if (state[threadIdx.x] != 0) return;
     bool isMaxPriority = true;
         for (int j = 0; j < n; ++j) {
@@ -23,7 +23,7 @@ __global__ void checkMax(int** graph,float* priorities,int* state, int n){
         }
 }
 
-__global__ void removeVertices( int** graph,int* state,bool* changes, int n){
+__global__ void removeVertices(int graph[n][n],int* state,bool* changes, int n){
     if (state[threadIdx.x] == 1) {
         state[threadIdx.x] = 2;
         for (int j = 0; j < n; ++j) {
@@ -37,8 +37,8 @@ __global__ void removeVertices( int** graph,int* state,bool* changes, int n){
 
 
 // Luby's Algorithm with Kokkos
-int* lubysAlgorithm(int** graph,float* priorities,int* state, int n) {
-    int** host_adj;
+int* lubysAlgorithm(int graph[n][n],float* priorities,int* state, int n) {
+    int* host_adj[n];
     cudaMemcpy(host_adj,graph,n*n*sizeof(int),cudaMemcpyDeviceToHost);
     for (int i=0;i<n;++i){
         std::cout << std::endl;
@@ -92,7 +92,7 @@ int main(int argc, char* argv[]) {
     {
         //Initialize graph
         int n = 6;
-        int** adj = new int*[n];
+        int adj[n][n];
         for(int i = 0;i < n; ++i){
             adj[i] = new int[n];
             for(int j = 0;j < n; ++j){
@@ -112,15 +112,8 @@ int main(int argc, char* argv[]) {
         adj[3][2] = 1;
         adj[4][3] = 1;
         adj[5][3] = 1;
-        for (int i=0;i<n;++i){
-            std::cout << std::endl;
-            for(int j=0;j<n;++j){
-                std::cout << adj [i][j] << " ";
-            }
-        }
-    std::cout << std::endl;
         // Run Luby's algorithm with Kokkos
-        int** d_adj;
+        int (*d_adj)[n];
         int* host_state = new int[n];
         for(int i = 0; i < n; ++i){
             host_state[i] = 0;
@@ -129,9 +122,8 @@ int main(int argc, char* argv[]) {
         float* priorities = new float[n];
         int* independentSet = new int[n];
         cudaMalloc(&state,n*sizeof(int));
-        cudaMalloc(&state,n*sizeof(int));
         cudaMalloc(&priorities,n*sizeof(float));
-        cudaMalloc(&d_adj,n*n*sizeof(int));
+        cudaMalloc((void**)&d_adj,n*n*sizeof(int));
         cudaMemcpy(state,host_state,n*sizeof(int),cudaMemcpyHostToDevice);
         cudaMemcpy(d_adj,adj,n*n*sizeof(int),cudaMemcpyHostToDevice);
         independentSet = lubysAlgorithm(adj,priorities,state,n);
