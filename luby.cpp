@@ -104,6 +104,13 @@ int main(int argc, char* argv[]) {
         h_graph(2, 3) = 1;
         h_graph(3, 4) = 1;
         h_graph(3, 5) = 1;
+        //backward edges
+        h_graph(1, 0) = 1;
+        h_graph(2, 0) = 1;
+        h_graph(3, 1) = 1;
+        h_graph(3, 2) = 1;
+        h_graph(4, 3) = 1;
+        h_graph(5, 3) = 1;
         Kokkos::deep_copy(adj,h_graph);
         // Run Luby's algorithm with Kokkos
         Kokkos::View<int*> independentSet = lubysAlgorithm(adj);
