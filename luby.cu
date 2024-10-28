@@ -37,15 +37,15 @@ __global__ void removeVertices(int* graph,int* state,bool* changes, int n){
 
 
 // Luby's Algorithm with Kokkos
-int* lubysAlgorithm(int* graph,int* state, int n) {
-    int* d_adj;
+int* lubysAlgorithm(int* host_graph,int* host_state, int n) {
+    int* graph;
     int* state;
     float* priorities;
     cudaMalloc(&state,n*sizeof(int));
     cudaMalloc(&priorities,n*sizeof(float));
-    cudaMalloc(&d_adj,n*n*sizeof(int));
+    cudaMalloc(&graph,n*n*sizeof(int));
     cudaMemcpy(state,host_state,n*sizeof(int),cudaMemcpyHostToDevice);
-    cudaMemcpy(d_adj,graph,n*n*sizeof(int),cudaMemcpyHostToDevice);
+    cudaMemcpy(graph,host_graph,n*n*sizeof(int),cudaMemcpyHostToDevice);
 
     int* host_adj = new int [n*n];
     cudaMemcpy(host_adj,d_adj,n*n*sizeof(int),cudaMemcpyDeviceToHost);
@@ -96,7 +96,7 @@ int* lubysAlgorithm(int* graph,int* state, int n) {
     cudaMemcpy(independentSet,state, n*sizeof(int), cudaMemcpyDeviceToHost);
     cudaFree(state);
     cudaFree(priorities);
-    cudaFree(d_adj);
+    cudaFree(graph);
     cudaFree(d_changes);
     cudaFree(d_state);
     return independentSet;
@@ -131,7 +131,7 @@ int main(int argc, char* argv[]) {
         for(int i = 0; i < n; ++i){
             host_state[i] = 0;
         }
-        independentSet = lubysAlgorithm(adj,host_state,n)
+        independentSet = lubysAlgorithm(adj,host_state,n);
         // Print the result
         std::cout << "Maximum Independent Set (MIS) nodes: " << std::endl;
         for(int i = 0; i < n; ++i){
