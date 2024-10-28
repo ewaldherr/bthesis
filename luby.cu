@@ -23,7 +23,7 @@ __global__ void checkMax(int* removed, int** graph,float* priorities,int* inMIS,
         }
 }
 
-__global__ void removeVertices(int* removed, int** graph,int* inMIS,bool& changes, int n){
+__global__ void removeVertices(int* removed, int** graph,int* inMIS,bool* changes, int n){
     if (inMIS[threadIdx.x] == 1) {
         removed[threadIdx.x] = 1;
         for (int j = 0; j < n; ++j) {
