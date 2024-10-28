@@ -38,6 +38,15 @@ __global__ void removeVertices( int** graph,int* state,bool* changes, int n){
 
 // Luby's Algorithm with Kokkos
 int* lubysAlgorithm(int** graph,float* priorities,int* state, int n) {
+    int** host_adj;
+    cudaMemcpy(host_adj,graph,n*n*sizeof(int),cudaMemcpyDeviceToHost);
+    for (int i=0;i<n;++i){
+        std::cout << std::endl;
+        for(intj==;j<n;++j){
+            std::cout << host_adj [i][j] << " ";
+        }
+    }
+    std::cout << std::endl;
     float* host_prios = new float[n];
     int* host_state = new int[n];
     int* independentSet = new int[n];
