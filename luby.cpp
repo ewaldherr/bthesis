@@ -98,6 +98,12 @@ int main(int argc, char* argv[]) {
         int V = 6;
         Kokkos::View<int**> adj ("adj",V,V);
         auto h_graph = Kokkos::create_mirror_view(adj);
+        for(int i=0; i<h_graph.extent(0);++i){
+            std::cout << std::endl;
+            for(int i=0; i<h_graph.extent(0);++i){
+                std::cout<< h_graph(i,j) << " ";
+        }
+        std::cout << std::endl;
         h_graph(0, 1) = 1;
         h_graph(0, 2) = 1;
         h_graph(1, 3) = 1;
