@@ -31,7 +31,7 @@ __global__ void removeVertices(int* removed, int** graph,int* inMIS,bool& change
                 removed[j] = 1;
             }
         }
-        changes = true; // If any vertex is added, flag a change
+        changes[0] = true; // If any vertex is added, flag a change
     }
 }
 
@@ -39,8 +39,8 @@ __global__ void removeVertices(int* removed, int** graph,int* inMIS,bool& change
 // Luby's Algorithm with Kokkos
 int* lubysAlgorithm(int* removed, int** graph,float* priorities,int* inMIS, int n) {
     int* independentSet = new int[n];
-    bool changes;
-    bool d_changes;
+    bool* changes = new bool[1];
+    bool* d_changes = new bool[1];
     cudaMalloc(&d_changes, sizeof(bool));
     curandState *d_state;
     cudaMalloc(&d_state, sizeof(curandState));
@@ -49,11 +49,11 @@ int* lubysAlgorithm(int* removed, int** graph,float* priorities,int* inMIS, int 
         initializePriorities<<<1,n>>>(priorities,d_state);
         checkMax<<<1,n>>>(removed,graph,priorities,inMIS,n);
         // Step 3: Add selected vertices to MIS and remove them and their neighbors
-        changes = false;
+        changes[0] = false;
         cudaMemcpy(d_changes,changes,sizeof(bool),cudaMemcpyHostToDevice);
         removeVertices<<<1,n>>>(removed,graph,inMIS,changes,n);
         cudaMemcpy(changes,d_changes,sizeof(bool),cudaMemcpyDeviceToHost);
-    } while (changes);
+    } while (changes[0]);
     cudaMemcpy(independentSet,inMIS, n*sizeof(int), cudaMemcpyDeviceToHost);
     return independentSet;
 }
