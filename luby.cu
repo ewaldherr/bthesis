@@ -57,10 +57,18 @@ int* lubysAlgorithm(int** graph,float* priorities,int* state, int n) {
         }
         std::cout << std::endl;
         checkMax<<<1,n>>>(graph,priorities,state,n);
+        for (int i = 0; i< n; ++i){
+            	std::cout << host_prios[i] << " " << host_state[i] << "  ";
+        }
+        std::cout << std::endl;
         // Step 3: Add selected vertices to MIS and remove them and their neighbors
         changes[0] = false;
         cudaMemcpy(d_changes,changes,sizeof(bool),cudaMemcpyHostToDevice);
         removeVertices<<<1,n>>>(graph,state,changes,n);
+        for (int i = 0; i< n; ++i){
+            	std::cout << host_prios[i] << " " << host_state[i] << "  ";
+        }
+        std::cout << std::endl;
         cudaMemcpy(changes,d_changes,sizeof(bool),cudaMemcpyDeviceToHost);
         ++ iters;
     } while (changes[0]);
@@ -86,6 +94,13 @@ int main(int argc, char* argv[]) {
         adj[2][3] = 1;
         adj[3][4] = 1;
         adj[3][5] = 1;
+        //backward edges
+        adj[1][0] = 1;
+        adj[2][0] = 1;
+        adj[3][1] = 1;
+        adj[3][2] = 1;
+        adj[4][3] = 1;
+        adj[5][3] = 1;
         // Run Luby's algorithm with Kokkos
         int** d_adj;
         int* host_state = new int[n];
