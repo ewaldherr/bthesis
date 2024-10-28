@@ -8,11 +8,11 @@ __global__ void initializePriorities(float* priorities,curandState * d_state) {
     priorities[threadIdx.x] = curand_uniform(d_state + threadIdx.x);
 }
 
-__global__ void checkMax(int graph[][N],float* priorities,int* state, int n){
+__global__ void checkMax(int* graph,float* priorities,int* state, int n){
     if (state[threadIdx.x] != 0) return;
     bool isMaxPriority = true;
         for (int j = 0; j < n; ++j) {
-            if (graph[threadIdx.x][j] == 1 && state[j] == 0 && priorities[j] >= priorities[threadIdx.x]) {
+            if (graph[threadIdx.x+j*n] == 1 && state[j] == 0 && priorities[j] >= priorities[threadIdx.x]) {
                 isMaxPriority = false;
                 break;
             }
@@ -23,11 +23,11 @@ __global__ void checkMax(int graph[][N],float* priorities,int* state, int n){
         }
 }
 
-__global__ void removeVertices(int graph[][N],int* state,bool* changes, int n){
+__global__ void removeVertices(int* graph,int* state,bool* changes, int n){
     if (state[threadIdx.x] == 1) {
         state[threadIdx.x] = 2;
         for (int j = 0; j < n; ++j) {
-            if (graph[threadIdx.x][j] == 1) {
+            if (graph[threadIdx.x+j*n] == 1) {
                 state[j] = -1;
             }
         }
@@ -37,13 +37,13 @@ __global__ void removeVertices(int graph[][N],int* state,bool* changes, int n){
 
 
 // Luby's Algorithm with Kokkos
-int* lubysAlgorithm(int graph[][N],float* priorities,int* state, int n) {
-    int* host_adj[n];
+int* lubysAlgorithm(int* graph,float* priorities,int* state, int n) {
+    int* host_adj;
     cudaMemcpy(host_adj,graph,n*n*sizeof(int),cudaMemcpyDeviceToHost);
     for (int i=0;i<n;++i){
         std::cout << std::endl;
         for(int j=0;j<n;++j){
-            std::cout << host_adj [i][j] << " ";
+            std::cout << host_adj [i+j*n] << " ";
         }
     }
     std::cout << std::endl;
@@ -93,10 +93,10 @@ int main(int argc, char* argv[]) {
         //Initialize graph
         int n = 6;
         #define N n;
-        int adj[n][n];
+        int* adj = new int[n*n];
         for(int i = 0;i < n; ++i){
             for(int j = 0;j < n; ++j){
-                adj[i][j] = 0;
+                adj[i+j*n] = 0;
             }
         }
         adj[0][1] = 1;
