@@ -1,12 +1,14 @@
 #include <iostream>
 #include <vector>
+#include <curand.h>
+#include <curand_kernel.h>
 
-__global__ void initializePriorities(int* priorities) {
-    unsigned seed = 1234 + threadIdx.x; // Seed for random number generator
-    priorities[threadIdx.x] = rand_r(&seed);
+__global__ void initializePriorities(float* priorities) {
+    
+    priorities[threadIdx.x] = curand_uniform(1234 + threadIdx.x);
 }
 
-__global__ void checkMax(int* removed, int** graph,int* priorities,int* inMIS, int n){
+__global__ void checkMax(int* removed, int** graph,float* priorities,int* inMIS, int n){
     if (removed[threadIdx.x] == 1) return;
     bool isMaxPriority = true;
         for (int j = 0; j < n; ++j) {
@@ -35,7 +37,7 @@ __global__ void removeVertices(int* removed, int** graph,int* inMIS,bool& change
 
 
 // Luby's Algorithm with Kokkos
-int* lubysAlgorithm(int* removed, int** graph,int* priorities,int* inMIS, int n) {
+int* lubysAlgorithm(int* removed, int** graph,float* priorities,int* inMIS, int n) {
     int* independentSet;
     bool changes;
     do {
@@ -70,11 +72,11 @@ int main(int argc, char* argv[]) {
         int** d_adj;
         int* inMIS;
         int* removed;
-        int* priorities;
+        float* priorities;
         int* independentSet;
         cudaMalloc(&inMIS,n*sizeof(int));
         cudaMalloc(&removed,n*sizeof(int));
-        cudaMalloc(&priorities,n*sizeof(int));
+        cudaMalloc(&priorities,n*sizeof(float));
         cudaMalloc(&d_adj,n*n*sizeof(int));
         cudaMemcpy(d_adj,adj,n*n*sizeof(int),cudaMemcpyHostToDevice);
         independentSet = lubysAlgorithm(removed,adj,priorities,inMIS,n);
