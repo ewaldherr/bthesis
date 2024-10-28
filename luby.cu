@@ -86,6 +86,10 @@ int main(int argc, char* argv[]) {
         adj[3][5] = 1;
         // Run Luby's algorithm with Kokkos
         int** d_adj;
+        int* host_state = new int[n];
+        for(int i = 0; i < n; ++i){
+            state[i] = 0;
+        }
         int* state = new int[n];
         float* priorities = new float[n];
         int* independentSet = new int[n];
@@ -93,6 +97,7 @@ int main(int argc, char* argv[]) {
         cudaMalloc(&state,n*sizeof(int));
         cudaMalloc(&priorities,n*sizeof(float));
         cudaMalloc(&d_adj,n*n*sizeof(int));
+        cudaMemcpy(state,host_state,n*sizeof(int),cudaMemcpyHostToDevice);
         cudaMemcpy(d_adj,adj,n*n*sizeof(int),cudaMemcpyHostToDevice);
         independentSet = lubysAlgorithm(adj,priorities,state,n);
         cudaFree(state);
