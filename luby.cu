@@ -112,6 +112,13 @@ int main(int argc, char* argv[]) {
         adj[3][2] = 1;
         adj[4][3] = 1;
         adj[5][3] = 1;
+        for (int i=0;i<n;++i){
+            std::cout << std::endl;
+            for(int j=0;j<n;++j){
+                std::cout << host_adj [i][j] << " ";
+            }
+        }
+    std::cout << std::endl;
         // Run Luby's algorithm with Kokkos
         int** d_adj;
         int* host_state = new int[n];
