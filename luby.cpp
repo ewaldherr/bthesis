@@ -12,26 +12,8 @@ KOKKOS_FUNCTION void initializePriorities(Kokkos::View<int*> priorities) {
     });
 }
 
-// Luby's Algorithm with Kokkos
-KOKKOS_FUNCTION Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int**> graph) {
-    Kokkos::View<int*> state("state", graph.extent(1));
-    Kokkos::View<int*> priorities("priorities", graph.extent(1));
-    auto h_state = Kokkos::create_mirror_view(state);
-    auto h_priorities = Kokkos::create_mirror_view(priorities);
-    Kokkos::deep_copy(state, 0);
-    int iter = 0;
-    bool changes;
-    do {
-        // Step 1: Assign random priorities to remaining vertices
-        initializePriorities(priorities);
-        Kokkos::deep_copy(h_priorities,priorities);
-        Kokkos::deep_copy(h_state,state);
-        for(int i = 0; i < state.extent(0);++i){
-            std::cout << h_priorities(i) << " ";
-        }
-        std::cout << std::endl;
-        // Step 2: Select vertices with highest priority in their neighborhood
-        Kokkos::parallel_for("select_max_priority", graph.extent(1), KOKKOS_LAMBDA(int u) {
+KOKKOS_FUNCTION void checkMax(Kokkos::View<int**> graph,Kokkos::View<int*> priorities,Kokkos::View<int*> state){
+    Kokkos::parallel_for("select_max_priority", graph.extent(1), KOKKOS_LAMBDA(int u) {
             if (state(u) != 0) return;
 
             bool isMaxPriority = true;
@@ -46,6 +28,40 @@ KOKKOS_FUNCTION Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int**> graph) {
                 state(u) = 1;
             }
         });
+}
+
+KOKKOS_FUNCTION void removeVertices(Kokkos::View<int**> graph, Kokkos::View<int*> state){
+    Kokkos::parallel_for("update_sets", graph.extent(1), KOKKOS_LAMBDA(int u) {
+        if (state(u) == 1) {
+            state(u) = 2;
+            for (int v = 0; v < graph.extent(1); ++v) {
+                if (graph(u, v) == 1) {
+                    state(v) = -1;
+                }
+            }
+        }
+    });
+}
+
+// Luby's Algorithm with Kokkos
+Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int**> graph) {
+    Kokkos::View<int*> state("state", graph.extent(1));
+    Kokkos::View<int*> priorities("priorities", graph.extent(1));
+    auto h_state = Kokkos::create_mirror_view(state);
+    auto h_priorities = Kokkos::create_mirror_view(priorities);
+    Kokkos::deep_copy(state, 0);
+    int iter = 0;
+    do {
+        // Step 1: Assign random priorities to remaining vertices
+        initializePriorities(priorities);
+        Kokkos::deep_copy(h_priorities,priorities);
+        Kokkos::deep_copy(h_state,state);
+        for(int i = 0; i < state.extent(0);++i){
+            std::cout << h_priorities(i) << " ";
+        }
+        std::cout << std::endl;
+        // Step 2: Select vertices with highest priority in their neighborhood
+        checkMax(graph,priorities,state);
         Kokkos::deep_copy(h_priorities,priorities);
         Kokkos::deep_copy(h_state,state);
         for(int i = 0; i < state.extent(0);++i){
@@ -57,24 +73,15 @@ KOKKOS_FUNCTION Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int**> graph) {
         }
         std::cout << std::endl;
         // Step 3: Add selected vertices to MIS and remove them and their neighbors
-        changes = false;
-        Kokkos::parallel_reduce("update_sets", graph.extent(1), KOKKOS_LAMBDA(int u, bool &local_changes) {
-            if (state(u) == 1) {
-                state(u) = 2;
-                for (int v = 0; v < graph.extent(1); ++v) {
-                    if (graph(u, v) == 1) {
-                        state(v) = -1;
-                    }
-                }
-                local_changes = true; // If any vertex is added, flag a change
-            }
-        }, changes);
+        removeVertices(graph,state);
         Kokkos::deep_copy(h_priorities,priorities);
         Kokkos::deep_copy(h_state,state);
         for(int i = 0; i < state.extent(0);++i){
             std::cout << h_priorities(i) << " " << h_state(i) << " ";
         }
-        std::cout << std::endl;        Kokkos::deep_copy(h_state,state);
+        std::cout << std::endl;
+        Kokkos::deep_copy(h_priorities,priorities)        
+        Kokkos::deep_copy(h_state,state);
         for(int i = 0; i < state.extent(0);++i){
             std::cout << h_priorities(i);
         }
