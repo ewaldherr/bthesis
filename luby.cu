@@ -38,7 +38,7 @@ __global__ void removeVertices(int* removed, int** graph,int* inMIS,bool& change
 
 // Luby's Algorithm with Kokkos
 int* lubysAlgorithm(int* removed, int** graph,float* priorities,int* inMIS, int n) {
-    int* independentSet;
+    int* independentSet = new int[n];
     bool changes;
     curandState *d_state;
     cudaMalloc(&d_state, sizeof(curandState));
@@ -58,8 +58,9 @@ int main(int argc, char* argv[]) {
     {
         //Initialize graph
         int n = 6;
-        int** adj;
+        int** adj = new int*[n];
         for(int i = 0;i < n; ++i){
+            adj[i] = new int[n];
             for(int j = 0;j < n; ++j){
                 adj[i][j] = 0;
             }
@@ -72,10 +73,10 @@ int main(int argc, char* argv[]) {
         adj[3][5] = 1;
         // Run Luby's algorithm with Kokkos
         int** d_adj;
-        int* inMIS;
-        int* removed;
-        float* priorities;
-        int* independentSet;
+        int* inMIS = new int[n];
+        int* removed = new int[n];
+        float* priorities = new float[n];
+        int* independentSet = new int[n];
         cudaMalloc(&inMIS,n*sizeof(int));
         cudaMalloc(&removed,n*sizeof(int));
         cudaMalloc(&priorities,n*sizeof(float));
