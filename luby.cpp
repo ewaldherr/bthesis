@@ -16,7 +16,7 @@ KOKKOS_FUNCTION void initializePriorities(Kokkos::View<int*> priorities) {
 KOKKOS_FUNCTION Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int**> graph) {
     Kokkos::View<int*> state("state", graph.extent(1));
     Kokkos::View<int*> priorities("priorities", graph.extent(1));
-
+    
     Kokkos::deep_copy(state, 0);
 
     bool changes;
@@ -77,12 +77,14 @@ int main(int argc, char* argv[]) {
         // Run Luby's algorithm with Kokkos
         Kokkos::View<int*> independentSet = lubysAlgorithm(adj);
         // Print the result
+        auto h_set = Kokkos::create_mirror_view(independentSet);
+        Kokkos::deep_copy(h_set,independentSet);
         std::cout << "Maximum Independent Set (MIS) nodes:" << std::endl;
-        Kokkos::parallel_for("print_results", V, KOKKOS_LAMBDA(int i) {
-            if (independentSet(i) == 1) {
-                printf("%d ", i);
+        for (int i = 0; i < h_set.extent(0); ++i){
+            if (h_set(i) == 1) {
+                std::cout << i << " ";
             }
-        });
+        }
         std::cout << std::endl;
     }
 

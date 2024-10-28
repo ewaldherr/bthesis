@@ -34,8 +34,6 @@ __global__ void removeVertices(int* graph,int* state, int n){
     }
 }
 
-
-// Luby's Algorithm with Kokkos
 int* lubysAlgorithm(int* host_graph,int* host_state, int n) {
     int* graph;
     int* state;
@@ -104,13 +102,14 @@ int main(int argc, char* argv[]) {
         adj[3 + 2 * 6] = 1;
         adj[4 + 3 * 6] = 1;
         adj[5 + 3 * 6] = 1;
-        // Run Luby's algorithm with Kokkos
+
         int* independentSet = new int[n];
         int* host_state = new int[n];
         for(int i = 0; i < n; ++i){
             host_state[i] = 0;
         }
         independentSet = lubysAlgorithm(adj,host_state,n);
+        
         // Print the result
         std::cout << "Maximum Independent Set (MIS) nodes: " << std::endl;
         for(int i = 0; i < n; ++i){
