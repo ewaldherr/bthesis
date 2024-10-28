@@ -72,12 +72,12 @@ int* lubysAlgorithm(int* host_graph,int* host_state, int n) {
     } while (changes);
     std::cout << iters << std::endl;
 
+    cudaMemcpy(independentSet,state, n*sizeof(int), cudaMemcpyDeviceToHost);
     cudaFree(state);
     cudaFree(priorities);
     cudaFree(graph);
     cudaFree(d_state);
 
-    cudaMemcpy(independentSet,state, n*sizeof(int), cudaMemcpyDeviceToHost);
     return independentSet;
 }
 
