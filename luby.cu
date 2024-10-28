@@ -85,6 +85,8 @@ int* lubysAlgorithm(int* graph,float* priorities,int* state, int n) {
     } while (changes[0]);
     std::cout << iters << std::endl;
     cudaMemcpy(independentSet,state, n*sizeof(int), cudaMemcpyDeviceToHost);
+    cudaFree(d_changes);
+    cudaFree(d_state);
     return independentSet;
 }
 
@@ -92,7 +94,6 @@ int main(int argc, char* argv[]) {
     {
         //Initialize graph
         int n = 6;
-        #define N n;
         int* adj = new int[n*n];
         for(int i = 0;i < n; ++i){
             for(int j = 0;j < n; ++j){
