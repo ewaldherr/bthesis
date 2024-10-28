@@ -113,7 +113,7 @@ int main(int argc, char* argv[]) {
         adj[4][3] = 1;
         adj[5][3] = 1;
         // Run Luby's algorithm with Kokkos
-        int** d_adj = new int*[10];
+        int** d_adj;
         int* host_state = new int[n];
         for(int i = 0; i < n; ++i){
             host_state[i] = 0;
