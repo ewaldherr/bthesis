@@ -57,6 +57,7 @@ int* lubysAlgorithm(int** graph,float* priorities,int* state, int n) {
         }
         std::cout << std::endl;
         checkMax<<<1,n>>>(graph,priorities,state,n);
+        cudaMemcpy(host_state,state,n*sizeof(int),cudaMemcpyDeviceToHost);
         for (int i = 0; i< n; ++i){
             	std::cout << host_prios[i] << " " << host_state[i] << "  ";
         }
@@ -65,6 +66,7 @@ int* lubysAlgorithm(int** graph,float* priorities,int* state, int n) {
         changes[0] = false;
         cudaMemcpy(d_changes,changes,sizeof(bool),cudaMemcpyHostToDevice);
         removeVertices<<<1,n>>>(graph,state,changes,n);
+        cudaMemcpy(host_state,state,n*sizeof(int),cudaMemcpyDeviceToHost);
         for (int i = 0; i< n; ++i){
             	std::cout << host_prios[i] << " " << host_state[i] << "  ";
         }
