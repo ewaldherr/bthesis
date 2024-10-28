@@ -47,15 +47,6 @@ KOKKOS_FUNCTION void removeVertices(Kokkos::View<int**> graph, Kokkos::View<int*
 
 // Luby's Algorithm with Kokkos
 Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int**> graph) {
-    auto h_graph = Kokkos::create_mirror_view(graph);
-    Kokkos::deep_copy(h_graph,graph);
-    for(int i=0; i<h_graph.extent(0);++i){
-            std::cout << std::endl;
-            for(int j=0; j<h_graph.extent(0);++j){
-                std::cout<< h_graph(i,j) << " ";
-            }
-        }
-        std::cout << std::endl;
     Kokkos::View<int*> state("state", graph.extent(1));
     Kokkos::View<double*> priorities("priorities", graph.extent(1));
     auto h_state = Kokkos::create_mirror_view(state);
@@ -80,18 +71,18 @@ Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int**> graph) {
             std::cout << h_priorities(i) << " " << h_state(i) << " ";
         }
         std::cout << std::endl;
+        for(int i = 0; i < state.extent(0);++i){
+            if(h_state(i)==1){
+                changes = true;
+                break;
+            }
+        }
         // Step 3: Add selected vertices to MIS and remove them and their neighbors
         removeVertices(graph,state);
         Kokkos::deep_copy(h_priorities,priorities);
         Kokkos::deep_copy(h_state,state);
         for(int i = 0; i < state.extent(0);++i){
             std::cout << h_priorities(i) << " " << h_state(i) << " ";
-        }
-        for(int i = 0; i < state.extent(0);++i){
-            if(h_state(i)==1){
-                changes = true;
-                break;
-            }
         }
         std::cout << std::endl;
         ++iter;
@@ -120,13 +111,6 @@ int main(int argc, char* argv[]) {
         h_graph(3, 2) = 1;
         h_graph(4, 3) = 1;
         h_graph(5, 3) = 1;
-        for(int i=0; i<h_graph.extent(0);++i){
-            std::cout << std::endl;
-            for(int j=0; j<h_graph.extent(0);++j){
-                std::cout<< h_graph(i,j) << " ";
-            }
-        }
-        std::cout << std::endl;
         Kokkos::deep_copy(adj,h_graph);
         // Run Luby's algorithm with Kokkos
         Kokkos::View<int*> independentSet = lubysAlgorithm(adj);
