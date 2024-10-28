@@ -48,7 +48,7 @@ int* lubysAlgorithm(int* host_graph,int* host_state, int n) {
     cudaMemcpy(graph,host_graph,n*n*sizeof(int),cudaMemcpyHostToDevice);
 
     int* host_adj = new int [n*n];
-    cudaMemcpy(host_adj,d_adj,n*n*sizeof(int),cudaMemcpyDeviceToHost);
+    cudaMemcpy(host_adj,graph,n*n*sizeof(int),cudaMemcpyDeviceToHost);
     for (int i=0;i<n;++i){
         std::cout << std::endl;
         for(int j=0;j<n;++j){
@@ -57,7 +57,6 @@ int* lubysAlgorithm(int* host_graph,int* host_state, int n) {
     }
     std::cout << std::endl;
     float* host_prios = new float[n];
-    int* host_state = new int[n];
     int* independentSet = new int[n];
     bool* changes = new bool[1];
     bool* d_changes;
