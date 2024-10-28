@@ -44,7 +44,9 @@ int* lubysAlgorithm(int* host_graph,int* host_state, int n) {
     bool changes;
     int iters = 0;
     int* host_state = new int[n];
+    curandState *d_state;
 
+    cudaMalloc(&d_state, sizeof(curandState));
     cudaMalloc(&state,n*sizeof(int));
     cudaMalloc(&priorities,n*sizeof(float));
     cudaMalloc(&graph,n*n*sizeof(int));
@@ -65,17 +67,18 @@ int* lubysAlgorithm(int* host_graph,int* host_state, int n) {
             }
         }
 
-        removeVertices<<<1,n>>>(graph,state,changes,n);
+        removeVertices<<<1,n>>>(graph,state,n);
 
         ++ iters;
     } while (changes);
     std::cout << iters << std::endl;
-    cudaMemcpy(independentSet,state, n*sizeof(int), cudaMemcpyDeviceToHost);
+
     cudaFree(state);
     cudaFree(priorities);
     cudaFree(graph);
-    cudaFree(d_changes);
     cudaFree(d_state);
+    
+    cudaMemcpy(independentSet,state, n*sizeof(int), cudaMemcpyDeviceToHost);
     return independentSet;
 }
 
