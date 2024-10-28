@@ -40,6 +40,8 @@ __global__ void removeVertices(int* removed, int** graph,int* inMIS,bool& change
 int* lubysAlgorithm(int* removed, int** graph,float* priorities,int* inMIS, int n) {
     int* independentSet = new int[n];
     bool changes;
+    bool d_changes;
+    cudaMalloc(&d_changes, sizeof(bool));
     curandState *d_state;
     cudaMalloc(&d_state, sizeof(curandState));
     do {
@@ -48,7 +50,9 @@ int* lubysAlgorithm(int* removed, int** graph,float* priorities,int* inMIS, int 
         checkMax<<<1,n>>>(removed,graph,priorities,inMIS,n);
         // Step 3: Add selected vertices to MIS and remove them and their neighbors
         changes = false;
+        cudaMemcpy(d_changes,changes,sizeof(bool),cudaMemcpyHostToDevice);
         removeVertices<<<1,n>>>(removed,graph,inMIS,changes,n);
+        cudaMemcpy(changes,d_changes,sizeof(bool),cudaMemcpyDeviceToHost);
     } while (changes);
     cudaMemcpy(independentSet,inMIS, n*sizeof(int), cudaMemcpyDeviceToHost);
     return independentSet;
