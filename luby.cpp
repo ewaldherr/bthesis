@@ -14,12 +14,10 @@ KOKKOS_FUNCTION void initializePriorities(Kokkos::View<int*> priorities) {
 
 // Luby's Algorithm with Kokkos
 KOKKOS_FUNCTION Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int**> graph) {
-    Kokkos::View<int*> inMIS("inMIS", graph.extent(1));
-    Kokkos::View<int*> removed("removed", graph.extent(1));
+    Kokkos::View<int*> state("state", graph.extent(1));
     Kokkos::View<int*> priorities("priorities", graph.extent(1));
 
-    Kokkos::deep_copy(inMIS, 0);
-    Kokkos::deep_copy(removed, 0);
+    Kokkos::deep_copy(state, 0);
 
     bool changes;
     do {
@@ -28,29 +26,29 @@ KOKKOS_FUNCTION Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int**> graph) {
 
         // Step 2: Select vertices with highest priority in their neighborhood
         Kokkos::parallel_for("select_max_priority", graph.extent(1), KOKKOS_LAMBDA(int u) {
-            if (removed(u) == 1) return;
+            if (state(u) != 0) return;
 
             bool isMaxPriority = true;
             for (int v = 0; v < graph.extent(1); ++v) {
-                if (graph(u, v) == 1 && removed(v) == 0 && priorities(v) >= priorities(u)) {
+                if (graph(u, v) == 1 && state(v) == 0 && priorities(v) >= priorities(u)) {
                     isMaxPriority = false;
                     break;
                 }
             }
 
             if (isMaxPriority) {
-                inMIS(u) = 1;
+                state(u) = 1;
             }
         });
 
         // Step 3: Add selected vertices to MIS and remove them and their neighbors
         changes = false;
         Kokkos::parallel_reduce("update_sets", graph.extent(1), KOKKOS_LAMBDA(int u, bool &local_changes) {
-            if (inMIS(u) == 1) {
-                removed(u) = 1;
+            if (state(u) == 1) {
+                state(u) = 2;
                 for (int v = 0; v < graph.extent(1); ++v) {
                     if (graph(u, v) == 1) {
-                        removed(v) = 1;
+                        state(v) = -1;
                     }
                 }
                 local_changes = true; // If any vertex is added, flag a change
@@ -59,7 +57,7 @@ KOKKOS_FUNCTION Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int**> graph) {
 
     } while (changes);
 
-    return inMIS;
+    return state;
 }
 
 int main(int argc, char* argv[]) {
