@@ -42,7 +42,7 @@ int* lubysAlgorithm(int** graph,float* priorities,int* state, int n) {
     cudaMemcpy(host_adj,graph,n*n*sizeof(int),cudaMemcpyDeviceToHost);
     for (int i=0;i<n;++i){
         std::cout << std::endl;
-        for(intj==;j<n;++j){
+        for(intj=0;j<n;++j){
             std::cout << host_adj [i][j] << " ";
         }
     }
