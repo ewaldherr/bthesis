@@ -49,28 +49,18 @@ KOKKOS_FUNCTION void removeVertices(Kokkos::View<int**> graph, Kokkos::View<int*
 Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int**> graph) {
     Kokkos::View<int*> state("state", graph.extent(1));
     Kokkos::View<double*> priorities("priorities", graph.extent(1));
+
     auto h_state = Kokkos::create_mirror_view(state);
-    auto h_priorities = Kokkos::create_mirror_view(priorities);
     Kokkos::deep_copy(state, 0);
-    int iter = 0;
+
     bool changes;
     do {
         // Step 1: Assign random priorities to remaining vertices
         initializePriorities(priorities);
-        Kokkos::deep_copy(h_priorities,priorities);
-        Kokkos::deep_copy(h_state,state);
-        for(int i = 0; i < state.extent(0);++i){
-            std::cout << h_priorities(i) << " " << h_state(i) << " ";
-        }
-        std::cout << std::endl;
         // Step 2: Select vertices with highest priority in their neighborhood
         checkMax(graph,priorities,state);
-        Kokkos::deep_copy(h_priorities,priorities);
         Kokkos::deep_copy(h_state,state);
-        for(int i = 0; i < state.extent(0);++i){
-            std::cout << h_priorities(i) << " " << h_state(i) << " ";
-        }
-        std::cout << std::endl;
+
         changes = false;
         for(int i = 0; i < state.extent(0);++i){
             if(h_state(i)==1){
@@ -80,15 +70,9 @@ Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int**> graph) {
         }
         // Step 3: Add selected vertices to MIS and remove them and their neighbors
         removeVertices(graph,state);
-        Kokkos::deep_copy(h_priorities,priorities);
-        Kokkos::deep_copy(h_state,state);
-        for(int i = 0; i < state.extent(0);++i){
-            std::cout << h_priorities(i) << " " << h_state(i) << " ";
-        }
-        std::cout << std::endl;
-        ++iter;
+
     } while (changes);
-    std::cout << iter << std::endl;
+
     return state;
 }
 
