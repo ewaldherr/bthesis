@@ -48,6 +48,7 @@ Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> ad
     Kokkos::View<int*> state("state", xadj.extent(0)-1);
     Kokkos::View<double*> priorities("priorities", xadj.extent(0)-1);
 
+    auto h_priorities = Kokkos::create_mirror_view(priorities);
     auto h_state = Kokkos::create_mirror_view(state);
     Kokkos::deep_copy(state, 0);
 
@@ -55,10 +56,20 @@ Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> ad
     do {
         // Step 1: Assign random priorities to remaining vertices
         initializePriorities(priorities);
+        Kokkos::deep_copy(h_state,state);
+        Kokkos::deep_copy(h_priorities,priorities);
+        for(int i = 0; i < xadj.extent(0)-1 ; ++i){
+            std::cout << h_priorities(i) << " " << h_state(i) << "  ";
+        }
+        std::cout << std::endl;
         // Step 2: Select vertices with highest priority in their neighborhood
         checkMax(xadj,adjncy,priorities,state);
         Kokkos::deep_copy(h_state,state);
-
+        Kokkos::deep_copy(h_priorities,priorities);
+        for(int i = 0; i < xadj.extent(0)-1 ; ++i){
+            std::cout << h_priorities(i) << " " << h_state(i) << "  ";
+        }
+        std::cout << std::endl;
         // Check if changes occured during last step
         changes = false;
         for(int i = 0; i < state.extent(0);++i){
@@ -69,6 +80,12 @@ Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> ad
         }
         // Step 3: Add selected vertices to MIS and remove them and their neighbors
         removeVertices(xadj,adjncy,state);
+        Kokkos::deep_copy(h_state,state);
+        Kokkos::deep_copy(h_priorities,priorities);
+        for(int i = 0; i < xadj.extent(0)-1 ; ++i){
+            std::cout << h_priorities(i) << " " << h_state(i) << "  ";
+        }
+        std::cout << std::endl;
 
     } while (changes);
 
