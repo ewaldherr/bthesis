@@ -14,13 +14,13 @@ KOKKOS_FUNCTION void initializePriorities(Kokkos::View<double*> priorities) {
     });
 }
 
-KOKKOS_FUNCTION void checkMax(Kokkos::View<int**> graph,Kokkos::View<double*> priorities,Kokkos::View<int*> state){
-    Kokkos::parallel_for("select_max_priority", graph.extent(1), KOKKOS_LAMBDA(int u) {
+KOKKOS_FUNCTION void checkMax(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy, Kokkos::View<double*> priorities, Kokkos::View<int*> state){
+    Kokkos::parallel_for("select_max_priority", xadj.extent(1)-1, KOKKOS_LAMBDA(int u) {
             if (state(u) != 0) return;
 
             bool isMaxPriority = true;
-            for (int v = 0; v < graph.extent(1); ++v) {
-                if (graph(u, v) == 1 && state(v) == 0 && priorities(v) >= priorities(u)) {
+            for (int v = xadj(u); v < xadj(u+1)-1; ++v) {
+                if (state(v) == 0 && priorities(adjncy(u+v)) >= priorities(u)) {
                     isMaxPriority = false;
                     break;
                 }
@@ -32,23 +32,21 @@ KOKKOS_FUNCTION void checkMax(Kokkos::View<int**> graph,Kokkos::View<double*> pr
         });
 }
 
-KOKKOS_FUNCTION void removeVertices(Kokkos::View<int**> graph, Kokkos::View<int*> state){
-    Kokkos::parallel_for("update_sets", graph.extent(1), KOKKOS_LAMBDA(int u) {
+KOKKOS_FUNCTION void removeVertices(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy, Kokkos::View<int*> state){
+    Kokkos::parallel_for("update_sets", xadj.extent(1)-1, KOKKOS_LAMBDA(int u) {
         if (state(u) == 1) {
             state(u) = 2;
-            for (int v = 0; v < graph.extent(1); ++v) {
-                if (graph(u, v) == 1) {
-                    state(v) = -1;
-                }
+            for (int v = xadj(u); v < xadj(u+1)-1; ++v) {
+                state(adjncy(u+v)) = -1;
             }
         }
     });
 }
 
 // Luby's Algorithm with Kokkos
-Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int**> graph) {
-    Kokkos::View<int*> state("state", graph.extent(1));
-    Kokkos::View<double*> priorities("priorities", graph.extent(1));
+Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy) {
+    Kokkos::View<int*> state("state", xadj.extent(1)-1);
+    Kokkos::View<double*> priorities("priorities", xadj.extent(1)-1);
 
     auto h_state = Kokkos::create_mirror_view(state);
     Kokkos::deep_copy(state, 0);
@@ -58,9 +56,10 @@ Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int**> graph) {
         // Step 1: Assign random priorities to remaining vertices
         initializePriorities(priorities);
         // Step 2: Select vertices with highest priority in their neighborhood
-        checkMax(graph,priorities,state);
+        checkMax(xadj,adjncy,priorities,state);
         Kokkos::deep_copy(h_state,state);
 
+        // Check if changes occured during last step
         changes = false;
         for(int i = 0; i < state.extent(0);++i){
             if(h_state(i)==1){
@@ -69,7 +68,7 @@ Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int**> graph) {
             }
         }
         // Step 3: Add selected vertices to MIS and remove them and their neighbors
-        removeVertices(graph,state);
+        removeVertices(xadj,adjncy,state);
 
     } while (changes);
 
@@ -81,24 +80,33 @@ int main(int argc, char* argv[]) {
     {
         //Initialize graph
         int V = 6;
-        Kokkos::View<int**> adj ("adj",V,V);
-        auto h_graph = Kokkos::create_mirror_view(adj);
-        h_graph(0, 1) = 1;
-        h_graph(0, 2) = 1;
-        h_graph(1, 3) = 1;
-        h_graph(2, 3) = 1;
-        h_graph(3, 4) = 1;
-        h_graph(3, 5) = 1;
-        //backward edges
-        h_graph(1, 0) = 1;
-        h_graph(2, 0) = 1;
-        h_graph(3, 1) = 1;
-        h_graph(3, 2) = 1;
-        h_graph(4, 3) = 1;
-        h_graph(5, 3) = 1;
-        Kokkos::deep_copy(adj,h_graph);
+        Kokkos::View<int*> xadj ("adj",V+1);
+        Kokkos::View<int*> adjncy ("adj",V*V);
+        xadj(0) = 0;
+        xadj(1) = 2;
+        xadj(2) = 4;
+        xadj(3) = 6;
+        xadj(4) = 10;
+        xadj(5) = 11;
+        xadj(6) = 12;
+        adjncy(0) = 1;
+        adjncy(1) = 2;
+        adjncy(2) = 0;
+        adjncy(3) = 3;
+        adjncy(4) = 0;
+        adjncy(5) = 3;
+        adjncy(6) = 1;
+        adjncy(7) = 2;
+        adjncy(8) = 4;
+        adjncy(9) = 5;
+        adjncy(10) = 3;
+        adjncy(11) = 3;
+        auto h_xadj = Kokkos::create_mirror_view(xadj);
+        auto h_adjncy = Kokkos::create_mirror_view(adjncy);
+        Kokkos::deep_copy(adjncy,h_adjncy);
+        Kokkos::deep_copy(xadj,h_xadj);
         // Run Luby's algorithm with Kokkos
-        Kokkos::View<int*> independentSet = lubysAlgorithm(adj);
+        Kokkos::View<int*> independentSet = lubysAlgorithm(xadj,adjncy);
         // Print the result
         auto h_set = Kokkos::create_mirror_view(independentSet);
         Kokkos::deep_copy(h_set,independentSet);
