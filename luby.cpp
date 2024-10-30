@@ -19,7 +19,7 @@ KOKKOS_FUNCTION void checkMax(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy
             if (state(u) != 0) return;
 
             bool isMaxPriority = true;
-            for (int v = xadj(u); v < xadj(u+1)-1; ++v) {
+            for (int v = xadj(u); v < xadj(u+1); ++v) {
                 if (state(v) == 0 && priorities(adjncy(v)) >= priorities(u)) {
                     isMaxPriority = false;
                     break;
@@ -36,7 +36,7 @@ KOKKOS_FUNCTION void removeVertices(Kokkos::View<int*> xadj, Kokkos::View<int*> 
     Kokkos::parallel_for("update_sets", xadj.extent(0)-1, KOKKOS_LAMBDA(int u) {
         if (state(u) == 1) {
             state(u) = 2;
-            for (int v = xadj(u); v < xadj(u+1)-1; ++v) {
+            for (int v = xadj(u); v < xadj(u+1); ++v) {
                 state(adjncy(v)) = -1;
             }
         }
