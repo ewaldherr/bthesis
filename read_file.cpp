@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <iostream>
 
-void readGraphFromFile(const std::string &filename, Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy) {
+void readGraphFromFile(const std::string &filename, Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy) {
     std::ifstream inputFile(filename);
     if (!inputFile.is_open()) {
         throw std::runtime_error("Failed to open graph file.");
