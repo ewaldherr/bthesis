@@ -65,7 +65,7 @@ Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> ad
         Kokkos::deep_copy(h_state,state);
         changes = false;
         for(int i = 0; i < state.extent(0);++i){
-            if(h_state(i)==1){
+            if(h_state(i)==2){
                 changes = true;
                 break;
             }
