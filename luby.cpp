@@ -83,9 +83,8 @@ int main(int argc, char* argv[]) {
     Kokkos::initialize(argc, argv);
     {
         //Initialize graph
-        int V = 6;
-        Kokkos::View<int*> xadj;
-        Kokkos::View<int*> adjncy;
+        Kokkos::View<int*> xadj("xadj",1);
+        Kokkos::View<int*> adjncy("adjncy",1);
         if(argc == 0){
             throw std::runtime_error("No input file. Abort program.");
         }
