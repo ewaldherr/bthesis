@@ -23,7 +23,7 @@ void readGraphFromFile(const std::string &filename, Kokkos::View<int*> xadj, Kok
         if (!(iss >> u >> v)) {
             continue; // Skip malformed lines
         }
-        edges.push_back(u, v);
+        edges.emplace_back(u, v);
         maxVertex = std::max({maxVertex, u, v});
     }
 
