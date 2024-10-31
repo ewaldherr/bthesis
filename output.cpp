@@ -2,7 +2,7 @@
 #include <fstream>
 #include <string>
 
-void writeIndependentSetToFile(const Kokkos::View<int*> &independentSetView, const std::string &filename) {
+void writeIndependentSetToFile(const Kokkos::View<int*> independentSet, const std::string &filename) {
     // Open the output file in write mode
     std::ofstream outputFile(filename);
     if (!outputFile.is_open()) {
@@ -10,11 +10,11 @@ void writeIndependentSetToFile(const Kokkos::View<int*> &independentSetView, con
     }
     
     // Loop through the entries in the Kokkos::View and write each entry to a new line
-    auto hostIndependentSetView = Kokkos::create_mirror_view(independentSetView);
-    Kokkos::deep_copy(hostIndependentSetView, independentSetView);
+    auto hostindependentSet = Kokkos::create_mirror_view(independentSet);
+    Kokkos::deep_copy(hostindependentSet, independentSet);
 
-    for (size_t i = 0; i < hostIndependentSetView.extent(0); ++i) {
-        outputFile << hostIndependentSetView(i) << "\n";
+    for (size_t i = 0; i < hostindependentSet.extent(0); ++i) {
+        outputFile << hostindependentSet(i) << "\n";
     }
     
     // Close the file

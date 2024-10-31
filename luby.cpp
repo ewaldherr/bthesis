@@ -4,6 +4,7 @@
 #include <vector>
 #include <random>
 #include <unordered_set>
+#include <output.cpp>
 
 // Function to initialize random priorities on the GPU
 KOKKOS_FUNCTION void initializePriorities(Kokkos::View<double*> priorities) {
@@ -108,18 +109,8 @@ int main(int argc, char* argv[]) {
 
         Kokkos::deep_copy(adjncy,h_adjncy);
         Kokkos::deep_copy(xadj,h_xadj);
-        // Run Luby's algorithm with Kokkos
-        Kokkos::View<int*> independentSet = lubysAlgorithm(xadj,adjncy);
-        // Print the result
-        auto h_set = Kokkos::create_mirror_view(independentSet);
-        Kokkos::deep_copy(h_set,independentSet);
-        std::cout << "Maximum Independent Set (MIS) nodes:" << std::endl;
-        for (int i = 0; i < h_set.extent(0); ++i){
-            if (h_set(i) == 2) {
-                std::cout << i << " ";
-            }
-        }
-        std::cout << std::endl;
+        // Run Luby's algorithm with Kokkos and write results to file
+        writeIndependentSetToFile(lubysAlgorithm(xadj,adjncy),"result_mis.txt");
     }
 
     Kokkos::finalize();
