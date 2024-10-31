@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <stdexcept>
 #include <algorithm>
+#include <iostream>
 
 void readGraphFromFile(const std::string &filename, Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy) {
     std::ifstream inputFile(filename);
