@@ -83,34 +83,16 @@ int main(int argc, char* argv[]) {
     {
         //Initialize graph
         int V = 6;
-        Kokkos::View<int*> xadj ("xadj",V+1);
-        Kokkos::View<int*> adjncy ("adjncy",V*V);
-        auto h_xadj = Kokkos::create_mirror_view(xadj);
-        auto h_adjncy = Kokkos::create_mirror_view(adjncy);
-        h_xadj(0) = 0;
-        h_xadj(1) = 2;
-        h_xadj(2) = 4;
-        h_xadj(3) = 6;
-        h_xadj(4) = 10;
-        h_xadj(5) = 11;
-        h_xadj(6) = 12;
-        h_adjncy(0) = 1;
-        h_adjncy(1) = 2;
-        h_adjncy(2) = 0;
-        h_adjncy(3) = 3;
-        h_adjncy(4) = 0;
-        h_adjncy(5) = 3;
-        h_adjncy(6) = 1;
-        h_adjncy(7) = 2;
-        h_adjncy(8) = 4;
-        h_adjncy(9) = 5;
-        h_adjncy(10) = 3;
-        h_adjncy(11) = 3;
-
-        Kokkos::deep_copy(adjncy,h_adjncy);
-        Kokkos::deep_copy(xadj,h_xadj);
-        // Run Luby's algorithm with Kokkos and write results to file
-        writeIndependentSetToFile(lubysAlgorithm(xadj,adjncy),"result_mis.txt");
+        Kokkos::View<int*> xadj;
+        Kokkos::View<int*> adjncy;
+        if(argc == 0){
+            throw std::runtime_error("No input file. Abort program.");
+        }
+        else{
+            readGraphFromFile(argv[0], xadj,adjncy);
+            // Run Luby's algorithm with Kokkos and write results to file
+            writeIndependentSetToFile(lubysAlgorithm(xadj,adjncy),"result_mis.txt");
+        }
     }
 
     Kokkos::finalize();
