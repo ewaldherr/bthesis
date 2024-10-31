@@ -23,8 +23,7 @@ void readGraphFromFile(const std::string &filename, Kokkos::View<int*> xadj, Kok
         if (!(iss >> u >> v)) {
             continue; // Skip malformed lines
         }
-        edges.emplace_back(u, v);
-        edges.emplace_back(v, u); 
+        edges.push_back(u, v);
         maxVertex = std::max({maxVertex, u, v});
     }
 
@@ -39,36 +38,36 @@ void readGraphFromFile(const std::string &filename, Kokkos::View<int*> xadj, Kok
     }
 
     // Step 3: Build xadj based on degree information
-    std::vector<int> h_xadj(numVertices + 1, 0);
+    std::vector<int> v_xadj(numVertices + 1, 0);
     for (int i = 1; i <= numVertices; ++i) {
-        h_xadj[i] = h_xadj[i - 1] + degree[i - 1];
+        v_xadj[i] = v_xadj[i - 1] + degree[i - 1];
     }
 
     // Step 4: Build adjncy by filling neighbors
-    std::vector<int> h_adjncy(edges.size());
-    std::vector<int> currentOffset = h_xadj;
+    std::vector<int> v_adjncy(edges.size());
+    std::vector<int> currentOffset = v_xadj;
 
     for (const auto &edge : edges) {
         int u = edge.first;
         int v = edge.second;
-        h_adjncy[currentOffset[u]++] = v;
+        v_adjncy[currentOffset[u]++] = v;
     }
 
     // Step 5: Create Kokkos views and copy data to device
     xadj = Kokkos::View<int*>("xadj", numVertices + 1);
     adjncy = Kokkos::View<int*>("adjncy", edges.size());
 
-    auto h_xadj_k = Kokkos::create_mirror_view(xadj);
-    auto h_adjncy_k = Kokkos::create_mirror_view(adjncy);
+    auto h_xadj = Kokkos::create_mirror_view(xadj);
+    auto h_adjncy = Kokkos::create_mirror_view(adjncy);
 
-    for (size_t i = 0; i < h_xadj.size(); ++i) {
-        h_xadj_k(i) = h_xadj[i];
+    for (size_t i = 0; i < v_xadj.size(); ++i) {
+        h_xadj(i) = v_xadj[i];
     }
 
-    for (size_t i = 0; i < h_adjncy.size(); ++i) {
-        h_adjncy_k(i) = h_adjncy[i];
+    for (size_t i = 0; i < v_adjncy.size(); ++i) {
+        h_adjncy(i) = v_adjncy[i];
     }
 
-    Kokkos::deep_copy(xadj, h_xadj_k);
-    Kokkos::deep_copy(adjncy, h_adjncy_k);
+    Kokkos::deep_copy(xadj, h_xadj);
+    Kokkos::deep_copy(adjncy, h_adjncy);
 }
