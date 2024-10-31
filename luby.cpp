@@ -85,11 +85,11 @@ int main(int argc, char* argv[]) {
         //Initialize graph
         Kokkos::View<int*> xadj("xadj",1);
         Kokkos::View<int*> adjncy("adjncy",1);
-        if(argc == 0){
+        if(argc == 1){
             throw std::runtime_error("No input file. Abort program.");
         }
         else{
-            readGraphFromFile(argv[0], xadj,adjncy);
+            readGraphFromFile(argv[1], xadj,adjncy);
             std::cout << xadj.extent(0) << " " << adjncy.extent(0) << std::endl;;
             // Run Luby's algorithm with Kokkos and write results to file
             writeIndependentSetToFile(lubysAlgorithm(xadj,adjncy),"result_mis.txt");
