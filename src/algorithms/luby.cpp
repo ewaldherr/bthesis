@@ -4,8 +4,8 @@
 #include <vector>
 #include <random>
 #include <unordered_set>
-#include "output.cpp"
-#include "read_file.cpp"
+#include "../read-write/output.cpp"
+#include "../read-write/read_file.cpp"
 
 // Function to initialize random priorities on the GPU
 KOKKOS_FUNCTION void initializePriorities(Kokkos::View<double*> priorities) {
@@ -16,6 +16,7 @@ KOKKOS_FUNCTION void initializePriorities(Kokkos::View<double*> priorities) {
     });
 }
 
+// Function that checks for each vertex if it has the max priority of its neighborhood
 KOKKOS_FUNCTION void checkMax(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy, Kokkos::View<double*> priorities, Kokkos::View<int*> state){
     Kokkos::parallel_for("select_max_priority", xadj.extent(0)-1, KOKKOS_LAMBDA(int u) {
             if (state(u) != -1) return;
@@ -34,6 +35,7 @@ KOKKOS_FUNCTION void checkMax(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy
         });
 }
 
+// Function to remove vertices of vertices added to MIS
 KOKKOS_FUNCTION void removeVertices(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy, Kokkos::View<int*> state){
     Kokkos::parallel_for("update_sets", xadj.extent(0)-1, KOKKOS_LAMBDA(int u) {
         if (state(u) == 2) {
@@ -45,7 +47,7 @@ KOKKOS_FUNCTION void removeVertices(Kokkos::View<int*> xadj, Kokkos::View<int*> 
     });
 }
 
-// Luby's Algorithm with Kokkos
+// Luby's Algorithm
 Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy) {
     Kokkos::View<int*> state("state", xadj.extent(0)-1);
     Kokkos::View<double*> priorities("priorities", xadj.extent(0)-1);
@@ -56,10 +58,10 @@ Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> ad
 
     bool changes;
     do {
-        // Step 1: Assign random priorities to remaining vertices
+        // Assign random priorities to remaining vertices
         initializePriorities(priorities);
 
-        // Step 2: Select vertices with highest priority in their neighborhood
+        // Select vertices with highest priority in their neighborhood
         checkMax(xadj,adjncy,priorities,state);
 
         // Check if changes occured during last step
@@ -71,7 +73,7 @@ Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> ad
                 break;
             }
         }
-        // Step 3: Add selected vertices to MIS and remove them and their neighbors
+        // Add selected vertices to MIS and remove them and their neighbors
         removeVertices(xadj,adjncy,state);
 
     } while (changes);
@@ -82,9 +84,10 @@ Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> ad
 int main(int argc, char* argv[]) {
     Kokkos::initialize(argc, argv);
     {
-        //Initialize graph
+        // Initialize graph
         Kokkos::View<int*> xadj("xadj",1);
         Kokkos::View<int*> adjncy("adjncy",1);
+        // Check if input graph is provided
         if(argc == 1){
             throw std::runtime_error("No input file. Abort program.");
         }
