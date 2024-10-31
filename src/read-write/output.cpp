@@ -1,6 +1,7 @@
 #include <Kokkos_Core.hpp>
 #include <fstream>
 #include <string>
+#include <iostream>
 
 void writeIndependentSetToFile(const Kokkos::View<int*> independentSet, const std::string &filename) {
     // Open the output file in write mode
