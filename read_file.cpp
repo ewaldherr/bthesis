@@ -54,8 +54,8 @@ void readGraphFromFile(const std::string &filename, Kokkos::View<int*> xadj, Kok
     }
 
     // Step 5: Create Kokkos views and copy data to device
-    xadj = Kokkos::View<int*>("xadj", numVertices + 1);
-    adjncy = Kokkos::View<int*>("adjncy", edges.size());
+    Kokkos::resize(xadj, numVertices + 1);
+    Kokkos::resize(adjncy, edges.size());
 
     auto h_xadj = Kokkos::create_mirror_view(xadj);
     auto h_adjncy = Kokkos::create_mirror_view(adjncy);
