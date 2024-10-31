@@ -17,28 +17,28 @@ KOKKOS_FUNCTION void initializePriorities(Kokkos::View<double*> priorities) {
 
 KOKKOS_FUNCTION void checkMax(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy, Kokkos::View<double*> priorities, Kokkos::View<int*> state){
     Kokkos::parallel_for("select_max_priority", xadj.extent(0)-1, KOKKOS_LAMBDA(int u) {
-            if (state(u) != 0) return;
+            if (state(u) != -1) return;
 
             bool isMaxPriority = true;
             for (int v = xadj(u); v < xadj(u+1); ++v) {
-                if (state(adjncy(v)) == 0 && priorities(adjncy(v)) >= priorities(u)) {
+                if (state(adjncy(v)) == -1 && priorities(adjncy(v)) >= priorities(u)) {
                     isMaxPriority = false;
                     break;
                 }
             }
 
             if (isMaxPriority) {
-                state(u) = 1;
+                state(u) = 2;
             }
         });
 }
 
 KOKKOS_FUNCTION void removeVertices(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy, Kokkos::View<int*> state){
     Kokkos::parallel_for("update_sets", xadj.extent(0)-1, KOKKOS_LAMBDA(int u) {
-        if (state(u) == 1) {
-            state(u) = 2;
+        if (state(u) == 2) {
+            state(u) = 1;
             for (int v = xadj(u); v < xadj(u+1); ++v) {
-                state(adjncy(v)) = -1;
+                state(adjncy(v)) = 0;
             }
         }
     });
@@ -51,7 +51,7 @@ Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> ad
 
     auto h_priorities = Kokkos::create_mirror_view(priorities);
     auto h_state = Kokkos::create_mirror_view(state);
-    Kokkos::deep_copy(state, 0);
+    Kokkos::deep_copy(state, -1);
 
     bool changes;
     do {
