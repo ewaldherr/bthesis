@@ -6,6 +6,7 @@
 #include <unordered_set>
 #include "../read-write/output.cpp"
 #include "../read-write/read_file.cpp"
+#include "verify_result.cpp"
 
 // Function to initialize random priorities on the GPU
 KOKKOS_FUNCTION void initializePriorities(Kokkos::View<double*> priorities) {
