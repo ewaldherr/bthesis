@@ -64,7 +64,6 @@ Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> ad
     do {
         // Assign random priorities to remaining vertices
         unsigned int seed = (unsigned int)time(NULL);
-        std::cout << seed << std::endl;
         initializePriorities(priorities,seed);
         Kokkos::deep_copy(h_priorities,priorities);
         for(int i=0;i<priorities.extent(0);++i){
