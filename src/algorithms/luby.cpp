@@ -12,7 +12,7 @@
 
 // Function to initialize random priorities on the GPU
 KOKKOS_FUNCTION void initializePriorities(Kokkos::View<double*> priorities) {
-    Kokkos::Random_XorShift64_Pool<> random_pool();
+    Kokkos::Random_XorShift64_Pool<> random_pool((unsigned int)time(NULL));
     random_pool.init((unsigned int)time(NULL),priorities.extent(0));
     Kokkos::parallel_for("init_priorities", priorities.extent(0), KOKKOS_LAMBDA(int i) {
         auto generator = random_pool.get_state();
