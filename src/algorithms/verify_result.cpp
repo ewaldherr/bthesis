@@ -7,7 +7,7 @@ void checkVertices(Kokkos::View<int*> result_mis, Kokkos::View<bool*> valid, Kok
         valid(u) = true;
         if(result_mis(u) == 0) return;
         for (int v = xadj(u); v < xadj(u+1); ++v) {
-            if (result_mis(v) == 1) {
+            if (result_mis(adjncy(v)) == 1) {
                 valid(u) = false;
                 break;
             }
