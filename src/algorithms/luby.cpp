@@ -63,7 +63,11 @@ Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> ad
     do {
         // Assign random priorities to remaining vertices
         initializePriorities(priorities);
-
+        Kokkos::deep_copy(h_priorities,priorities);
+        for(int i=0;i<priorities.extent(0);++i){
+            std::cout << h_priorities(i) << " ";
+        }
+        std::cout << std::endl;
         // Select vertices with highest priority in their neighborhood
         checkMax(xadj,adjncy,priorities,state);
 
