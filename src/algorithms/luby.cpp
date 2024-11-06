@@ -15,6 +15,7 @@ KOKKOS_FUNCTION void initializePriorities(Kokkos::View<double*> priorities) {
     Kokkos::parallel_for("init_priorities", priorities.extent(0), KOKKOS_LAMBDA(int i) {
         auto generator = random_pool.get_state();
         priorities(i) = generator.drand(0., 1.);
+        random_pool.free_state(generator);
     });
 }
 
