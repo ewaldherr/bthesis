@@ -1,17 +1,6 @@
 #include <Kokkos_Core.hpp>
 #include <iostream>
 
-bool verifyResult(Kokkos::View<int*> result_mis, Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy){
-    Kokkos::View<bool*> valid ("valid", result_mis.extent(0));
-    auto h_valid = Kokkos::create_mirror_view(h_valid);
-
-    checkVertices(result_mis, valid, xadj, adjncy);
-    for(int i = 0; i < valid.extent(0); ++i){
-        if(!valid(i)) return false;
-    }
-    return true;
-}
-
 //check for each vertex inside of solution if another vertex in solution is adjacent
 void checkVertices(Kokkos::View<int*> result_mis, Kokkos::View<bool*> valid, Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy){
     Kokkos::parallel_for("check_vertices", valid.extent(0), KOKKOS_LAMBDA(int u) {
@@ -25,3 +14,17 @@ void checkVertices(Kokkos::View<int*> result_mis, Kokkos::View<bool*> valid, Kok
         }
     });
 }
+
+bool verifyResult(Kokkos::View<int*> result_mis, Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy){
+    Kokkos::View<bool*> valid ("valid", result_mis.extent(0));
+    auto h_valid = Kokkos::create_mirror_view(valid);
+
+    checkVertices(result_mis, valid, xadj, adjncy);
+    Kokkos::deep_copy(h_valid,valid);
+
+    for(int i = 0; i < valid.extent(0); ++i){
+        if(!h_valid(i)) return false;
+    }
+    return true;
+}
+
