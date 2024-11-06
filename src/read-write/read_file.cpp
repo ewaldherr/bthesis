@@ -27,6 +27,7 @@ void readGraphFromFile(const std::string &filename, Kokkos::View<int*>& xadj, Ko
             continue; 
         }
         edges.emplace_back(u, v);
+        edges.emplace_back(v, u);
         maxVertex = std::max({maxVertex, u, v});
     }
 
