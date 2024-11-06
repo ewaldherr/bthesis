@@ -18,6 +18,7 @@ KOKKOS_FUNCTION void initializePriorities(Kokkos::View<double*> priorities) {
         priorities(i) = generator.drand(0.,1.);
         random_pool.free_state(generator);
     });
+    delete random_pool;
 }
 
 // Function that checks for each vertex if it has the max priority of its neighborhood
