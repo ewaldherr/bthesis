@@ -99,8 +99,8 @@ int main(int argc, char* argv[]) {
             // Run Luby's algorithm with Kokkos and write results to file
             result_mis = lubysAlgorithm(xadj,adjncy);
             writeIndependentSetToFile(result_mis,"result_mis.txt");
-            if(argc > 2){
-                if(argv[2] == "1"){
+            if(argc == 3){
+                if(argv[2] == "VERIFY"){
                     std::cout << "Verifying solution..." << std::endl;
                     bool valid = verifyResult(result_mis, xadj, adjncy);
                     if(valid){
