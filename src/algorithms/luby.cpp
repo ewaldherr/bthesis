@@ -100,7 +100,7 @@ int main(int argc, char* argv[]) {
             result_mis = lubysAlgorithm(xadj,adjncy);
             writeIndependentSetToFile(result_mis,"result_mis.txt");
             if(argc > 2){
-                if(argv[3] == "1"){
+                if(argv[2] == "1"){
                     std::cout << "Verifying solution..." << std::endl;
                     bool valid = verifyResult(result_mis, xadj, adjncy);
                     if(valid){
