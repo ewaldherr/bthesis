@@ -8,12 +8,13 @@
 #include "../read-write/output.cpp"
 #include "../read-write/read_file.cpp"
 #include "verify_result.cpp"
+#include <ctime>
 
 // Function to initialize random priorities on the GPU
 KOKKOS_FUNCTION void initializePriorities(Kokkos::View<double*> priorities) {
     Kokkos::Random_XorShift64_Pool<> random_pool();
     Kokkos::parallel_for("init_priorities", priorities.extent(0), KOKKOS_LAMBDA(int i) {
-        auto generator = random_pool.get_state();
+        auto generator = random_pool.get_state((unsigned int)time(NULL));
         priorities(i) = generator.drand(0.,1.);
         random_pool.free_state(generator);
     });
