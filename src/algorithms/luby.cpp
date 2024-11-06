@@ -93,9 +93,22 @@ int main(int argc, char* argv[]) {
         }
         else{
             readGraphFromFile(argv[1], xadj,adjncy);
+            Kokkos::View<int*> result_mis("mis",xadj.extent(0)-1);
             std::cout << "Determining MIS of " << argv[1] << " with " << xadj.extent(0)-1 << " nodes and " << adjncy.extent(0) << " edges."<<std::endl;;
             // Run Luby's algorithm with Kokkos and write results to file
-            writeIndependentSetToFile(lubysAlgorithm(xadj,adjncy),"result_mis.txt");
+            result_mis = lubysAlgorithm(xadj,adjncy);
+            writeIndependentSetToFile(result_mis,"result_mis.txt");
+        }
+        if(argc > 2){
+            if(argv[3] == "1"){
+                std::cout << "Verifying solution..." << std::endl;
+                bool valid = verifyResult(result_mis, xadj, adjncy);
+                if(valid){
+                    std::cout << "Solution is valid" << std::endl;
+                } else{
+                    std::cout << "Solution is NOT valid" << std::endl;
+                }
+            }
         }
     }
 
