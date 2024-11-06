@@ -99,15 +99,15 @@ int main(int argc, char* argv[]) {
             // Run Luby's algorithm with Kokkos and write results to file
             result_mis = lubysAlgorithm(xadj,adjncy);
             writeIndependentSetToFile(result_mis,"result_mis.txt");
-        }
-        if(argc > 2){
-            if(argv[3] == "1"){
-                std::cout << "Verifying solution..." << std::endl;
-                bool valid = verifyResult(result_mis, xadj, adjncy);
-                if(valid){
-                    std::cout << "Solution is valid" << std::endl;
-                } else{
-                    std::cout << "Solution is NOT valid" << std::endl;
+            if(argc > 2){
+                if(argv[3] == "1"){
+                    std::cout << "Verifying solution..." << std::endl;
+                    bool valid = verifyResult(result_mis, xadj, adjncy);
+                    if(valid){
+                        std::cout << "Solution is valid" << std::endl;
+                    } else{
+                        std::cout << "Solution is NOT valid" << std::endl;
+                    }
                 }
             }
         }
