@@ -11,8 +11,8 @@
 #include <ctime>
 
 // Function to initialize random priorities on the GPU
-KOKKOS_FUNCTION void initializePriorities(Kokkos::View<double*> priorities) {
-    Kokkos::Random_XorShift64_Pool<> random_pool((unsigned int)time(NULL));
+KOKKOS_FUNCTION void initializePriorities(Kokkos::View<double*> priorities, unsigned int seed) {
+    Kokkos::Random_XorShift64_Pool<> random_pool(seed);
     Kokkos::parallel_for("init_priorities", priorities.extent(0), KOKKOS_LAMBDA(int i) {
         auto generator = random_pool.get_state();
         priorities(i) = generator.drand(0.,1.);
@@ -63,7 +63,8 @@ Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> ad
     bool changes;
     do {
         // Assign random priorities to remaining vertices
-        initializePriorities(priorities);
+        unsigned int seed = (unsigned int)time(NULL);
+        initializePriorities(priorities,seed);
         Kokkos::deep_copy(h_priorities,priorities);
         for(int i=0;i<priorities.extent(0);++i){
             std::cout << h_priorities(i) << " ";
