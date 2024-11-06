@@ -4,6 +4,7 @@
 #include <vector>
 #include <random>
 #include <unordered_set>
+#include <string>
 #include "../read-write/output.cpp"
 #include "../read-write/read_file.cpp"
 #include "verify_result.cpp"
@@ -99,9 +100,8 @@ int main(int argc, char* argv[]) {
             // Run Luby's algorithm with Kokkos and write results to file
             result_mis = lubysAlgorithm(xadj,adjncy);
             writeIndependentSetToFile(result_mis,"result_mis.txt");
-            if(argc == 3){
-                std::cout << "checking arg" << std::endl;
-                if(argv[2] == "VERIFY"){
+            if(argc > 2){
+                if(strcmp(argv[2],"1") == 0){
                     std::cout << "Verifying solution..." << std::endl;
                     bool valid = verifyResult(result_mis, xadj, adjncy);
                     if(valid){
