@@ -8,14 +8,6 @@
 #include <algorithm>
 #include <iostream>
 
-// Custom hash function for std::pair<int, int>
-struct pair_hash {
-    template <class T1, class T2>
-    std::size_t operator() (const std::pair<T1, T2> &pair) const {
-        return std::hash<T1>()(pair.first) ^ std::hash<T2>()(pair.second);
-    }
-};
-
 void readGraphFromFile(const std::string &filename, Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy) {
     std::cout << "Reading in " << filename << std::endl;
     std::ifstream inputFile(filename);
@@ -29,7 +21,7 @@ void readGraphFromFile(const std::string &filename, Kokkos::View<int*>& xadj, Ko
     std::string line;
 
     // Use a set to track unique edges
-    std::unordered_set<std::pair<int, int>, pair_hash> edgeSet;
+    std::set<std::pair<int, int>> edgeSet;
 
     while (std::getline(inputFile, line)) {
         std::istringstream iss(line);
