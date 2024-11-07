@@ -3,6 +3,7 @@
 #include <sstream>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 #include <stdexcept>
 #include <algorithm>
 #include <iostream>
@@ -19,16 +20,30 @@ void readGraphFromFile(const std::string &filename, Kokkos::View<int*>& xadj, Ko
     int maxVertex = -1;
     std::string line;
 
+    // Use a set to track unique edges
+    std::unordered_set<std::pair<int, int>, boost::hash<std::pair<int, int>>> edgeSet;
+
     while (std::getline(inputFile, line)) {
         std::istringstream iss(line);
         int u, v;
         // Skip malformed lines
         if (!(iss >> u >> v)) {
-            continue; 
+            continue;
         }
-        edges.emplace_back(u, v);
-        edges.emplace_back(v, u);
-        maxVertex = std::max({maxVertex, u, v});
+
+        // Ensure no duplicates for undirected graphs by storing both (u, v) and (v, u)
+        if (edgeSet.count({u, v}) == 0) {
+            edges.emplace_back(u, v);
+            edgeSet.insert({u, v});
+            maxVertex = std::max({maxVertex, u, v});
+        }
+
+        // Ensure backward edges for directed graphs
+        if (edgeSet.count({v, u}) == 0) {
+            edges.emplace_back(v, u);
+            edgeSet.insert({v, u});
+            maxVertex = std::max({maxVertex, v, u});
+        }
     }
 
     inputFile.close();
@@ -47,7 +62,7 @@ void readGraphFromFile(const std::string &filename, Kokkos::View<int*>& xadj, Ko
         v_xadj[i] = v_xadj[i - 1] + degree[i - 1];
     }
 
-    //Build adjncy by filling neighbors
+    // Build adjncy by filling neighbors
     std::vector<int> v_adjncy(edges.size());
     std::vector<int> currentOffset = v_xadj;
 
