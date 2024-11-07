@@ -13,7 +13,7 @@
 
 
 // Function to initialize random priorities on the GPU
-KOKKOS_FUNCTION void initializePriorities(Kokkos::View<double*> priorities) {
+KOKKOS_FUNCTION void initializePriorities(Kokkos::View<double*, Kokkos::CudaSpace> priorities) {
     Kokkos::Random_XorShift64_Pool<> random_pool((unsigned int)time(NULL));
     Kokkos::parallel_for("init_priorities", priorities.extent(0), KOKKOS_LAMBDA(int i) {
         auto generator = random_pool.get_state();
@@ -23,7 +23,7 @@ KOKKOS_FUNCTION void initializePriorities(Kokkos::View<double*> priorities) {
 }
 
 // Function that checks for each vertex if it has the max priority of its neighborhood
-KOKKOS_FUNCTION void checkMax(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy, Kokkos::View<double*> priorities, Kokkos::View<int*> state){
+KOKKOS_FUNCTION void checkMax(Kokkos::View<int*, Kokkos::CudaSpace> xadj, Kokkos::View<int*, Kokkos::CudaSpace> adjncy, Kokkos::View<double*, Kokkos::CudaSpace> priorities, Kokkos::View<int*, Kokkos::CudaSpace> state){
     Kokkos::parallel_for("select_max_priority", xadj.extent(0)-1, KOKKOS_LAMBDA(int u) {
             if (state(u) != -1) return;
 
@@ -42,7 +42,7 @@ KOKKOS_FUNCTION void checkMax(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy
 }
 
 // Function to remove vertices of vertices added to MIS
-KOKKOS_FUNCTION void removeVertices(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy, Kokkos::View<int*> state){
+KOKKOS_FUNCTION void removeVertices(Kokkos::View<int*, Kokkos::CudaSpace> xadj, Kokkos::View<int*, Kokkos::CudaSpace> adjncy, Kokkos::View<int*, Kokkos::CudaSpace> state){
     Kokkos::parallel_for("update_sets", xadj.extent(0)-1, KOKKOS_LAMBDA(int u) {
         if (state(u) == 2) {
             state(u) = 1;
@@ -54,9 +54,9 @@ KOKKOS_FUNCTION void removeVertices(Kokkos::View<int*> xadj, Kokkos::View<int*> 
 }
 
 // Luby's Algorithm
-Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy) {
-    Kokkos::View<int*> state("state", xadj.extent(0)-1);
-    Kokkos::View<double*> priorities("priorities", xadj.extent(0)-1);
+Kokkos::View<int*, Kokkos::CudaSpace> lubysAlgorithm(Kokkos::View<int*, Kokkos::CudaSpace> xadj, Kokkos::View<int*, Kokkos::CudaSpace> adjncy) {
+    Kokkos::View<int*, Kokkos::CudaSpace> state("state", xadj.extent(0)-1);
+    Kokkos::View<double*, Kokkos::CudaSpace> priorities("priorities", xadj.extent(0)-1);
 
     auto h_priorities = Kokkos::create_mirror_view(priorities);
     auto h_state = Kokkos::create_mirror_view(state);
@@ -91,15 +91,15 @@ int main(int argc, char* argv[]) {
     Kokkos::initialize(argc, argv);
     {
         // Initialize graph
-        Kokkos::View<int*> xadj("xadj",1);
-        Kokkos::View<int*> adjncy("adjncy",1);
+        Kokkos::View<int*, Kokkos::CudaSpace> xadj("xadj",1);
+        Kokkos::View<int*, Kokkos::CudaSpace> adjncy("adjncy",1);
         // Check if input graph is provided
         if(argc == 1){
             throw std::runtime_error("No input file. Abort program.");
         }
         else{
             readGraphFromFile(argv[1], xadj,adjncy);
-            Kokkos::View<int*> result_mis("mis",xadj.extent(0)-1);
+            Kokkos::View<int*, Kokkos::CudaSpace> result_mis("mis",xadj.extent(0)-1);
             std::cout << "Determining MIS of " << argv[1] << " with " << xadj.extent(0)-1 << " nodes and " << adjncy.extent(0) << " edges."<<std::endl;;
             // Run Luby's algorithm with Kokkos and write results to file
             auto algo_start = std::chrono::high_resolution_clock::now();

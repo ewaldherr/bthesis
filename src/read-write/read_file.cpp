@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <iostream>
 
-void readGraphFromFile(const std::string &filename, Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy) {
+void readGraphFromFile(const std::string &filename, Kokkos::View<int*, Kokkos::CudaSpace>& xadj, Kokkos::View<int*, Kokkos::CudaSpace>& adjncy) {
     std::cout << "Reading in " << filename << std::endl;
     std::ifstream inputFile(filename);
     if (!inputFile.is_open()) {
