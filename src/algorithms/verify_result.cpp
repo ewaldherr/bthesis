@@ -2,7 +2,7 @@
 #include <iostream>
 
 //check for each vertex inside of solution if another vertex in solution is adjacent
-void checkVertices(Kokkos::View<int*, Kokkos::CudaSpace> result_mis, Kokkos::View<bool*, Kokkos::CudaSpace> valid, Kokkos::View<int*, Kokkos::CudaSpace> xadj, Kokkos::View<int*, Kokkos::CudaSpace> adjncy){
+void checkVertices(Kokkos::View<int*> result_mis, Kokkos::View<bool*> valid, Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy){
     Kokkos::parallel_for("check_vertices", valid.extent(0), KOKKOS_LAMBDA(int u) {
         valid(u) = true;
         if(result_mis(u) == 0) return;
@@ -15,8 +15,8 @@ void checkVertices(Kokkos::View<int*, Kokkos::CudaSpace> result_mis, Kokkos::Vie
     });
 }
 
-bool verifyResult(Kokkos::View<int*, Kokkos::CudaSpace> result_mis, Kokkos::View<int*, Kokkos::CudaSpace> xadj, Kokkos::View<int*, Kokkos::CudaSpace> adjncy){
-    Kokkos::View<bool*, Kokkos::CudaSpace> valid ("valid", result_mis.extent(0));
+bool verifyResult(Kokkos::View<int*> result_mis, Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy){
+    Kokkos::View<bool*> valid ("valid", result_mis.extent(0));
     auto h_valid = Kokkos::create_mirror_view(valid);
 
     checkVertices(result_mis, valid, xadj, adjncy);
