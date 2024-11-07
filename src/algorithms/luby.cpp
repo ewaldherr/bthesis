@@ -5,10 +5,12 @@
 #include <random>
 #include <unordered_set>
 #include <string>
+#include <ctime>
+#include <chrono>
 #include "../read-write/output.cpp"
 #include "../read-write/read_file.cpp"
 #include "verify_result.cpp"
-#include <ctime>
+
 
 // Function to initialize random priorities on the GPU
 KOKKOS_FUNCTION void initializePriorities(Kokkos::View<double*> priorities) {
@@ -99,8 +101,14 @@ int main(int argc, char* argv[]) {
             Kokkos::View<int*> result_mis("mis",xadj.extent(0)-1);
             std::cout << "Determining MIS of " << argv[1] << " with " << xadj.extent(0)-1 << " nodes and " << adjncy.extent(0) << " edges."<<std::endl;;
             // Run Luby's algorithm with Kokkos and write results to file
+            auto start = std::chrono::high_resolution_clock::now();
             result_mis = lubysAlgorithm(xadj,adjncy);
+            auto stop = std::chrono::high_resolution_clock::now();
+            auto duration = duration_cast<seconds>(stop - start);
+            std::cout << "Determined MIS in " << duration.count() << " seconds" << std::endl;
+
             writeIndependentSetToFile(result_mis,"result_mis.txt");
+
             if(argc > 2){
                 if(strcmp(argv[2],"1") == 0){
                     std::cout << "Verifying solution..." << std::endl;
