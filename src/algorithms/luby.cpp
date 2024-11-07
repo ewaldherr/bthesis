@@ -15,7 +15,7 @@
 // Function to initialize random priorities on the GPU
 KOKKOS_FUNCTION void initializePriorities(Kokkos::View<double*, Kokkos::CudaSpace> priorities) {
     Kokkos::Random_XorShift64_Pool<> random_pool((unsigned int)time(NULL));
-    Kokkos::parallel_for("init_priorities", priorities.extent(0), KOKKOS_LAMBDA(int i) {
+    Kokkos::parallel_for("init_priorities", RangePolicy<Kokkos::Cuda>(0 , priorities.extent(0)) , KOKKOS_LAMBDA(int i) {
         auto generator = random_pool.get_state();
         priorities(i) = generator.drand(0.,1.);
         random_pool.free_state(generator);
@@ -24,7 +24,7 @@ KOKKOS_FUNCTION void initializePriorities(Kokkos::View<double*, Kokkos::CudaSpac
 
 // Function that checks for each vertex if it has the max priority of its neighborhood
 KOKKOS_FUNCTION void checkMax(Kokkos::View<int*, Kokkos::CudaSpace> xadj, Kokkos::View<int*, Kokkos::CudaSpace> adjncy, Kokkos::View<double*, Kokkos::CudaSpace> priorities, Kokkos::View<int*, Kokkos::CudaSpace> state){
-    Kokkos::parallel_for("select_max_priority", xadj.extent(0)-1, KOKKOS_LAMBDA(int u) {
+    Kokkos::parallel_for("select_max_priority", RangePolicy<Kokkos::Cuda>(0 , priorities.extent(0)), KOKKOS_LAMBDA(int u) {
             if (state(u) != -1) return;
 
             bool isMaxPriority = true;
@@ -43,7 +43,7 @@ KOKKOS_FUNCTION void checkMax(Kokkos::View<int*, Kokkos::CudaSpace> xadj, Kokkos
 
 // Function to remove vertices of vertices added to MIS
 KOKKOS_FUNCTION void removeVertices(Kokkos::View<int*, Kokkos::CudaSpace> xadj, Kokkos::View<int*, Kokkos::CudaSpace> adjncy, Kokkos::View<int*, Kokkos::CudaSpace> state){
-    Kokkos::parallel_for("update_sets", xadj.extent(0)-1, KOKKOS_LAMBDA(int u) {
+    Kokkos::parallel_for("update_sets", RangePolicy<Kokkos::Cuda>(0 , state.extent(0)), KOKKOS_LAMBDA(int u) {
         if (state(u) == 2) {
             state(u) = 1;
             for (int v = xadj(u); v < xadj(u+1); ++v) {
