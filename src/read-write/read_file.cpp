@@ -21,7 +21,7 @@ void readGraphFromFile(const std::string &filename, Kokkos::View<int*>& xadj, Ko
     std::string line;
 
     // Use a set to track unique edges
-    std::unordered_set<std::pair<int, int>> edgeSet;
+    std::set<std::pair<int, int>> edgeSet;
 
     while (std::getline(inputFile, line)) {
         std::istringstream iss(line);
