@@ -104,8 +104,8 @@ int main(int argc, char* argv[]) {
             auto start = std::chrono::high_resolution_clock::now();
             result_mis = lubysAlgorithm(xadj,adjncy);
             auto stop = std::chrono::high_resolution_clock::now();
-            auto duration = std::chrono::duration_cast<std::chrono::seconds>(stop - start);
-            std::cout << "Determined MIS in " << duration.count() << " seconds" << std::endl;
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+            std::cout << "Determined MIS in " << duration.count()/1000 << " seconds" << std::endl;
 
             writeIndependentSetToFile(result_mis,"result_mis.txt");
 
