@@ -67,14 +67,11 @@ void readGraphFromFile(const std::string &filename, Kokkos::View<int*>& xadj, Ko
     // Write values to mirror_views
     for (size_t i = 0; i < v_xadj.size(); ++i) {
         h_xadj(i) = v_xadj[i];
-        std::cout << h_xadj(i) << " ";
     }
-    std::cout << std::endl;
+
     for (size_t i = 0; i < v_adjncy.size(); ++i) {
         h_adjncy(i) = v_adjncy[i];
-        std::cout << h_adjncy(i) << " ";
     }
-    std::cout << std::endl;
     // Copy graph information to device
     Kokkos::deep_copy(xadj, h_xadj);
     Kokkos::deep_copy(adjncy, h_adjncy);
