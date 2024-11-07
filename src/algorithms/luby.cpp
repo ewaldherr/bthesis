@@ -87,6 +87,7 @@ Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> ad
 }
 
 int main(int argc, char* argv[]) {
+    auto start = std::chrono::high_resolution_clock::now();
     Kokkos::initialize(argc, argv);
     {
         // Initialize graph
@@ -101,14 +102,17 @@ int main(int argc, char* argv[]) {
             Kokkos::View<int*> result_mis("mis",xadj.extent(0)-1);
             std::cout << "Determining MIS of " << argv[1] << " with " << xadj.extent(0)-1 << " nodes and " << adjncy.extent(0) << " edges."<<std::endl;;
             // Run Luby's algorithm with Kokkos and write results to file
-            auto start = std::chrono::high_resolution_clock::now();
+            auto algo_start = std::chrono::high_resolution_clock::now();
             result_mis = lubysAlgorithm(xadj,adjncy);
-            auto stop = std::chrono::high_resolution_clock::now();
-            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-            std::cout << "Determined MIS in " << duration.count() << " milliseconds" << std::endl;
+            auto algo_stop = std::chrono::high_resolution_clock::now();
+            auto algo_duration = std::chrono::duration_cast<std::chrono::milliseconds>(algo_stop - algo_start);
+            std::cout << "Determined MIS in " << algo_duration.count() << " milliseconds" << std::endl;
 
             writeIndependentSetToFile(result_mis,"result_mis.txt");
 
+            auto stop = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+            std::cout << "Main program run for " << duration.count() << " milliseconds" << std::endl;
             if(argc > 2){
                 if(strcmp(argv[2],"1") == 0){
                     std::cout << "Verifying solution..." << std::endl;
