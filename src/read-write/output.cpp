@@ -5,7 +5,7 @@
 
 void writeIndependentSetToFile(const Kokkos::View<int*> independentSet, const std::string &filename) {
     // Open the output file in write mode
-    std::ofstream outputFile(filename);
+    std::ofstream outputFile("result/" + filename);
     if (!outputFile.is_open()) {
         throw std::runtime_error("Failed to open output file.");
     }
