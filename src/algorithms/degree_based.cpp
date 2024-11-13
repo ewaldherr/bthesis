@@ -54,14 +54,16 @@ Kokkos::View<int*> degreeBasedAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<in
         std::cout << std::endl;
         // Select vertices with highest priority in their neighborhood
         checkMaxDegreePrio(xadj,adjncy,priorities,state);
-        std::cout << "checkMax done" << std::endl;
-        Kokkos::fence();
-        std::cout << "fence done" << std::endl;
+        Kokkos::deep_copy(h_priorities,priorities);
+        Kokkos::deep_copy(h_state,state);
+        for(int i = 0; i < state.extent(0);++i){
+            std::cout << h_state(i) << " " << h_priorities(i) << " "; 
+        }
+        std::cout << std::endl;
         // Check if changes occured during last step
         Kokkos::deep_copy(h_state,state);
         changes = false;
         for(int i = 0; i < state.extent(0);++i){
-            std::cout << h_state(i) << " ";
             if(h_state(i)==2){
                 changes = true;
                 break;
