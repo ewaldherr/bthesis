@@ -19,7 +19,7 @@ KOKKOS_FUNCTION void checkMaxDegreePrio(Kokkos::View<int*>& xadj, Kokkos::View<i
                 bool isSmaller = true;
                 if(xadj(u+1)-xadj(u) < xadj(v+1)-xadj(v)) isSmaller = false;
                 if(xadj(u+1)-xadj(u) == xadj(v+1)-xadj(v)){
-                    if(priorities(adjncy(u)) > priorities(adjncy(v))) isSmaller = false;
+                    if(priorities(u) > priorities(adjncy(v))) isSmaller = false;
                 }
                 if ((state(adjncy(v)) == -1 && isSmaller) || state(adjncy(v)) == 2) {
                     isMaxPriority = false;
