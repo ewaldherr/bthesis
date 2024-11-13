@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
 
             // Run algorithm with Kokkos
             auto algo_start = std::chrono::high_resolution_clock::now();
-            if(strcmp(algorithm,"DEGREE") == 0){
+            if(algorithm.compare("DEGREE") == 0){
                     result_mis = degreeBasedAlgorithm(xadj,adjncy);
             } else{
                     result_mis = lubysAlgorithm(xadj,adjncy);
