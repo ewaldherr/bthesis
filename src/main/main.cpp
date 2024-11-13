@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
             // Write results to file
             std::string input_path = argv[1];
             std::string base_filename = input_path.substr(input_path.find_last_of("/\\") + 1);
-            writeIndependentSetToFile(result_mis,"result_" + base_filename);
+            writeIndependentSetToFile(result_mis,"mis_" + base_filename);
 
             auto stop = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
