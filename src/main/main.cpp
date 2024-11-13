@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
             // Determining which algorithm to use
             std::string algorithm;
             if(argc == 2){
-                std::cout << "No algorithm provided. Continuing with LUBY as default"
+                std::cout << "No algorithm provided. Continuing with LUBY as default";
                 algorithm = "LUBY";
             } else {
                 algorithm = argv[2];
@@ -31,10 +31,9 @@ int main(int argc, char* argv[]) {
 
             // Run algorithm with Kokkos
             auto algo_start = std::chrono::high_resolution_clock::now();
-            switch(algorithm){
-                case "DEGREE":
-                    result_mis = degreeBasedAlgorithm(xadj,adjncy)
-                default:
+            if(strcmp(algorithm,"DEGREE") == 0){
+                    result_mis = degreeBasedAlgorithm(xadj,adjncy);
+            } else{
                     result_mis = lubysAlgorithm(xadj,adjncy);
             }
             auto algo_stop = std::chrono::high_resolution_clock::now();
@@ -47,7 +46,7 @@ int main(int argc, char* argv[]) {
             auto stop = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
             std::cout << "Main program run for " << duration.count() << " milliseconds" << std::endl;
-            
+
             if(argc > 3){
                 if(strcmp(argv[3],"1") == 0){
                     std::cout << "Verifying solution..." << std::endl;
