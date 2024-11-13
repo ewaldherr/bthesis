@@ -2,6 +2,7 @@
 #include "../read-write/read_file.cpp"
 #include "../algorithms/verify_result.cpp"
 #include "../algorithms/degree_based.cpp"
+#include "../algorithms/luby_iter.cpp"
 
 int main(int argc, char* argv[]) {
     auto start = std::chrono::high_resolution_clock::now();
@@ -31,10 +32,12 @@ int main(int argc, char* argv[]) {
             // Run algorithm with Kokkos
             auto algo_start = std::chrono::high_resolution_clock::now();
             if(algorithm.compare("DEGREE") == 0){
-                    result_mis = degreeBasedAlgorithm(xadj,adjncy);
+                result_mis = degreeBasedAlgorithm(xadj,adjncy);
+            } else if(algorithm.compare("LUBYITER") == 0){
+                result_mis = LubyIterAlgorithm(xadj,adjncy);
             } else{
-                    Kokkos::View<int*> state("state", xadj.extent(0)-1);
-                    result_mis = lubysAlgorithm(xadj, adjncy, state);
+                Kokkos::View<int*> state("state", xadj.extent(0)-1);
+                result_mis = lubysAlgorithm(xadj, adjncy, state);
             }
             auto algo_stop = std::chrono::high_resolution_clock::now();
             auto algo_duration = std::chrono::duration_cast<std::chrono::milliseconds>(algo_stop - algo_start);
