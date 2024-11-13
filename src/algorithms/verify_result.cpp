@@ -1,15 +1,25 @@
 #include <Kokkos_Core.hpp>
 #include <iostream>
 
-//check for each vertex inside of solution if another vertex in solution is adjacent
+// Check for each vertex inside of solution if another vertex in solution is adjacent
 void checkVertices(Kokkos::View<int*> result_mis, Kokkos::View<bool*> valid, Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy){
     Kokkos::parallel_for("check_vertices", valid.extent(0), KOKKOS_LAMBDA(int u) {
         valid(u) = true;
-        if(result_mis(u) == 0) return;
-        for (int v = xadj(u); v < xadj(u+1); ++v) {
-            if (result_mis(adjncy(v)) == 1) {
-                valid(u) = false;
-                break;
+        // Check for maximality
+        if(result_mis(u) == 0){
+            for (int v = xadj(u); v < xadj(u+1); ++v) {
+                if (result_mis(adjncy(v)) == 1) {
+                    return;
+                }
+            }
+            valid(u) = false;
+        // Check for independency
+        } else {
+            for (int v = xadj(u); v < xadj(u+1); ++v) {
+                if (result_mis(adjncy(v)) == 1) {
+                    valid(u) = false;
+                    break;
+                }
             }
         }
     });
