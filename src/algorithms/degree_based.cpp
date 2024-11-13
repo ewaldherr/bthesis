@@ -49,7 +49,7 @@ Kokkos::View<int*> degreeBasedAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<in
 
         // Select vertices with highest priority in their neighborhood
         checkMaxDegreePrio(xadj,adjncy,priorities,state);
-
+        Kokkos::fence();
         // Check if changes occured during last step
         Kokkos::deep_copy(h_state,state);
         changes = false;
