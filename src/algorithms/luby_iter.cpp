@@ -45,5 +45,5 @@ Kokkos::View<int*> LubyIterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*>
         removeAtRandom(xadj, adjncy, current_solution, 0.5);
     }
 
-    return state;
+    return best_solution;
 }
