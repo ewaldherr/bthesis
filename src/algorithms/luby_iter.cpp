@@ -22,7 +22,7 @@ KOKKOS_FUNCTION void removeAtRandom(Kokkos::View<int*>& xadj , Kokkos::View<int*
         auto generator = random_pool.get_state();
         if(generator.drand(0.,1.)<= probability){
             current_solution(i) = -1;
-            for (int v = xadj(u); v < xadj(u+1); ++v) {
+            for (int v = xadj(i); v < xadj(i+1); ++v) {
                 current_solution(adjncy(v)) = -1;
             }
         }
