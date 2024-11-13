@@ -44,12 +44,13 @@ Kokkos::View<int*> degreeBasedAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<in
 
     bool changes;
     do {
+        std::cout << "priorities starting" << std::endl;
         // Assign random priorities to remaining vertices
         initializePriorities(priorities);
-
+        std::cout << "priorities done" << std::endl;
         // Select vertices with highest priority in their neighborhood
         checkMaxDegreePrio(xadj,adjncy,priorities,state);
-
+        std::cout << "checkmax done" << std::endl;
         // Check if changes occured during last step
         Kokkos::deep_copy(h_state,state);
         changes = false;
@@ -62,7 +63,7 @@ Kokkos::View<int*> degreeBasedAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<in
 
         // Add selected vertices to MIS and remove them and their neighbors
         removeVertices(xadj,adjncy,state);
-
+        std::cout << "removeVertices done" << std::endl;
     } while (changes);
 
     return state;
