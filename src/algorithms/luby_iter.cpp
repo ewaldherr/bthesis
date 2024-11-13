@@ -21,7 +21,7 @@ KOKKOS_FUNCTION void removeAtRandom(Kokkos::View<int*>& xadj , Kokkos::View<int*
         if(current_solution(i)==0) return;
         auto generator = random_pool.get_state();
         if(generator.drand(0.,1.)<= probability){
-            current_solution(i) = -1
+            current_solution(i) = -1;
             for (int v = xadj(u); v < xadj(u+1); ++v) {
                 current_solution(adjncy(v)) = -1;
             }
@@ -37,7 +37,7 @@ Kokkos::View<int*> LubyIterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*>
     Kokkos::View<int*> current_solution("current_solution", xadj.extent(0)-1);
     Kokkos::View<int*> best_solution("best_solution", xadj.extent(0)-1);
     auto h_current = Kokkos::create_mirror_view(current_solution);
-    Kokkos::deep_copy(state, -1);
+    Kokkos::deep_copy(current_solution, -1);
 
     for(int i =0; i < iterations; ++i){
         current_solution = lubysAlgorithm(xadj, adjncy, current_solution);
