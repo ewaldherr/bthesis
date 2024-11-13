@@ -9,15 +9,6 @@
 #include <chrono>
 #include "luby.cpp"
 
-// Function that checks which of two Vertices has higher degree-based priority
-KOKKOS_FUNCTION bool isGreater(int u, int v, Kokkos::View<int*> xadj, Kokkos::View<double*> priorities){
-    if(xadj(u+1)-xadj(u) < xadj(v+1)-xadj(v)) return true;
-    if(xadj(u+1)-xadj(u) == xadj(v+1)-xadj(v)){
-        if(priorities(u) > priorities(v)) return true;
-    }
-    return false;
-}
-
 // Function that checks for each vertex if it has the max priority of its neighborhood
 KOKKOS_FUNCTION void checkMaxDegreePrio(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy, Kokkos::View<double*> priorities, Kokkos::View<int*> state){
     Kokkos::parallel_for("select_max_priority", xadj.extent(0)-1, KOKKOS_LAMBDA(int u) {
@@ -25,7 +16,12 @@ KOKKOS_FUNCTION void checkMaxDegreePrio(Kokkos::View<int*> xadj, Kokkos::View<in
 
             bool isMaxPriority = true;
             for (int v = xadj(u); v < xadj(u+1); ++v) {
-                if ((state(adjncy(v)) == -1 && isGreater(u,v,xadj,priorities)) || state(adjncy(v)) == 2) {
+                bool isGreater = true;
+                if(xadj(u+1)-xadj(u) > xadj(v+1)-xadj(v)) isGreater = false;
+                if(xadj(u+1)-xadj(u) == xadj(v+1)-xadj(v)){
+                    if(priorities(u) <= priorities(v)) isGreater = false;
+                }
+                if ((state(adjncy(v)) == -1 && isGreater) || state(adjncy(v)) == 2) {
                     isMaxPriority = false;
                     break;
                 }

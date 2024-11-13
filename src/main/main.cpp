@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) {
             // Determining which algorithm to use
             std::string algorithm;
             if(argc == 2){
-                std::cout << "No algorithm provided. Continuing with LUBY as default";
+                std::cout << "No algorithm provided. Continuing with LUBY as default" << std::endl;;
                 algorithm = "LUBY";
             } else {
                 algorithm = argv[2];
