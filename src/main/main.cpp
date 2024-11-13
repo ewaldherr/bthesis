@@ -40,7 +40,9 @@ int main(int argc, char* argv[]) {
             std::cout << "Determined MIS in " << algo_duration.count() << " milliseconds" << std::endl;
 
             // Write results to file
-            writeIndependentSetToFile(result_mis,"result_mis.txt");
+            std::string input_path = argv[1];
+            std::string base_filename = input_path.substr(input_path.find_last_of("/\\") + 1);
+            writeIndependentSetToFile(result_mis,"result_" + base_filename);
 
             auto stop = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
