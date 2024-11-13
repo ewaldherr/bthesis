@@ -15,8 +15,19 @@ void checkSize(Kokkos::View<int*>& best_solution, Kokkos::View<int*>& current_so
     }
 }
 
-KOKKOS_FUNCTION void removeAtRandom(Kokkos::View<int*>& current_solution){
-
+KOKKOS_FUNCTION void removeAtRandom(Kokkos::View<int*>& xadj , Kokkos::View<int*>& adjncy, Kokkos::View<int*>& current_solution, double probability){
+    Kokkos::Random_XorShift64_Pool<> random_pool((unsigned int)time(NULL));
+    Kokkos::parallel_for("remove_vertices", current_solution.extent(0), KOKKOS_LAMBDA(int i) {
+        if(current_solution(i)==0) return;
+        auto generator = random_pool.get_state();
+        if(generator.drand(0.,1.)<= probability){
+            current_solution(i) = -1
+            for (int v = xadj(u); v < xadj(u+1); ++v) {
+                current_solution(adjncy(v)) = -1;
+            }
+        }
+        random_pool.free_state(generator);
+    });
 }
 
 // Degree-based version of Luby's Algorithm
@@ -31,7 +42,7 @@ Kokkos::View<int*> LubyIterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*>
     for(int i =0; i < iterations; ++i){
         current_solution = lubysAlgorithm(xadj, adjncy, current_solution);
         checkSize(best_solution, current_solution, best_size);
-        removeAtRandom(current_solution);
+        removeAtRandom(xadj, adjncy, current_solution, 0.5);
     }
 
     return state;
