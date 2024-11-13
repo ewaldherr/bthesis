@@ -33,7 +33,8 @@ int main(int argc, char* argv[]) {
             if(algorithm.compare("DEGREE") == 0){
                     result_mis = degreeBasedAlgorithm(xadj,adjncy);
             } else{
-                    result_mis = lubysAlgorithm(xadj,adjncy);
+                    Kokkos::View<int*> state("state", xadj.extent(0)-1);
+                    result_mis = lubysAlgorithm(xadj, adjncy, state);
             }
             auto algo_stop = std::chrono::high_resolution_clock::now();
             auto algo_duration = std::chrono::duration_cast<std::chrono::milliseconds>(algo_stop - algo_start);
