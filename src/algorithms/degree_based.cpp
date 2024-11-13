@@ -1,12 +1,3 @@
-#include <Kokkos_Core.hpp>
-#include <Kokkos_Random.hpp>
-#include <iostream>
-#include <vector>
-#include <random>
-#include <unordered_set>
-#include <string>
-#include <ctime>
-#include <chrono>
 #include "luby.cpp"
 
 // Function that checks for each vertex if it has the max priority of its neighborhood
