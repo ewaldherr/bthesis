@@ -60,7 +60,7 @@ Kokkos::View<int*> degreeBasedAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<in
                 break;
             }
         }
-        std::cout << "changes done" << std::endl;
+
         // Add selected vertices to MIS and remove them and their neighbors
         removeVertices(xadj,adjncy,state);
         std::cout << "removeVertices done" << std::endl;
