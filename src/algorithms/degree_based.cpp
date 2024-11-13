@@ -10,7 +10,7 @@
 #include "luby.cpp"
 
 // Function that checks for each vertex if it has the max priority of its neighborhood
-KOKKOS_FUNCTION void checkMaxDegreePrio(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy, Kokkos::View<double*> priorities, Kokkos::View<int*> state){
+KOKKOS_FUNCTION void checkMaxDegreePrio(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy, Kokkos::View<double*>& priorities, Kokkos::View<int*>& state){
     Kokkos::parallel_for("select_max_priority", xadj.extent(0)-1, KOKKOS_LAMBDA(int u) {
             if (state(u) != -1) return;
 

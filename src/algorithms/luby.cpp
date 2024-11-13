@@ -9,7 +9,7 @@
 #include <chrono>
 
 // Function to initialize random priorities on the GPU
-KOKKOS_FUNCTION void initializePriorities(Kokkos::View<double*> priorities) {
+KOKKOS_FUNCTION void initializePriorities(Kokkos::View<double*>& priorities) {
     Kokkos::Random_XorShift64_Pool<> random_pool((unsigned int)time(NULL));
     Kokkos::parallel_for("init_priorities", priorities.extent(0), KOKKOS_LAMBDA(int i) {
         auto generator = random_pool.get_state();
@@ -19,7 +19,7 @@ KOKKOS_FUNCTION void initializePriorities(Kokkos::View<double*> priorities) {
 }
 
 // Function that checks for each vertex if it has the max priority of its neighborhood
-KOKKOS_FUNCTION void checkMax(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy, Kokkos::View<double*> priorities, Kokkos::View<int*> state){
+KOKKOS_FUNCTION void checkMax(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy, Kokkos::View<double*>& priorities, Kokkos::View<int*>& state){
     Kokkos::parallel_for("select_max_priority", xadj.extent(0)-1, KOKKOS_LAMBDA(int u) {
             if (state(u) != -1) return;
 
@@ -38,7 +38,7 @@ KOKKOS_FUNCTION void checkMax(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy
 }
 
 // Function to remove vertices of vertices added to MIS
-KOKKOS_FUNCTION void removeVertices(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy, Kokkos::View<int*> state){
+KOKKOS_FUNCTION void removeVertices(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy, Kokkos::View<int*>& state){
     Kokkos::parallel_for("update_sets", xadj.extent(0)-1, KOKKOS_LAMBDA(int u) {
         if (state(u) == 2) {
             state(u) = 1;
