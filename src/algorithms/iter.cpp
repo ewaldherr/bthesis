@@ -53,7 +53,7 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adj
     Kokkos::deep_copy(current_solution, -1);
     Kokkos::deep_copy(best_solution, -1);
 
-    if(algorithm.compare("LUBYITER")){
+    if(algorithm.compare("LUBYITER") == 0){
         for(int i =0; i < iterations; ++i){
             current_solution = lubysAlgorithm(xadj, adjncy, current_solution, seed + i);
             checkSize(best_solution, current_solution, best_size);
