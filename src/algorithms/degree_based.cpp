@@ -1,15 +1,15 @@
 #include "luby.cpp"
 
 // Function that checks for each vertex if it has the max priority of its neighborhood
-KOKKOS_FUNCTION void checkMaxDegreePrio(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy, Kokkos::View<double*>& priorities, Kokkos::View<int*>& state){
+KOKKOS_FUNCTION void checkMaxDegreePrio(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy, Kokkos::View<int*>& degree, Kokkos::View<double*>& priorities, Kokkos::View<int*>& state){
     Kokkos::parallel_for("select_max_priority", xadj.extent(0)-1, KOKKOS_LAMBDA(int u) {
             if (state(u) != -1) return;
 
             bool isMaxPriority = true;
             for (int v = xadj(u); v < xadj(u+1); ++v) {
                 bool isSmaller = true;
-                if(xadj(u+1)-xadj(u) < xadj(adjncy(v)+1)-xadj(adjncy(v))) isSmaller = false;
-                if(xadj(u+1)-xadj(u) == xadj(adjncy(v)+1)-xadj(adjncy(v))){
+                if(degree(u) < degree(adjncy(v))) isSmaller = false;
+                if(degree(u) == degree(adjncy(v))){
                     if(priorities(u) > priorities(adjncy(v))) isSmaller = false;
                 }
                 if ((state(adjncy(v)) == -1 && isSmaller) || state(adjncy(v)) == 2) {
@@ -25,7 +25,7 @@ KOKKOS_FUNCTION void checkMaxDegreePrio(Kokkos::View<int*>& xadj, Kokkos::View<i
 }
 
 // Degree-based version of Luby's Algorithm
-Kokkos::View<int*> degreeBasedAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy, Kokkos::View<int*>& state, unsigned int seed) {
+Kokkos::View<int*> degreeBasedAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy, Kokkos::View<int*> degree,  Kokkos::View<int*>& state, unsigned int seed) {
     Kokkos::View<double*> priorities("priorities", xadj.extent(0)-1);
 
     auto h_priorities = Kokkos::create_mirror_view(priorities);

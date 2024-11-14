@@ -3,6 +3,12 @@
 #include "../algorithms/verify_result.cpp"
 #include "../algorithms/iter.cpp"
 
+void initializeDegrees(Kokkos::View<int*>& degree, Kokkos::View<int*> xadj){
+    for(int i = 0; i < degree.extent(0); ++i){
+        degree(i) = xadj(u+1)-xadj(u);
+    }
+}
+
 int main(int argc, char* argv[]) {
     auto start = std::chrono::high_resolution_clock::now();
     Kokkos::initialize(argc, argv);
@@ -40,7 +46,9 @@ int main(int argc, char* argv[]) {
             Kokkos::View<int*> state("state", xadj.extent(0)-1);
             auto algo_start = std::chrono::high_resolution_clock::now();
             if(algorithm.compare("DEGREE") == 0){
-                result_mis = degreeBasedAlgorithm(xadj, adjncy, state, seed);
+                Kokkos::View<int*> degree("degree", xadj.extent(0)-1);
+                initializeDegrees(degree, xadj);
+                result_mis = degreeBasedAlgorithm(xadj, adjncy, degree, state, seed);
             } else if(algorithm.compare("LUBYITER") == 0 || algorithm.compare("DEGREEITER") == 0){
                 result_mis = iterAlgorithm(xadj, adjncy, 100, algorithm, seed);
             } else{

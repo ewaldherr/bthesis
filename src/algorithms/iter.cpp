@@ -1,5 +1,18 @@
 #include "degree_based.cpp"
 
+KOKKOS_FUNCTION void updateDegrees(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy, Kokkos::View<int*>& current_solution, Kokkos::View<int*> degree){
+    Kokkos::parallel_for("update_degrees", degree.extent(0), KOKKOS_LAMBDA(int i) {
+        if(current_solution(i) != -1) return;
+        degree(i) = 0;
+        for (int v = xadj(i); v < xadj(i+1); ++v) {
+            if(current_solution(adjncy(v)) == -1){
+                degree(i)++;
+            }
+        }
+    });
+}
+
+//TODO: parallize with Kokkos parallel_reduce
 void checkSize(Kokkos::View<int*>& best_solution, Kokkos::View<int*>& current_solution, int& best_size){
     auto h_current = Kokkos::create_mirror_view(current_solution);
     Kokkos::deep_copy(h_current, current_solution);
@@ -14,7 +27,7 @@ void checkSize(Kokkos::View<int*>& best_solution, Kokkos::View<int*>& current_so
     }
 }
 
-KOKKOS_FUNCTION void removeAtRandom(Kokkos::View<int*>& xadj , Kokkos::View<int*>& adjncy, Kokkos::View<int*>& current_solution, double probability){
+KOKKOS_FUNCTION void removeAtRandom(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy, Kokkos::View<int*>& current_solution, double probability){
     Kokkos::Random_XorShift64_Pool<> random_pool((unsigned int)time(NULL));
     Kokkos::parallel_for("remove_vertices", current_solution.extent(0), KOKKOS_LAMBDA(int i) {
         if(current_solution(i)==0) return;
@@ -31,7 +44,7 @@ KOKKOS_FUNCTION void removeAtRandom(Kokkos::View<int*>& xadj , Kokkos::View<int*
 }
 
 // Iterative Algorithm with removing vertices from the solution 
-Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy, int iterations, std::string algorithm, unsigned int seed) {
+Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy, int iterations, Kokkos::View<int*> degree, std::string algorithm, unsigned int seed) {
     int size = 0;
     int& best_size = size;
     Kokkos::View<int*> current_solution("current_solution", xadj.extent(0)-1);
@@ -48,9 +61,12 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adj
         }
     } else{
         for(int i =0; i < iterations; ++i){
-            current_solution = degreeBasedAlgorithm(xadj, adjncy, current_solution, seed + i);
+            current_solution = degreeBasedAlgorithm(xadj, adjncy, degree, current_solution, seed + i);
             checkSize(best_solution, current_solution, best_size);
-            removeAtRandom(xadj, adjncy, current_solution, 0.5);
+            if (i != iterations -1){
+                removeAtRandom(xadj, adjncy, current_solution, 0.5);
+                updateDegrees(xadj, adjncy, current_solution, degree);
+            }
         }
     }
 
