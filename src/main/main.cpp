@@ -47,7 +47,11 @@ int main(int argc, char* argv[]) {
             // Set up degrees
             Kokkos::View<int*> degree("degree", xadj.extent(0)-1);
             initializeDegrees(degree, xadj);
-
+            auto h_degree = Kokkos::create_mirror_view(degree);
+            for(int i = 0; i < degree.extent(0); ++i){
+                std::cout << h_degree(i) << " ";
+            }
+            std::cout << std::endl;
             // Run algorithm with Kokkos
             Kokkos::View<int*> state("state", xadj.extent(0)-1);
             auto algo_start = std::chrono::high_resolution_clock::now();
