@@ -3,7 +3,7 @@
 #include "../algorithms/verify_result.cpp"
 #include "../algorithms/iter.cpp"
 
-void initializeDegrees(Kokkos::View<int*>& degree, Kokkos::View<int*> xadj){
+void initializeDegrees(Kokkos::View<int*> degree, Kokkos::View<int*> xadj){
     auto h_degree = Kokkos::create_mirror_view(degree);
     auto h_xadj = Kokkos::create_mirror_view(xadj);
     for(int i = 0; i < degree.extent(0); ++i){
