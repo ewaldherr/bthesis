@@ -7,10 +7,8 @@ void checkSize(Kokkos::View<int*>& best_solution, Kokkos::View<int*>& current_so
     int size = 0;
     // Loop through the entries in the independent set and write each entry to a new line
     for (size_t i = 0; i < h_current.extent(0); ++i) {
-        std::cout << h_current(i) << " ";
         if (h_current(i) == 1) size++;
     }
-    std::cout << std::endl;
     if(size > best_size){
         best_size = size;
         Kokkos::deep_copy(best_solution,current_solution);
