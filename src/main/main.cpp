@@ -5,7 +5,7 @@
 
 void initializeDegrees(Kokkos::View<int*>& degree, Kokkos::View<int*> xadj){
     for(int i = 0; i < degree.extent(0); ++i){
-        degree(i) = xadj(u+1)-xadj(u);
+        degree(i) = xadj(i+1)-xadj(i);
     }
 }
 
@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
             }
             Kokkos::View<int*> result_mis("mis",xadj.extent(0)-1);
             std::cout << "Determining MIS of " << argv[1] << " with " << xadj.extent(0)-1 << " nodes and " << adjncy.extent(0) << " edges using " << algorithm << "."<< std::endl;;
-
+            // Set up seed for RNG
             unsigned int seed;
             if(argc > 4){
                 std::string str_seed= argv[4];
@@ -41,16 +41,17 @@ int main(int argc, char* argv[]) {
             } else{
                 seed = (unsigned int)time(NULL);
             }
+            // Set up degrees
+            Kokkos::View<int*> degree("degree", xadj.extent(0)-1);
+            initializeDegrees(degree, xadj);
 
             // Run algorithm with Kokkos
             Kokkos::View<int*> state("state", xadj.extent(0)-1);
             auto algo_start = std::chrono::high_resolution_clock::now();
             if(algorithm.compare("DEGREE") == 0){
-                Kokkos::View<int*> degree("degree", xadj.extent(0)-1);
-                initializeDegrees(degree, xadj);
                 result_mis = degreeBasedAlgorithm(xadj, adjncy, degree, state, seed);
             } else if(algorithm.compare("LUBYITER") == 0 || algorithm.compare("DEGREEITER") == 0){
-                result_mis = iterAlgorithm(xadj, adjncy, 100, algorithm, seed);
+                result_mis = iterAlgorithm(xadj, adjncy, 100, degree, algorithm, seed);
             } else{
                 result_mis = lubysAlgorithm(xadj, adjncy, state, seed);
             }
