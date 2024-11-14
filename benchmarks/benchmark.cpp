@@ -14,6 +14,16 @@ Kokkos::View<int*> initializeDegrees(Kokkos::View<int*> xadj){
     return degree;
 }
 
+void getSize(Kokkos::View<int*> mis){
+    auto h_mis = Kokkos::create_mirror_view(mis);
+    Kokkos::deep_copy(h_mis, mis);
+    int size = 0;
+    for(int i = 0; i < mis.extent(0); ++i){
+        if(h_mis(i) == 1) size++;
+    }
+    std::cout << "Solution has size " << size << std::endl;
+}
+
 int main(int argc, char* argv[]) {
     Kokkos::initialize(argc, argv);
     {
@@ -60,7 +70,7 @@ int main(int argc, char* argv[]) {
                     auto algo_stop = std::chrono::high_resolution_clock::now();
                     auto algo_duration = std::chrono::duration_cast<std::chrono::milliseconds>(algo_stop - algo_start);
                     std::cout << "Determined MIS in " << algo_duration.count() << " milliseconds" << std::endl;
-
+                    getSize(result_mis);
                     std::cout << "Verifying solution..." << std::endl;
                     bool valid = verifyResult(result_mis, xadj, adjncy);
                     if(valid){
