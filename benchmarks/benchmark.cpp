@@ -63,7 +63,7 @@ int main(int argc, char* argv[]) {
                     if(algo.compare("DEGREE") == 0){
                         result_mis = degreeBasedAlgorithm(xadj, adjncy, degree, state, seed);
                     } else if(algo.compare("LUBYITER") == 0 || algo.compare("DEGREEITER") == 0){
-                        result_mis = iterAlgorithm(xadj, adjncy, 100, degree, algorithm, seed);
+                        result_mis = iterAlgorithm(xadj, adjncy, 100, degree, algo, seed);
                     } else{
                         result_mis = lubysAlgorithm(xadj, adjncy, state, seed);
                     }
