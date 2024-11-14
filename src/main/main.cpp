@@ -4,9 +4,12 @@
 #include "../algorithms/iter.cpp"
 
 void initializeDegrees(Kokkos::View<int*>& degree, Kokkos::View<int*> xadj){
+    auto h_degree = Kokkos::create_mirror_view(degree);
+    auto h_xadj = Kokkos::create_mirror_view(xadj);
     for(int i = 0; i < degree.extent(0); ++i){
-        degree(i) = xadj(i+1)-xadj(i);
+        h_degree(i) = h_xadj(i+1)-h_xadj(i);
     }
+    Kokkos::deep_copy(degree, h_degree);
 }
 
 int main(int argc, char* argv[]) {
