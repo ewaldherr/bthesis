@@ -13,7 +13,7 @@ void checkSize(Kokkos::View<int*>& best_solution, Kokkos::View<int*>& current_so
     std::cout << std::endl;
     if(size > best_size){
         best_size = size;
-        best_solution = current_solution;
+        Kokkos::deep_copy(best_solution,current_solution);
     }
 }
 
