@@ -9,8 +9,8 @@
 #include <chrono>
 
 // Function to initialize random priorities on the GPU
-KOKKOS_FUNCTION void initializePriorities(Kokkos::View<double*>& priorities) {
-    Kokkos::Random_XorShift64_Pool<> random_pool((unsigned int)time(NULL));
+KOKKOS_FUNCTION void initializePriorities(Kokkos::View<double*>& priorities, unsigned int seed) {
+    Kokkos::Random_XorShift64_Pool<> random_pool(seed);
     Kokkos::parallel_for("init_priorities", priorities.extent(0), KOKKOS_LAMBDA(int i) {
         auto generator = random_pool.get_state();
         priorities(i) = generator.drand(0.,1.);
@@ -50,17 +50,19 @@ KOKKOS_FUNCTION void removeVertices(Kokkos::View<int*>& xadj, Kokkos::View<int*>
 }
 
 // Luby's Algorithm
-Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy, Kokkos::View<int*> state) {
+Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy, Kokkos::View<int*> state, unsigned int seed) {
     Kokkos::View<double*> priorities("priorities", xadj.extent(0)-1);
 
     auto h_priorities = Kokkos::create_mirror_view(priorities);
     auto h_state = Kokkos::create_mirror_view(state);
     Kokkos::deep_copy(state, -1);
 
+    // Assign random priorities to remaining vertices
+    initializePriorities(priorities, seed);
+    
     bool changes;
     do {
-        // Assign random priorities to remaining vertices
-        initializePriorities(priorities);
+
         // Select vertices with highest priority in their neighborhood
         checkMax(xadj,adjncy,priorities,state);
 
