@@ -1,7 +1,6 @@
 #include "../read-write/output.cpp"
 #include "../read-write/read_file.cpp"
 #include "../algorithms/verify_result.cpp"
-#include "../algorithms/degree_based.cpp"
 #include "../algorithms/luby_iter.cpp"
 
 int main(int argc, char* argv[]) {
