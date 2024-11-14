@@ -9,7 +9,9 @@ Kokkos::View<int*> initializeDegrees(Kokkos::View<int*>& xadj){
     auto h_xadj = Kokkos::create_mirror_view(xadj);
     for(int i = 0; i < degree.extent(0); ++i){
         h_degree(i) = h_xadj(i+1)-h_xadj(i);
+        std::cout << h_degree(i) << " "; 
     }
+    std::cout << std::endl;
     Kokkos::deep_copy(degree, h_degree);
     return degree;
 }
