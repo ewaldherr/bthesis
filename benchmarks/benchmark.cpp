@@ -1,4 +1,6 @@
-#include "../src/main/main.cpp"
+#include "../src/read-write/output.cpp"
+#include "../src/algorithms/verify_result.cpp"
+#include "../src/algorithms/iter.cpp"
 
 int main(int argc, char* argv[]) {
     Kokkos::initialize(argc, argv);
