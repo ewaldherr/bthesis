@@ -3,13 +3,15 @@
 #include "../algorithms/verify_result.cpp"
 #include "../algorithms/iter.cpp"
 
-void initializeDegrees(Kokkos::View<int*> degree, Kokkos::View<int*> xadj){
+Kokkos::View<int*> initializeDegrees(Kokkos::View<int*>& xadj){
+    Kokkos::View<int*> degree("degree", xadj.extent(0)-1);
     auto h_degree = Kokkos::create_mirror_view(degree);
     auto h_xadj = Kokkos::create_mirror_view(xadj);
     for(int i = 0; i < degree.extent(0); ++i){
         h_degree(i) = h_xadj(i+1)-h_xadj(i);
     }
     Kokkos::deep_copy(degree, h_degree);
+    return degree;
 }
 
 int main(int argc, char* argv[]) {
@@ -46,7 +48,7 @@ int main(int argc, char* argv[]) {
             }
             // Set up degrees
             Kokkos::View<int*> degree("degree", xadj.extent(0)-1);
-            initializeDegrees(degree, xadj);
+            degree = initializeDegrees(xadj);
             auto h_degree = Kokkos::create_mirror_view(degree);
             for(int i = 0; i < degree.extent(0); ++i){
                 std::cout << h_degree(i) << " ";
