@@ -1,4 +1,4 @@
-#include "luby.hpp"
+#include "degree_based.cpp"
 
 void checkSize(Kokkos::View<int*>& best_solution, Kokkos::View<int*>& current_solution, int& best_size){
     auto h_current = Kokkos::create_mirror_view(current_solution);

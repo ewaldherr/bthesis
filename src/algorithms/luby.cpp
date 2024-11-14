@@ -7,7 +7,6 @@
 #include <string>
 #include <ctime>
 #include <chrono>
-#include "luby.hpp"
 
 // Function to initialize random priorities on the GPU
 KOKKOS_FUNCTION void initializePriorities(Kokkos::View<double*>& priorities) {
