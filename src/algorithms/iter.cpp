@@ -13,14 +13,11 @@ KOKKOS_FUNCTION void updateDegrees(Kokkos::View<int*>& xadj, Kokkos::View<int*>&
 }
 
 //TODO: parallize with Kokkos parallel_reduce
-void checkSize(Kokkos::View<int*>& best_solution, Kokkos::View<int*>& current_solution, int& best_size){
-    auto h_current = Kokkos::create_mirror_view(current_solution);
-    Kokkos::deep_copy(h_current, current_solution);
+KOKKOS_FUNCTION void checkSize(Kokkos::View<int*>& best_solution, Kokkos::View<int*>& current_solution, Kokkos::View<int*>& best_size){
     int size = 0;
-    
-    for (size_t i = 0; i < h_current.extent(0); ++i) {
-        if (h_current(i) == 1) size++;
-    }
+    Kokkos::parallel_reduce ("Reduction", N, KOKKOS_LAMBDA (const int i, int& sum) {
+        if (h_current(i) == 1) sum++;
+    }, size);
     if(size > best_size){
         best_size = size;
         Kokkos::deep_copy(best_solution,current_solution);
@@ -45,8 +42,8 @@ KOKKOS_FUNCTION void removeAtRandom(Kokkos::View<int*>& xadj, Kokkos::View<int*>
 
 // Iterative Algorithm with removing vertices from the solution 
 Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy, int iterations, Kokkos::View<int*> degree, std::string algorithm, unsigned int seed) {
-    int size = 0;
-    int& best_size = size;
+    Kokkos::View<int*> best_size ("best_size", 1);
+    Kokkos::deep_copy(best_size, 0);
     Kokkos::View<int*> current_solution("current_solution", xadj.extent(0)-1);
     Kokkos::View<int*> best_solution("best_solution", xadj.extent(0)-1);
     auto h_current = Kokkos::create_mirror_view(current_solution);
