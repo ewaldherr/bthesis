@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
             if(algorithm.compare("DEGREE") == 0){
                 result_mis = degreeBasedAlgorithm(xadj, adjncy, state);
             } else if(algorithm.compare("LUBYITER") == 0 || algorithm.compare("DEGREEITER") == 0){
-                result_mis = LubyIterAlgorithm(xadj,adjncy,100);
+                result_mis = iterAlgorithm(xadj, adjncy, 100, algorithm);
             } else{
                 result_mis = lubysAlgorithm(xadj, adjncy, state);
             }

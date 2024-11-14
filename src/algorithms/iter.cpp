@@ -31,7 +31,7 @@ KOKKOS_FUNCTION void removeAtRandom(Kokkos::View<int*>& xadj , Kokkos::View<int*
 }
 
 // Iterative Algorithm with removing vertices from the solution 
-Kokkos::View<int*> IterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy, int iterations, std::string algorithm) {
+Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy, int iterations, std::string algorithm) {
     int size = 0;
     int& best_size = size;
     Kokkos::View<int*> current_solution("current_solution", xadj.extent(0)-1);
