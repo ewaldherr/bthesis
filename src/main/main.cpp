@@ -1,7 +1,7 @@
 #include "../read-write/output.cpp"
 #include "../read-write/read_file.cpp"
 #include "../algorithms/verify_result.cpp"
-#include "../algorithms/luby_iter.cpp"
+#include "../algorithms/iter.cpp"
 
 int main(int argc, char* argv[]) {
     auto start = std::chrono::high_resolution_clock::now();
@@ -29,13 +29,13 @@ int main(int argc, char* argv[]) {
             std::cout << "Determining MIS of " << argv[1] << " with " << xadj.extent(0)-1 << " nodes and " << adjncy.extent(0) << " edges using " << algorithm << "."<< std::endl;;
 
             // Run algorithm with Kokkos
+            Kokkos::View<int*> state("state", xadj.extent(0)-1);
             auto algo_start = std::chrono::high_resolution_clock::now();
             if(algorithm.compare("DEGREE") == 0){
-                result_mis = degreeBasedAlgorithm(xadj,adjncy);
-            } else if(algorithm.compare("LUBYITER") == 0){
+                result_mis = degreeBasedAlgorithm(xadj, adjncy, state);
+            } else if(algorithm.compare("LUBYITER") == 0 || algorithm.compare("DEGREEITER") == 0){
                 result_mis = LubyIterAlgorithm(xadj,adjncy,100);
             } else{
-                Kokkos::View<int*> state("state", xadj.extent(0)-1);
                 result_mis = lubysAlgorithm(xadj, adjncy, state);
             }
             auto algo_stop = std::chrono::high_resolution_clock::now();

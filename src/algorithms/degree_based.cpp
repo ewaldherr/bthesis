@@ -25,8 +25,7 @@ KOKKOS_FUNCTION void checkMaxDegreePrio(Kokkos::View<int*>& xadj, Kokkos::View<i
 }
 
 // Degree-based version of Luby's Algorithm
-Kokkos::View<int*> degreeBasedAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy) {
-    Kokkos::View<int*> state("state", xadj.extent(0)-1);
+Kokkos::View<int*> degreeBasedAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy, Kokkos::View<int*>& state) {
     Kokkos::View<double*> priorities("priorities", xadj.extent(0)-1);
 
     auto h_priorities = Kokkos::create_mirror_view(priorities);
