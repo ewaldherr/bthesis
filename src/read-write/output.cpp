@@ -2,17 +2,11 @@
 #include <fstream>
 #include <string>
 #include <iostream>
-#include <filesystem> // C++17 or later
 
 void writeIndependentSetToFile(const Kokkos::View<int*> independentSet, const std::string &filename) {
-    // Ensure the "results" directory exists
-    std::filesystem::path dir("results");
-    if (!std::filesystem::exists(dir)) {
-        std::filesystem::create_directory(dir);
-    }
 
     // Open the output file in write mode
-    std::ofstream outputFile(dir / filename); // Use directory path with filename
+    std::ofstream outputFile(filename); // Use directory path with filename
     if (!outputFile.is_open()) {
         throw std::runtime_error("Failed to open output file.");
     }
