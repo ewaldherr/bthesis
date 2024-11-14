@@ -18,8 +18,8 @@ KOKKOS_FUNCTION void checkSize(Kokkos::View<int*>& best_solution, Kokkos::View<i
     Kokkos::parallel_reduce ("Reduction", N, KOKKOS_LAMBDA (const int i, int& sum) {
         if (h_current(i) == 1) sum++;
     }, size);
-    if(size > best_size){
-        best_size = size;
+    if(size > best_size(0)){
+        best_size(0) = size;
         Kokkos::deep_copy(best_solution,current_solution);
     }
 }
