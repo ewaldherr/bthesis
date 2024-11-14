@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
 
             unsigned int seed;
             if(argc > 4){
-                seed = argv[4];
+                seed = (unsigned int)argv[4];
             } else{
                 seed = (unsigned int)time(NULL);
             }
