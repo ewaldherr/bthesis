@@ -7,11 +7,10 @@ Kokkos::View<int*> initializeDegrees(Kokkos::View<int*> xadj){
     Kokkos::View<int*> degree("degree", xadj.extent(0)-1);
     auto h_degree = Kokkos::create_mirror_view(degree);
     auto h_xadj = Kokkos::create_mirror_view(xadj);
+    Kokkos::deep_copy(h_xadj, xadj);
     for(int i = 0; i < degree.extent(0); ++i){
         h_degree(i) = h_xadj(i+1)-h_xadj(i);
-        std::cout << h_degree(i) << " "; 
     }
-    std::cout << std::endl;
     Kokkos::deep_copy(degree, h_degree);
     return degree;
 }
@@ -39,7 +38,8 @@ int main(int argc, char* argv[]) {
                 algorithm = argv[2];
             }
             Kokkos::View<int*> result_mis("mis",xadj.extent(0)-1);
-            std::cout << "Determining MIS of " << argv[1] << " with " << xadj.extent(0)-1 << " nodes and " << adjncy.extent(0) << " edges using " << algorithm << "."<< std::endl;;
+            std::cout << "Determining MIS of " << argv[1] << " with " << xadj.extent(0)-1 << " nodes and " << adjncy.extent(0) << " edges using " << algorithm << "."<< std::endl;
+
             // Set up seed for RNG
             unsigned int seed;
             if(argc > 4){
@@ -48,14 +48,11 @@ int main(int argc, char* argv[]) {
             } else{
                 seed = (unsigned int)time(NULL);
             }
+
             // Set up degrees
             Kokkos::View<int*> degree("degree", xadj.extent(0)-1);
             degree = initializeDegrees(xadj);
-            auto h_degree = Kokkos::create_mirror_view(degree);
-            for(int i = 0; i < degree.extent(0); ++i){
-                std::cout << h_degree(i) << " ";
-            }
-            std::cout << std::endl;
+            
             // Run algorithm with Kokkos
             Kokkos::View<int*> state("state", xadj.extent(0)-1);
             auto algo_start = std::chrono::high_resolution_clock::now();
