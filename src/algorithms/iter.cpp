@@ -15,8 +15,8 @@ KOKKOS_FUNCTION void updateDegrees(Kokkos::View<int*>& xadj, Kokkos::View<int*>&
 //TODO: parallize with Kokkos parallel_reduce
 KOKKOS_FUNCTION void checkSize(Kokkos::View<int*>& best_solution, Kokkos::View<int*>& current_solution, Kokkos::View<int*>& best_size){
     int size = 0;
-    Kokkos::parallel_reduce ("Reduction", N, KOKKOS_LAMBDA (const int i, int& sum) {
-        if (h_current(i) == 1) sum++;
+    Kokkos::parallel_reduce ("Reduction", current_solution.extent(0), KOKKOS_LAMBDA (const int i, int& sum) {
+        if (current_solution(i) == 1) sum++;
     }, size);
     if(size > best_size(0)){
         best_size(0) = size;
