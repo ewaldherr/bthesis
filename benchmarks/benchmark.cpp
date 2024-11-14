@@ -1,4 +1,4 @@
-#include "../src/read-write/output.cpp"
+#include "../src/read-write/read_file.cpp"
 #include "../src/algorithms/verify_result.cpp"
 #include "../src/algorithms/iter.cpp"
 
