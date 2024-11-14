@@ -42,13 +42,13 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adj
 
     if(algorithm.compare("LUBYITER")){
         for(int i =0; i < iterations; ++i){
-            current_solution = lubysAlgorithm(xadj, adjncy, current_solution, seed);
+            current_solution = lubysAlgorithm(xadj, adjncy, current_solution, seed + i);
             checkSize(best_solution, current_solution, best_size);
             removeAtRandom(xadj, adjncy, current_solution, 0.5);
         }
     } else{
         for(int i =0; i < iterations; ++i){
-            current_solution = degreeBasedAlgorithm(xadj, adjncy, current_solution, seed);
+            current_solution = degreeBasedAlgorithm(xadj, adjncy, current_solution, seed + i);
             checkSize(best_solution, current_solution, best_size);
             removeAtRandom(xadj, adjncy, current_solution, 0.5);
         }
