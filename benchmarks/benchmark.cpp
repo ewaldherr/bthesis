@@ -21,7 +21,7 @@ void getSize(Kokkos::View<int*> mis){
     for(int i = 0; i < mis.extent(0); ++i){
         if(h_mis(i) == 1) size++;
     }
-    std::cout << "Solution has size " << size << std::endl;
+    std::cout << size << "vertices are inside of the MIS."  << std::endl;
 }
 
 int main(int argc, char* argv[]) {
@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
                 seed = (unsigned int)time(NULL);
             }
             // Determining which algorithm to use
-            std::string[4] algorithm = {"LUBY","LUBYITER","DEGREE","DEGREEITER"};
+            std::string algorithms[4] = {"LUBY","LUBYITER","DEGREE","DEGREEITER"};
 
             for(auto algo: algorithms){
                 Kokkos::View<int*> result_mis("mis",xadj.extent(0)-1);
@@ -63,7 +63,7 @@ int main(int argc, char* argv[]) {
                     if(algo.compare("DEGREE") == 0){
                         result_mis = degreeBasedAlgorithm(xadj, adjncy, degree, state, seed);
                     } else if(algo.compare("LUBYITER") == 0 || algo.compare("DEGREEITER") == 0){
-                        result_mis = iterAlgorithm(xadj, adjncy, 100, degree, algorithm, seed);
+                        result_mis = iterAlgorithm(xadj, adjncy, 100, degree, algo, seed);
                     } else{
                         result_mis = lubysAlgorithm(xadj, adjncy, state, seed);
                     }
