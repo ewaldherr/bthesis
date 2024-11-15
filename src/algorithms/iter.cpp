@@ -24,8 +24,8 @@ KOKKOS_FUNCTION void checkSize(Kokkos::View<int*>& best_solution, Kokkos::View<i
     }
 }
 
-KOKKOS_FUNCTION void removeAtRandom(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy, Kokkos::View<int*>& current_solution, double probability){
-    Kokkos::Random_XorShift64_Pool<> random_pool((unsigned int)time(NULL));
+KOKKOS_FUNCTION void removeAtRandom(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy, Kokkos::View<int*>& current_solution, double probability, unsigned int seed){
+    Kokkos::Random_XorShift64_Pool<> random_pool(seed);
     Kokkos::parallel_for("remove_vertices", current_solution.extent(0), KOKKOS_LAMBDA(int i) {
         if(current_solution(i)==0) return;
 
@@ -54,14 +54,14 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adj
         for(int i =0; i < iterations; ++i){
             current_solution = lubysAlgorithm(xadj, adjncy, current_solution, seed + i);
             checkSize(best_solution, current_solution, best_size);
-            removeAtRandom(xadj, adjncy, current_solution, 0.5);
+            removeAtRandom(xadj, adjncy, current_solution, 0.5, seed);
         }
     } else{
         for(int i =0; i < iterations; ++i){
             current_solution = degreeBasedAlgorithm(xadj, adjncy, degree, current_solution, seed + i);
             checkSize(best_solution, current_solution, best_size);
             if (i != iterations -1){
-                removeAtRandom(xadj, adjncy, current_solution, 0.5);
+                removeAtRandom(xadj, adjncy, current_solution, 0.5, seed);
                 updateDegrees(xadj, adjncy, current_solution, degree);
             }
         }
