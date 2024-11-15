@@ -21,7 +21,7 @@ void getSize(Kokkos::View<int*> mis){
     for(int i = 0; i < mis.extent(0); ++i){
         if(h_mis(i) == 1) size++;
     }
-    std::cout << size << "vertices are inside of the MIS."  << std::endl;
+    std::cout << size << " vertices are inside of the MIS."  << std::endl;
 }
 
 int main(int argc, char* argv[]) {
