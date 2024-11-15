@@ -4,7 +4,7 @@ This application is a optimization algorithm. It is developed as part of a bache
 
 ## Dependencies
 
-Kokkos (https://github.com/kokkos/kokkos): Enables performance portable parallelism. Used for running the algorithms on GPUs.
+Kokkos (https://github.com/kokkos/kokkos): Enables performance portable parallelism. Used for running the algorithms on GPUs. \
 Cuda (https://developer.nvidia.com/cuda-toolkit): Required to build project. 
 
 ## Usage
@@ -15,7 +15,7 @@ Use `git clone https://github.com/ewaldherr/bthesis` to clone the repository
 
 ### Building
 
-Use `-mkdir build` followed by `cd build` to set up the building process.
+Use `-mkdir build` followed by `cd build` to set up the building process. \
 Use `cmake .. -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=~/kokkos -DKokkos_ENABLE_CUDA=ON`followed by `make` to finish the building process. 
 
 ### Algorithms
@@ -38,7 +38,7 @@ Solves the problem similiar to Luby's algorithm, while including vertices with t
 
 ### Input Format
 
-Input graph needs to be provided as a edge list:
+Input graph needs to be provided as a edge list: \
 <id_source> <id_destination>
 
 ### Output Format
