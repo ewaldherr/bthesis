@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
                 Kokkos::View<int*> result_mis("mis",xadj.extent(0)-1);
                 std::cout << "Determining MIS of " << argv[1] << " with " << xadj.extent(0)-1 << " nodes and " << adjncy.extent(0) << " edges using " << algo << "."<< std::endl;
 
-                for(int i = 0; i < 10; ++i){
+                for(int i = 0; i < 1; ++i){
                     // Set up degrees
                     Kokkos::View<int*> degree("degree", xadj.extent(0)-1);
                     degree = initializeDegrees(xadj);
@@ -63,7 +63,7 @@ int main(int argc, char* argv[]) {
                     if(algo.compare("DEGREE") == 0){
                         result_mis = degreeBasedAlgorithm(xadj, adjncy, degree, state, seed + 100 * i);
                     } else if(algo.compare("LUBYITER") == 0 || algo.compare("DEGREEITER") == 0){
-                        result_mis = iterAlgorithm(xadj, adjncy, 100, degree, algo, seed + 100 * i);
+                        result_mis = iterAlgorithm(xadj, adjncy, 10, degree, algo, seed + 100 * i);
                     } else{
                         result_mis = lubysAlgorithm(xadj, adjncy, state, seed + 100 * i);
                     }
