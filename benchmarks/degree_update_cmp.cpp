@@ -60,7 +60,7 @@ int main(int argc, char* argv[]) {
                     // Run algorithm with Kokkos
                     Kokkos::View<int*> state("state", xadj.extent(0)-1);
                     auto algo_start = std::chrono::high_resolution_clock::now();
-                    result_mis = degreeBasedAlgorithm(xadj, adjncy, degree, state, seed + 100 * i, algorithm);
+                    result_mis = degreeBasedAlgorithm(xadj, adjncy, degree, state, seed + 100 * i, algo);
                     auto algo_stop = std::chrono::high_resolution_clock::now();
                     auto algo_duration = std::chrono::duration_cast<std::chrono::milliseconds>(algo_stop - algo_start);
                     std::cout << "Determined MIS in " << algo_duration.count() << " milliseconds" << std::endl;
