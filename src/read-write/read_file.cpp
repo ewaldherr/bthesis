@@ -46,6 +46,7 @@ void readGraphFromFile(const std::string &filename, Kokkos::View<int*>& xadj, Ko
     }
 
     inputFile.close();
+    std::cout << "Input file closed" << std::endl;
 
     int numVertices = maxVertex + 1;
     std::vector<int> degree(numVertices, 0);
@@ -70,6 +71,7 @@ void readGraphFromFile(const std::string &filename, Kokkos::View<int*>& xadj, Ko
         int v = edge.second;
         v_adjncy[currentOffset[u]++] = v;
     }
+    std::cout << "Vectors set up" << std::endl;
 
     // Resize Kokkos views
     Kokkos::resize(xadj, numVertices + 1);
@@ -89,4 +91,6 @@ void readGraphFromFile(const std::string &filename, Kokkos::View<int*>& xadj, Ko
     // Copy graph information to device
     Kokkos::deep_copy(xadj, h_xadj);
     Kokkos::deep_copy(adjncy, h_adjncy);
+
+    std::cout << "Graph loaded successfully" << std::endl;
 }
