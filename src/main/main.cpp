@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
         }
         else{
             readGraphFromFile(argv[1], xadj,adjncy);
-
+            std::cout << "Code running on " << Kokkos::DefaultExecutionSpace::name() << std::endl;
             // Determining which algorithm to use
             std::string algorithm;
             if(argc == 2){

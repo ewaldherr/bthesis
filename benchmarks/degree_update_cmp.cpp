@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
         }
         else{
             readGraphFromFile(argv[1], xadj,adjncy);
-
+            std::cout << "Code running on " << Kokkos::DefaultExecutionSpace::name() << std::endl;
             // Set up seed for RNG
             unsigned int seed;
             if(argc > 2){
