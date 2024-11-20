@@ -1,6 +1,6 @@
 #include "../src/read-write/read_file.cpp"
 #include "../src/algorithms/verify_result.cpp"
-#include "../src/algorithms/iter.cpp"
+#include "../src/algorithms/degree_based.cpp"
 
 Kokkos::View<int*> initializeDegrees(Kokkos::View<int*> xadj){
     Kokkos::View<int*> degree("degree", xadj.extent(0)-1);
@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
                 seed = (unsigned int)time(NULL);
             }
             // Determining which algorithm to use
-            std::string algorithms[4] = {"LUBY","LUBYITER","DEGREE","DEGREEITER"};
+            std::string algorithms[2] = {"DEGREE","DEGREEUD"};
 
             for(auto algo: algorithms){
                 Kokkos::View<int*> result_mis("mis",xadj.extent(0)-1);
@@ -60,13 +60,7 @@ int main(int argc, char* argv[]) {
                     // Run algorithm with Kokkos
                     Kokkos::View<int*> state("state", xadj.extent(0)-1);
                     auto algo_start = std::chrono::high_resolution_clock::now();
-                    if(algo.compare("DEGREE") == 0 || algo.compare("DEGREEUD") == 0){
-                        result_mis = degreeBasedAlgorithm(xadj, adjncy, degree, state, seed + 100 * i, algo);
-                    } else if(algo.compare("LUBYITER") == 0 || algo.compare("DEGREEITER") == 0){
-                        result_mis = iterAlgorithm(xadj, adjncy, 10, degree, algo, seed + 100 * i);
-                    } else{
-                        result_mis = lubysAlgorithm(xadj, adjncy, state, seed + 100 * i);
-                    }
+                    result_mis = degreeBasedAlgorithm(xadj, adjncy, degree, state, seed + 100 * i, algo);
                     auto algo_stop = std::chrono::high_resolution_clock::now();
                     auto algo_duration = std::chrono::duration_cast<std::chrono::milliseconds>(algo_stop - algo_start);
                     std::cout << "Determined MIS in " << algo_duration.count() << " milliseconds" << std::endl;
