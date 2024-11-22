@@ -27,13 +27,17 @@ void readGraphFromFile(const std::string &filename, Kokkos::View<int*>& xadj, Ko
             continue;
         }
 
-        edges.emplace_back(u, v);
+        edges.emplace_back(std::minmax(u,v));
         maxVertex = std::max({maxVertex, u, v});
 
     }
 
     inputFile.close();
     std::cout << "Input file closed" << std::endl;
+
+    // Remove duplicate edges
+    std::sort(edges.begin(), edges.end());
+    edges.erase(std::unique(edges.begin(), edges.end()), edges.end());
 
     int numVertices = maxVertex + 1;
     std::vector<int> degree(numVertices, 0);
