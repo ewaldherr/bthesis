@@ -19,9 +19,6 @@ void readGraphFromFile(const std::string &filename, Kokkos::View<int*>& xadj, Ko
     int maxVertex = -1;
     std::string line;
 
-    // Use a set to track unique edges
-    std::set<std::pair<int, int>> edgeSet;
-
     while (std::getline(inputFile, line)) {
         std::istringstream iss(line);
         int u, v;
@@ -30,19 +27,9 @@ void readGraphFromFile(const std::string &filename, Kokkos::View<int*>& xadj, Ko
             continue;
         }
 
-        // Ensure no duplicates for undirected graphs by storing both (u, v) and (v, u)
-        if (edgeSet.count({u, v}) == 0) {
-            edges.emplace_back(u, v);
-            edgeSet.insert({u, v});
-            maxVertex = std::max({maxVertex, u, v});
-        }
+        edges.emplace_back(u, v);
+        maxVertex = std::max({maxVertex, u, v});
 
-        // Ensure backward edges for directed graphs
-        if (edgeSet.count({v, u}) == 0) {
-            edges.emplace_back(v, u);
-            edgeSet.insert({v, u});
-            maxVertex = std::max({maxVertex, v, u});
-        }
     }
 
     inputFile.close();
@@ -54,6 +41,7 @@ void readGraphFromFile(const std::string &filename, Kokkos::View<int*>& xadj, Ko
     // Count the degree of each vertex
     for (const auto &edge : edges) {
         degree[edge.first]++;
+        degree[edge.second]++;
     }
 
     // Build xadj based on degree information
@@ -70,6 +58,7 @@ void readGraphFromFile(const std::string &filename, Kokkos::View<int*>& xadj, Ko
         int u = edge.first;
         int v = edge.second;
         v_adjncy[currentOffset[u]++] = v;
+        v_adjncy[currentOffset[v]++] = u;
     }
     std::cout << "Vectors set up" << std::endl;
 
