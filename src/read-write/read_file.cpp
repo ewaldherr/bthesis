@@ -64,7 +64,7 @@ void readGraphFromFile(const std::string &filename, Kokkos::View<int*>& xadj, Ko
 
     // Resize Kokkos views
     Kokkos::resize(xadj, numVertices + 1);
-    Kokkos::resize(adjncy, edges.size());
+    Kokkos::resize(adjncy, 2*edges.size());
     std::cout << "Resized Views" << std::endl;
 
     auto h_xadj = Kokkos::create_mirror_view(xadj);
