@@ -51,7 +51,7 @@ void readGraphFromFile(const std::string &filename, Kokkos::View<int*>& xadj, Ko
     }
 
     // Build adjncy by filling neighbors
-    std::vector<int> v_adjncy(edges.size());
+    std::vector<int> v_adjncy(2*edges.size());
     std::vector<int> currentOffset = v_xadj;
 
     for (const auto &edge : edges) {
