@@ -36,7 +36,7 @@ void readGraphFromFile(const std::string &filename, Kokkos::View<int*>& xadj, Ko
     std::cout << "Input file closed" << std::endl;
 
     // Remove duplicate edges
-    std::sort(edges.begin(), edges.end());
+    // Assume sorted vector: std::sort(edges.begin(), edges.end());
     edges.erase(std::unique(edges.begin(), edges.end()), edges.end());
 
     int numVertices = maxVertex + 1;
