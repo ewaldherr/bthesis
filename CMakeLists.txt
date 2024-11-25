@@ -1,6 +1,13 @@
 cmake_minimum_required(VERSION 3.16)
 project(LubyGPU CXX)
 find_package(Kokkos REQUIRED)
+
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
 add_executable(Main src/main/main.cpp)
 add_executable(Benchmark benchmarks/benchmark.cpp)
 add_executable(DegreeUpdate benchmarks/degree_update_cmp.cpp)
