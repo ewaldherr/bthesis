@@ -19,23 +19,33 @@ KOKKOS_FUNCTION void initializePriorities(Kokkos::View<double*>& priorities, uns
 }
 
 // Function that checks for each vertex if it has the max priority of its neighborhood
-KOKKOS_FUNCTION void checkMax(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy, Kokkos::View<double*>& priorities, Kokkos::View<int*>& state){
-    Kokkos::parallel_for("select_max_priority", xadj.extent(0)-1, KOKKOS_LAMBDA(int u) {
-            if (state(u) != -1) return;
+KOKKOS_FUNCTION void checkMax(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy, Kokkos::View<double*>& priorities, Kokkos::View<int*>& state) {
+    Kokkos::parallel_for("select_max_priority", xadj.extent(0) - 1, KOKKOS_LAMBDA(int u) {
+        if (state(u) != -1) return;
 
-            bool isMaxPriority = true;
-            for (int v = xadj(u); v < xadj(u+1); ++v) {
-                if ((state(adjncy(v)) == -1 && priorities(adjncy(v)) >= priorities(u)) || state(adjncy(v)) == 2) {
-                    isMaxPriority = false;
-                    break;
-                }
-            }
+        // Check bounds for xadj
+        if (u + 1 >= xadj.extent(0)) return;
 
-            if (isMaxPriority) {
-                state(u) = 2;
+        bool isMaxPriority = true;
+        for (int v = xadj(u); v < xadj(u+1); ++v) {
+            // Check bounds for adjncy
+            if (v >= adjncy.extent(0)) continue;
+            int neighbor = adjncy(v);
+            // Validate neighbor index
+            if (neighbor < 0 || neighbor >= state.extent(0)) continue;
+
+            if ((state(neighbor) == -1 && priorities(neighbor) >= priorities(u)) || state(neighbor) == 2) {
+                isMaxPriority = false;
+                break;
             }
-        });
+        }
+
+        if (isMaxPriority) {
+            state(u) = 2;
+        }
+    });
 }
+
 
 // Function to remove vertices of vertices added to MIS
 KOKKOS_FUNCTION void removeVertices(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy, Kokkos::View<int*>& state){
