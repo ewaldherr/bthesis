@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
                 Kokkos::View<int*> result_mis("mis",xadj.extent(0)-1);
                 std::cout << "Determining MIS of " << argv[1] << " with " << xadj.extent(0)-1 << " nodes and " << adjncy.extent(0)/2 << " edges using " << algo << "."<< std::endl;
 
-                for(int i = 0; i < 3; ++i){
+                for(int i = 0; i < 5; ++i){
                     // Set up degrees
                     Kokkos::View<int*> degree("degree", xadj.extent(0)-1);
                     degree = initializeDegrees(xadj);
