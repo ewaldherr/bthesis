@@ -8,62 +8,63 @@
 #include <iostream>
 
 void readGraphFromFile(const std::string &filename, Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy) {
-    std::cout << "Reading " << filename << std::endl;
+    std::cout << "Reading METIS file " << filename << std::endl;
 
     std::ifstream inputFile(filename);
     if (!inputFile.is_open()) {
-        throw std::runtime_error("Failed to open graph file.");
+        throw std::runtime_error("Failed to open METIS graph file.");
     }
 
-    // First Pass: Find max vertex ID and count degrees
-    int maxVertex = -1;
-    int u, v;
-    std::vector<int> degree;
-
-    while (inputFile >> u >> v) {
-        if (u < 0 || v < 0 || u == v) continue; // Skip invalid edges
-        maxVertex = std::max({maxVertex, u, v});
-        if (maxVertex >= degree.size()) degree.resize(maxVertex + 1, 0);
-        degree[u]++;
-        degree[v]++;
+    // Read the header
+    int numVertices, numEdges;
+    inputFile >> numVertices >> numEdges;
+    if (numVertices <= 0 || numEdges <= 0) {
+        throw std::runtime_error("Invalid header in METIS graph file.");
     }
 
-    int numVertices = maxVertex + 1;
-
-    // Build xadj
+    // Resize xadj and temporary storage for adjacency list
     std::vector<int> v_xadj(numVertices + 1, 0);
-    for (int i = 1; i <= maxVertex; ++i) {
-        v_xadj[i] = v_xadj[i - 1] + degree[i - 1];
+    std::vector<int> edges;
+
+    // Read adjacency lists
+    std::string line;
+    std::getline(inputFile, line); // Skip to the next line after header
+    int currentIndex = 0;
+
+    while (std::getline(inputFile, line)) {
+        std::istringstream iss(line);
+        int neighbor;
+
+        while (iss >> neighbor) {
+            edges.push_back(neighbor - 1); // Convert 1-based to 0-based indexing
+        }
+
+        v_xadj[currentIndex + 1] = edges.size();
+        currentIndex++;
     }
 
-    // Second Pass: Populate adjncy
-    inputFile.clear();
-    inputFile.seekg(0, std::ios::beg);
-
-    std::vector<int> v_adjncy(v_xadj.back());
-    std::vector<int> currentOffset = v_xadj;
-
-    while (inputFile >> u >> v) {
-        if (u < 0 || v < 0 || u == v) continue; // Skip invalid edges
-        v_adjncy[currentOffset[u]++] = v;
-        v_adjncy[currentOffset[v]++] = u;
+    if (currentIndex != numVertices) {
+        throw std::runtime_error("Mismatch between declared and actual number of vertices.");
     }
 
     inputFile.close();
 
-    // Convert to Kokkos Views
+    // Resize Kokkos Views
     Kokkos::resize(xadj, numVertices + 1);
-    Kokkos::resize(adjncy, v_adjncy.size());
+    Kokkos::resize(adjncy, edges.size());
 
     auto h_xadj = Kokkos::create_mirror_view(xadj);
     auto h_adjncy = Kokkos::create_mirror_view(adjncy);
 
+    // Copy data into host views
     std::copy(v_xadj.begin(), v_xadj.end(), h_xadj.data());
-    std::copy(v_adjncy.begin(), v_adjncy.end(), h_adjncy.data());
+    std::copy(edges.begin(), edges.end(), h_adjncy.data());
 
+    // Transfer data to device
     Kokkos::deep_copy(xadj, h_xadj);
     Kokkos::deep_copy(adjncy, h_adjncy);
 
-    std::cout << "Graph loaded successfully!" << std::endl;
+    std::cout << "METIS graph loaded successfully!" << std::endl;
 }
+
 
