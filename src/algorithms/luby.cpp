@@ -53,19 +53,19 @@ KOKKOS_FUNCTION void removeVertices(Kokkos::View<int*>& xadj, Kokkos::View<int*>
 Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy, Kokkos::View<int*> state, unsigned int seed) {
     Kokkos::View<double*> priorities("priorities", xadj.extent(0)-1);
 
-    auto h_priorities = Kokkos::create_mirror_view(priorities);
     auto h_state = Kokkos::create_mirror_view(state);
     Kokkos::deep_copy(state, -1);
 
+    std::cout << "initialized host copies" << std::endl;
     // Assign random priorities to remaining vertices
     initializePriorities(priorities, seed);
-    
+    std::cout << "initialized priorities" << std::endl;
     bool changes;
     do {
 
         // Select vertices with highest priority in their neighborhood
         checkMax(xadj,adjncy,priorities,state);
-
+        std::cout << "Checked max" << std::endl;
         // Check if changes occured during last step
         Kokkos::deep_copy(h_state,state);
         changes = false;
@@ -75,9 +75,10 @@ Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> ad
                 break;
             }
         }
+        std::cout << "Checked for changes" << std::endl;
         // Add selected vertices to MIS and remove them and their neighbors
         removeVertices(xadj,adjncy,state);
-
+        std::cout << "Removed vertices" << std::endl;
     } while (changes);
 
     return state;

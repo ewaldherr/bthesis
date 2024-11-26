@@ -41,7 +41,6 @@ KOKKOS_FUNCTION void checkMaxDegreePrio(Kokkos::View<int*>& xadj, Kokkos::View<i
 Kokkos::View<int*> degreeBasedAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy, Kokkos::View<int*> degree,  Kokkos::View<int*>& state, unsigned int seed, std::string algorithm) {
     Kokkos::View<double*> priorities("priorities", xadj.extent(0)-1);
 
-    auto h_priorities = Kokkos::create_mirror_view(priorities);
     auto h_state = Kokkos::create_mirror_view(state);
     Kokkos::deep_copy(state, -1);
 
