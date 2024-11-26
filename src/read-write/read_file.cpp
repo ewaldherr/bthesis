@@ -8,81 +8,62 @@
 #include <iostream>
 
 void readGraphFromFile(const std::string &filename, Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy) {
-    std::cout << "Reading in " << filename << std::endl;
+    std::cout << "Reading " << filename << std::endl;
+
     std::ifstream inputFile(filename);
     if (!inputFile.is_open()) {
         throw std::runtime_error("Failed to open graph file.");
     }
 
-    // Read edges and find the max vertex ID
-    std::vector<std::pair<int, int>> edges;
+    // First Pass: Find max vertex ID and count degrees
     int maxVertex = -1;
-    std::string line;
+    int u, v;
+    std::vector<int> degree;
 
-    while (std::getline(inputFile, line)) {
-        std::istringstream iss(line);
-        int u, v;
-        // Skip malformed lines
-        if (!(iss >> u >> v)) {
-            continue;
-        }
-
-        edges.emplace_back(std::minmax(u,v));
+    while (inputFile >> u >> v) {
+        if (u < 0 || v < 0 || u == v) continue; // Skip invalid edges
         maxVertex = std::max({maxVertex, u, v});
-
+        if (maxVertex >= degree.size()) degree.resize(maxVertex + 1, 0);
+        degree[u]++;
+        degree[v]++;
     }
-
-    inputFile.close();
-    std::cout << "Input file closed" << std::endl;
-
-    // Remove duplicate edges
-    // Assume sorted vector: std::sort(edges.begin(), edges.end());
-    edges.erase(std::unique(edges.begin(), edges.end()), edges.end());
 
     int numVertices = maxVertex + 1;
-    std::vector<int> degree(numVertices, 0);
 
-    // Count the degree of each vertex
-    for (const auto &edge : edges) {
-        degree[edge.first]++;
-        degree[edge.second]++;
-    }
-
-    // Build xadj based on degree information
+    // Build xadj
     std::vector<int> v_xadj(numVertices + 1, 0);
-    for (int i = 1; i <= numVertices; ++i) {
+    for (int i = 1; i <= maxVertex; ++i) {
         v_xadj[i] = v_xadj[i - 1] + degree[i - 1];
     }
 
-    // Build adjncy by filling neighbors
-    std::vector<int> v_adjncy(2*edges.size());
+    // Second Pass: Populate adjncy
+    inputFile.clear();
+    inputFile.seekg(0, std::ios::beg);
+
+    std::vector<int> v_adjncy(v_xadj.back());
     std::vector<int> currentOffset = v_xadj;
 
-    for (const auto &edge : edges) {
-        int u = edge.first;
-        int v = edge.second;
+    while (inputFile >> u >> v) {
+        if (u < 0 || v < 0 || u == v) continue; // Skip invalid edges
         v_adjncy[currentOffset[u]++] = v;
         v_adjncy[currentOffset[v]++] = u;
     }
-    std::cout << "Vectors set up" << std::endl;
 
-    // Resize Kokkos views
+    inputFile.close();
+
+    // Convert to Kokkos Views
     Kokkos::resize(xadj, numVertices + 1);
-    Kokkos::resize(adjncy, 2*edges.size());
-    std::cout << "Resized Views" << std::endl;
+    Kokkos::resize(adjncy, v_adjncy.size());
 
     auto h_xadj = Kokkos::create_mirror_view(xadj);
     auto h_adjncy = Kokkos::create_mirror_view(adjncy);
 
-    std::cout << "Created host copies" << std::endl;
-
     std::copy(v_xadj.begin(), v_xadj.end(), h_xadj.data());
     std::copy(v_adjncy.begin(), v_adjncy.end(), h_adjncy.data());
-
-    std::cout << "Copied data to host copies" << std::endl;
 
     Kokkos::deep_copy(xadj, h_xadj);
     Kokkos::deep_copy(adjncy, h_adjncy);
 
-    std::cout << "Graph loaded successfully" << std::endl;
+    std::cout << "Graph loaded successfully!" << std::endl;
 }
+
