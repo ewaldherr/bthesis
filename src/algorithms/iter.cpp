@@ -46,7 +46,7 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adj
         }
     } else{
         for(int i =0; i < iterations; ++i){
-            current_solution = degreeBasedAlgorithm(xadj, adjncy, degree, current_solution, seed + i, algorithm);
+            current_solution = degreeBasedAlgorithm(xadj, adjncy, degree, current_solution, seed + i, algorithm, 5);
             checkSize(best_solution, current_solution, best_size);
             if (i != iterations -1){
                 removeAtRandom(xadj, adjncy, current_solution, 0.5, seed);

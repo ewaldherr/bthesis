@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
                     Kokkos::View<int*> state("state", xadj.extent(0)-1);
                     auto algo_start = std::chrono::high_resolution_clock::now();
                     if(algo.compare("DEGREE") == 0 || algo.compare("DEGREEUD") == 0){
-                        result_mis = degreeBasedAlgorithm(xadj, adjncy, degree, state, seed + 100 * i, algo);
+                        result_mis = degreeBasedAlgorithm(xadj, adjncy, degree, state, seed + 100 * i, algo, 5);
                     } else if(algo.compare("LUBYITER") == 0 || algo.compare("DEGREEITER") == 0){
                         result_mis = iterAlgorithm(xadj, adjncy, 10, degree, algo, seed + 100 * i);
                     } else{
