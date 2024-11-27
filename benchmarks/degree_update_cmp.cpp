@@ -65,8 +65,8 @@ int main(int argc, char* argv[]) {
                     auto algo_start = std::chrono::high_resolution_clock::now();
                     result_mis = degreeBasedAlgorithm(xadj, adjncy, degree, state, seed + 100 * i, algo, j*2);
                     auto algo_stop = std::chrono::high_resolution_clock::now();
-                    auto algo_duration = std::chrono::duration_cast<std::chrono::milliseconds>(algo_stop - algo_start);
-                    std::cout << "Determined MIS in " << algo_duration.count() << " milliseconds" << std::endl;
+                    auto algo_duration = std::chrono::duration_cast<std::chrono::microseconds>(algo_stop - algo_start);
+                    std::cout << "Determined MIS in " << algo_duration.count() << " microseconds" << std::endl;
                     getSize(result_mis);
                     std::cout << "Verifying solution..." << std::endl;
                     bool valid = verifyResult(result_mis, xadj, adjncy);
