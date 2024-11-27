@@ -82,6 +82,6 @@ Kokkos::View<int*> degreeBasedAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<in
         ++totalIterations;
     } while (changes);
 
-    std::cout << "The algorithm run a total of " << totalIterations << " total iterations"
+    std::cout << "The algorithm run a total of " << totalIterations << " total iterations" << std::endl;
     return state;
 }
