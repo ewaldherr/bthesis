@@ -47,7 +47,12 @@ Kokkos::View<int*> degreeBasedAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<in
 
     // Assign random priorities to remaining vertices
     initializePriorities(priorities, seed);
-    int iter = 0;
+
+    int iter = 1;
+    if(updateFrequency == 0){
+        ++updateFrequency;
+    }
+
     bool changes;
     do {
         if(iter == updateFrequency && algorithm.compare("DEGREEUD") == 0){
