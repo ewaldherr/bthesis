@@ -38,26 +38,19 @@ int main(int argc, char* argv[]) {
             readGraphFromFile(argv[1], xadj,adjncy);
             std::cout << "Code running on " << Kokkos::DefaultExecutionSpace::name() << std::endl;
 
-            // Set up update frequency
-            int freq = 5;
-            if(argc > 2){
-                std::string str_freq= argv[2];
-                freq = std::stoi(str_freq);
-            } 
-
             // Set up seed for RNG
             unsigned int seed;
-            if(argc > 3){
-                std::string str_seed= argv[3];
+            if(argc > 2){
+                std::string str_seed= argv[2];
                 seed = std::stoi(str_seed);
             } else{
                 seed = (unsigned int)time(NULL);
             }
 
             // Determining which algorithm to use
-            std::string algorithms[1] = {"DEGREEUD"};
+            std::string algo = "DEGREEUD";
 
-            for(auto algo: algorithms){
+            for(int j = 0; j < 10; ++j){
                 Kokkos::View<int*> result_mis("mis",xadj.extent(0)-1);
                 std::cout << "Determining MIS of " << argv[1] << " with " << xadj.extent(0)-1 << " nodes and " << adjncy.extent(0) << " edges using " << algo << "."<< std::endl;
 
@@ -69,7 +62,7 @@ int main(int argc, char* argv[]) {
                     // Run algorithm with Kokkos
                     Kokkos::View<int*> state("state", xadj.extent(0)-1);
                     auto algo_start = std::chrono::high_resolution_clock::now();
-                    result_mis = degreeBasedAlgorithm(xadj, adjncy, degree, state, seed + 100 * i, algo, freq);
+                    result_mis = degreeBasedAlgorithm(xadj, adjncy, degree, state, seed + 100 * i, algo, j);
                     auto algo_stop = std::chrono::high_resolution_clock::now();
                     auto algo_duration = std::chrono::duration_cast<std::chrono::milliseconds>(algo_stop - algo_start);
                     std::cout << "Determined MIS in " << algo_duration.count() << " milliseconds" << std::endl;
