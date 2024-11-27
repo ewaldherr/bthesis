@@ -48,11 +48,14 @@ Kokkos::View<int*> degreeBasedAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<in
     // Assign random priorities to remaining vertices
     initializePriorities(priorities, seed);
 
+    int totalIterations = 0;
     int iter = 1;
     if(updateFrequency == 0){
         ++updateFrequency;
     }
-
+    if(updateFrequency == 10){
+        updateFrequency = 1000000;
+    }
     bool changes;
     do {
         if(iter == updateFrequency && algorithm.compare("DEGREEUD") == 0){
@@ -76,7 +79,9 @@ Kokkos::View<int*> degreeBasedAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<in
         // Add selected vertices to MIS and remove them and their neighbors
         removeVertices(xadj,adjncy,state);
         ++iter;
+        ++totalIterations;
     } while (changes);
 
+    std::cout << "The algorithm run a total of " << totalIterations << " total iterations"
     return state;
 }
