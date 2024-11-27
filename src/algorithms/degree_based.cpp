@@ -52,6 +52,7 @@ Kokkos::View<int*> degreeBasedAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<in
     do {
         if(iter == updateFrequency && algorithm.compare("DEGREEUD") == 0){
             updateDegrees(xadj, adjncy, state, degree);
+            iter = 0;
         }
 
         // Select vertices with highest priority in their neighborhood
