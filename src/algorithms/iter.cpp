@@ -44,7 +44,7 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adj
             current_solution = lubysAlgorithm(xadj, adjncy, current_solution, seed + i);
             int newBest = checkSize(best_solution, current_solution, best_size);
             if(newBest > 0){
-                i = 0;
+                i = -1;
                 std::cout << "New best solution found of size " << newBest << std::endl;
             }
             if(i<9){
@@ -57,7 +57,7 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adj
             current_solution = degreeBasedAlgorithm(xadj, adjncy, degree, current_solution, seed + i, algorithm, 2);
             int newBest = checkSize(best_solution, current_solution, best_size);
             if(newBest > 0){
-                i = 0;
+                i = -1;
                 std::cout << "New best solution found of size " << newBest << std::endl;
             }
             if(i<9){
