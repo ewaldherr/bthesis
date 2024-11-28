@@ -11,6 +11,9 @@ KOKKOS_FUNCTION int checkSize(Kokkos::View<int*>& best_solution, Kokkos::View<in
         Kokkos::deep_copy(best_solution,current_solution);
         return best_size;
     }
+    if(size == best_size){
+        return -1;
+    }
     return 0;
 }
 
@@ -61,6 +64,9 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adj
             if(newBest > 0){
                 i = -1;
                 std::cout << "New best solution found of size " << newBest << std::endl;
+            }
+            if(newBest == -1){
+                std::cout << "Found best solution again" << std::endl;
             }
             if(i<9){
                 removeAtRandom(xadj, adjncy, current_solution, 0.25, seed + 10 * totalIterations);
