@@ -42,28 +42,28 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adj
     int totalIterations = 0;
     if(algorithm.compare("LUBYITER") == 0){
         for(int i =0; i < 10; ++i){
-            current_solution = lubysAlgorithm(xadj, adjncy, current_solution, seed + i);
+            current_solution = lubysAlgorithm(xadj, adjncy, current_solution, seed + totalIterations);
             int newBest = checkSize(best_solution, current_solution, best_size);
             if(newBest > 0){
                 i = -1;
                 std::cout << "New best solution found of size " << newBest << std::endl;
             }
             if(i<9){
-                removeAtRandom(xadj, adjncy, current_solution, 0.5, seed + 10 * totalIterations);
+                removeAtRandom(xadj, adjncy, current_solution, 0.25, seed + 10 * totalIterations);
             }
             ++totalIterations;
         }
     } else{
         algorithm = "DEGREEUD";
         for(int i =0; i < 10; ++i){
-            current_solution = degreeBasedAlgorithm(xadj, adjncy, degree, current_solution, seed + i, algorithm, 2);
+            current_solution = degreeBasedAlgorithm(xadj, adjncy, degree, current_solution, seed + totalIterations, algorithm, 2);
             int newBest = checkSize(best_solution, current_solution, best_size);
             if(newBest > 0){
                 i = -1;
                 std::cout << "New best solution found of size " << newBest << std::endl;
             }
             if(i<9){
-                removeAtRandom(xadj, adjncy, current_solution, 0.5, seed + 10 * totalIterations);
+                removeAtRandom(xadj, adjncy, current_solution, 0.25, seed + 10 * totalIterations);
                 updateDegrees(xadj, adjncy, current_solution, degree);
             }
             ++totalIterations;
