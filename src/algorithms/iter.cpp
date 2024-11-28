@@ -1,7 +1,7 @@
 #include "degree_based.cpp"
 
 //TODO: parallize with Kokkos parallel_reduce
-KOKKOS_FUNCTION bool checkSize(Kokkos::View<int*>& best_solution, Kokkos::View<int*>& current_solution, int& best_size){
+KOKKOS_FUNCTION int checkSize(Kokkos::View<int*>& best_solution, Kokkos::View<int*>& current_solution, int& best_size){
     int size = 0;
     Kokkos::parallel_reduce ("Reduction", current_solution.extent(0), KOKKOS_LAMBDA (const int i, int& sum) {
         if (current_solution(i) == 1) sum++;
@@ -9,10 +9,9 @@ KOKKOS_FUNCTION bool checkSize(Kokkos::View<int*>& best_solution, Kokkos::View<i
     if(size > best_size){
         best_size = size;
         Kokkos::deep_copy(best_solution,current_solution);
-        std::cout << "New best solution found of size " << best_size << std::endl;
-        return true;
+        return best_size;
     }
-    return false;
+    return 0;
 }
 
 KOKKOS_FUNCTION void removeAtRandom(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy, Kokkos::View<int*>& current_solution, double probability, unsigned int seed){
@@ -43,8 +42,10 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adj
     if(algorithm.compare("LUBYITER") == 0){
         for(int i =0; i < 10; ++i){
             current_solution = lubysAlgorithm(xadj, adjncy, current_solution, seed + i);
-            if(checkSize(best_solution, current_solution, best_size)){
+            int newBest = checkSize(best_solution, current_solution, best_size);
+            if(newBest > 0){
                 i = 0;
+                std::cout << "New best solution found of size " << newBest << std::endl;
             }
             if(i<9){
                 removeAtRandom(xadj, adjncy, current_solution, 0.5, seed);
@@ -54,8 +55,10 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adj
         algorithm = "DEGREEUD";
         for(int i =0; i < 10; ++i){
             current_solution = degreeBasedAlgorithm(xadj, adjncy, degree, current_solution, seed + i, algorithm, 2);
-            if(checkSize(best_solution, current_solution, best_size)){
+            int newBest = checkSize(best_solution, current_solution, best_size);
+            if(newBest > 0){
                 i = 0;
+                std::cout << "New best solution found of size " << newBest << std::endl;
             }
             if(i<9){
                 removeAtRandom(xadj, adjncy, current_solution, 0.5, seed);
