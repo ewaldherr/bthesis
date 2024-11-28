@@ -39,6 +39,7 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adj
     auto h_current = Kokkos::create_mirror_view(current_solution);
     Kokkos::deep_copy(current_solution, -1);
     Kokkos::deep_copy(best_solution, -1);
+    int totalIterations = 0;
     if(algorithm.compare("LUBYITER") == 0){
         for(int i =0; i < 10; ++i){
             current_solution = lubysAlgorithm(xadj, adjncy, current_solution, seed + i);
@@ -48,8 +49,9 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adj
                 std::cout << "New best solution found of size " << newBest << std::endl;
             }
             if(i<9){
-                removeAtRandom(xadj, adjncy, current_solution, 0.5, seed);
+                removeAtRandom(xadj, adjncy, current_solution, 0.5, seed + 10 * totalIterations);
             }
+            ++totalIterations;
         }
     } else{
         algorithm = "DEGREEUD";
@@ -61,11 +63,12 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adj
                 std::cout << "New best solution found of size " << newBest << std::endl;
             }
             if(i<9){
-                removeAtRandom(xadj, adjncy, current_solution, 0.5, seed);
+                removeAtRandom(xadj, adjncy, current_solution, 0.5, seed + 10 * totalIterations);
                 updateDegrees(xadj, adjncy, current_solution, degree);
             }
+            ++totalIterations
         }
     }
-
+    std::cout << "Iterative approach lasted a total of " << totalIterations << " iterations." << std::endl;
     return best_solution;
 }
