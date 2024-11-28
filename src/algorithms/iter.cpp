@@ -66,7 +66,7 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adj
                 removeAtRandom(xadj, adjncy, current_solution, 0.5, seed + 10 * totalIterations);
                 updateDegrees(xadj, adjncy, current_solution, degree);
             }
-            ++totalIterations
+            ++totalIterations;
         }
     }
     std::cout << "Iterative approach lasted a total of " << totalIterations << " iterations." << std::endl;
