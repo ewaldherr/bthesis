@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
                 seed = (unsigned int)time(NULL);
             }
             // Determining which algorithm to use
-            std::string algorithms[3] = {"LUBY","DEGREE","DEGREEUD"};
+            std::string algorithms[2] = {"LUBYITER","DEGREEITER"};
 
             for(auto algo: algorithms){
                 Kokkos::View<int*> result_mis("mis",xadj.extent(0)-1);
@@ -63,7 +63,7 @@ int main(int argc, char* argv[]) {
                     if(algo.compare("DEGREE") == 0 || algo.compare("DEGREEUD") == 0){
                         result_mis = degreeBasedAlgorithm(xadj, adjncy, degree, state, seed + 100 * i, algo, 5);
                     } else if(algo.compare("LUBYITER") == 0 || algo.compare("DEGREEITER") == 0){
-                        result_mis = iterAlgorithm(xadj, adjncy, 10, degree, algo, seed + 100 * i);
+                        result_mis = iterAlgorithm(xadj, adjncy, degree, algo, seed + 100 * i);
                     } else{
                         result_mis = lubysAlgorithm(xadj, adjncy, state, seed + 100 * i);
                     }

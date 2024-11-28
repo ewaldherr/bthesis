@@ -1,7 +1,7 @@
 #include "degree_based.cpp"
 
 //TODO: parallize with Kokkos parallel_reduce
-KOKKOS_FUNCTION void checkSize(Kokkos::View<int*>& best_solution, Kokkos::View<int*>& current_solution, int& best_size){
+KOKKOS_FUNCTION bool checkSize(Kokkos::View<int*>& best_solution, Kokkos::View<int*>& current_solution, int& best_size){
     int size = 0;
     Kokkos::parallel_reduce ("Reduction", current_solution.extent(0), KOKKOS_LAMBDA (const int i, int& sum) {
         if (current_solution(i) == 1) sum++;
@@ -9,7 +9,10 @@ KOKKOS_FUNCTION void checkSize(Kokkos::View<int*>& best_solution, Kokkos::View<i
     if(size > best_size){
         best_size = size;
         Kokkos::deep_copy(best_solution,current_solution);
+        std::cout << "New best solution found of size " << best_size << std::endl;
+        return true;
     }
+    return false;
 }
 
 KOKKOS_FUNCTION void removeAtRandom(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy, Kokkos::View<int*>& current_solution, double probability, unsigned int seed){
@@ -29,7 +32,7 @@ KOKKOS_FUNCTION void removeAtRandom(Kokkos::View<int*>& xadj, Kokkos::View<int*>
 }
 
 // Iterative Algorithm with removing vertices from the solution 
-Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy, int iterations, Kokkos::View<int*> degree, std::string algorithm, unsigned int seed) {
+Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy, Kokkos::View<int*> degree, std::string algorithm, unsigned int seed) {
     int size = 0;
     int& best_size = size;
     Kokkos::View<int*> current_solution("current_solution", xadj.extent(0)-1);
@@ -37,18 +40,24 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adj
     auto h_current = Kokkos::create_mirror_view(current_solution);
     Kokkos::deep_copy(current_solution, -1);
     Kokkos::deep_copy(best_solution, -1);
-
     if(algorithm.compare("LUBYITER") == 0){
-        for(int i =0; i < iterations; ++i){
+        for(int i =0; i < 10; ++i){
             current_solution = lubysAlgorithm(xadj, adjncy, current_solution, seed + i);
-            checkSize(best_solution, current_solution, best_size);
-            removeAtRandom(xadj, adjncy, current_solution, 0.5, seed);
+            if(checkSize(best_solution, current_solution, best_size)){
+                i = 0;
+            }
+            if(i<9){
+                removeAtRandom(xadj, adjncy, current_solution, 0.5, seed);
+            }
         }
     } else{
-        for(int i =0; i < iterations; ++i){
-            current_solution = degreeBasedAlgorithm(xadj, adjncy, degree, current_solution, seed + i, algorithm, 5);
-            checkSize(best_solution, current_solution, best_size);
-            if (i != iterations -1){
+        algorithm = "DEGREEUD";
+        for(int i =0; i < 10; ++i){
+            current_solution = degreeBasedAlgorithm(xadj, adjncy, degree, current_solution, seed + i, algorithm, 2);
+            if(checkSize(best_solution, current_solution, best_size)){
+                i = 0;
+            }
+            if(i<9){
                 removeAtRandom(xadj, adjncy, current_solution, 0.5, seed);
                 updateDegrees(xadj, adjncy, current_solution, degree);
             }
