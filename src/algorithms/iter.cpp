@@ -52,7 +52,7 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adj
                 std::cout << "New best solution found of size " << newBest << std::endl;
             }
             if(i<9){
-                removeAtRandom(xadj, adjncy, current_solution, 0.25, seed + 10 * totalIterations);
+                removeAtRandom(xadj, adjncy, current_solution, 0.5, seed + 10 * totalIterations);
             }
             ++totalIterations;
         }
@@ -69,7 +69,7 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adj
                 std::cout << "Found best solution again" << std::endl;
             }
             if(i<9){
-                removeAtRandom(xadj, adjncy, current_solution, 0.25, seed + 10 * totalIterations);
+                removeAtRandom(xadj, adjncy, current_solution, 0.5, seed + 10 * totalIterations);
                 updateDegrees(xadj, adjncy, current_solution, degree);
             }
             ++totalIterations;
