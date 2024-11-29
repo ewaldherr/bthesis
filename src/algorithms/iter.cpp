@@ -44,7 +44,7 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adj
     Kokkos::deep_copy(best_solution, -1);
     int totalIterations = 0;
     if(algorithm.compare("LUBYITER") == 0){
-        for(int i =0; i < 10; ++i){
+        for(int i =0; i < 100; ++i){
             current_solution = lubysAlgorithm(xadj, adjncy, current_solution, seed + totalIterations);
             int newBest = checkSize(best_solution, current_solution, best_size);
             if(newBest > 0){
@@ -58,7 +58,7 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adj
         }
     } else{
         algorithm = "DEGREEUD";
-        for(int i =0; i < 10; ++i){
+        for(int i =0; i < 100; ++i){
             current_solution = degreeBasedAlgorithm(xadj, adjncy, degree, current_solution, seed + totalIterations, algorithm, 1);
             int newBest = checkSize(best_solution, current_solution, best_size);
             if(newBest > 0){
