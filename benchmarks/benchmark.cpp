@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
                 seed = (unsigned int)time(NULL);
             }
             // Determining which algorithm to use
-            std::string algorithms[1] = {"DEGREEITER"};
+            std::string algorithms[4] = {"LUBY", "DEGREE", "DEGREEUD", "DEGREEITER"};
 
             for(auto algo: algorithms){
                 Kokkos::View<int*> result_mis("mis",xadj.extent(0)-1);
