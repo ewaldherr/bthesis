@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
                     result_mis = degreeBasedAlgorithm(xadj, adjncy, degree, state, seed + 100 * i, algo, j*2);
                     auto algo_stop = std::chrono::high_resolution_clock::now();
                     auto algo_duration = std::chrono::duration_cast<std::chrono::microseconds>(algo_stop - algo_start);
-                    commulativeTime += algo_duration;
+                    commulativeTime += algo_duration.count();
                     std::cout << "Determined MIS in " << algo_duration.count() << " microseconds" << std::endl;
                     commulativeSize += getSize(result_mis);
                     std::cout << "Verifying solution..." << std::endl;
