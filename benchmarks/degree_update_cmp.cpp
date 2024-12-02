@@ -56,7 +56,7 @@ int main(int argc, char* argv[]) {
                 std::cout << "Determining MIS of " << argv[1] << " with " << xadj.extent(0)-1 << " nodes and " << adjncy.extent(0) << " edges using " << algo << "."<< std::endl;
                 std::cout << "Current update frequency is " << j*2 << std::endl;
 
-                int commulativeTime = 0;                  
+                std::chrono::microseconds commulativeTime;                  
                 int commulativeSize = 0;
 
                 for(int i = 0; i < 5; ++i){

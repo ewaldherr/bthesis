@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
                 Kokkos::View<int*> result_mis("mis",xadj.extent(0)-1);
                 std::cout << "Determining MIS of " << argv[1] << " with " << xadj.extent(0)-1 << " nodes and " << adjncy.extent(0)/2 << " edges using " << algo << "."<< std::endl;
 
-                int commulativeTime = 0;                  
+                std::chrono::microseconds commulativeTime;                  
                 int commulativeSize = 0;
 
                 for(int i = 0; i < 5; ++i){
