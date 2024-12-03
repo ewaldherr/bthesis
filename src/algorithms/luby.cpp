@@ -58,7 +58,8 @@ Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> ad
 
     // Assign random priorities to remaining vertices
     initializePriorities(priorities, seed);
-    
+    int totalIterations = 0;
+
     bool changes;
     do {
 
@@ -77,9 +78,11 @@ Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> ad
 
         // Add selected vertices to MIS and remove them and their neighbors
         removeVertices(xadj,adjncy,state);
-
+        
+        totalIterations++;
     } while (changes);
 
+    std::cout << "The algorithm run a total of " << totalIterations << " total iterations" << std::endl;
     return state;
 }
 
