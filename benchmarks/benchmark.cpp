@@ -46,6 +46,8 @@ int main(int argc, char* argv[]) {
             } else{
                 seed = (unsigned int)time(NULL);
             }
+            std::cout << "Using seed " << seed << std::endl;
+
             // Set up reduction
             std::string reduction;
             if(argc > 3){
