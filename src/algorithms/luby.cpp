@@ -55,7 +55,6 @@ Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> ad
     Kokkos::View<double*> priorities("priorities", xadj.extent(0)-1);
 
     auto h_state = Kokkos::create_mirror_view(state);
-    Kokkos::deep_copy(state, -1);
 
     // Assign random priorities to remaining vertices
     initializePriorities(priorities, seed);

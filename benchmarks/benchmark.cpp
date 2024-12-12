@@ -46,6 +46,13 @@ int main(int argc, char* argv[]) {
             } else{
                 seed = (unsigned int)time(NULL);
             }
+            // Set up reduction
+            std::string reduction;
+            if(argc > 3){
+                reduction = argv[3];
+            } else{
+                reduction = "NONE";
+            }
             // Determining which algorithm to use
             std::string algorithms[4] = {"LUBY", "DEGREE", "DEGREEUD", "DEGREEITER"};
 
@@ -63,6 +70,25 @@ int main(int argc, char* argv[]) {
 
                     // Run algorithm with Kokkos
                     Kokkos::View<int*> state("state", xadj.extent(0)-1);
+                    Kokkos::deep_copy(state, -1);
+
+                    // Execute reductions
+                    if(reduction.compare("NONE") != 0){
+                        auto reduction_start = std::chrono::high_resolution_clock::now();
+                        if(reduction.compare("TRIVIAL") == 0){
+                            includeTrivial(degree,state);
+                        }
+                        if(reduction.compare("LOWDEG") == 0){
+                            lowDegree(degree,state);
+                        }
+                        if(reduction.compare("TRIANGLE") == 0){
+                            includeTriangle(degree,state);
+                        }
+                        auto reduction_stop = std::chrono::high_resolution_clock::now();
+                        auto reduction_duration = std::chrono::duration_cast<std::chrono::microseconds>(reduction_stop - reduction_start);
+                    }
+                    std::cout << "Conducted reductions in " << reduction_duration.count() << " microseconds";
+
                     auto algo_start = std::chrono::high_resolution_clock::now();
                     if(algo.compare("DEGREE") == 0 || algo.compare("DEGREEUD") == 0){
                         result_mis = degreeBasedAlgorithm(xadj, adjncy, degree, state, seed + 100 * i, algo, 1);
@@ -73,7 +99,7 @@ int main(int argc, char* argv[]) {
                     }
                     auto algo_stop = std::chrono::high_resolution_clock::now();
                     auto algo_duration = std::chrono::duration_cast<std::chrono::microseconds>(algo_stop - algo_start);
-                    commulativeTime += algo_duration.count();
+                    commulativeTime += algo_duration.count() + reduction_duration.count();
                     std::cout << "Determined MIS in " << algo_duration.count() << " microseconds" << std::endl;
                     commulativeSize += getSize(result_mis);
                     std::cout << "Verifying solution..." << std::endl;
