@@ -73,8 +73,8 @@ int main(int argc, char* argv[]) {
                     Kokkos::deep_copy(state, -1);
 
                     // Execute reductions
+                    auto reduction_start = std::chrono::high_resolution_clock::now();
                     if(reduction.compare("NONE") != 0){
-                        auto reduction_start = std::chrono::high_resolution_clock::now();
                         if(reduction.compare("TRIVIAL") == 0){
                             includeTrivial(degree,state,xadj,adjncy);
                         }
@@ -84,9 +84,9 @@ int main(int argc, char* argv[]) {
                         if(reduction.compare("TRIANGLE") == 0){
                             includeTriangle(degree,state,xadj,adjncy);
                         }
-                        auto reduction_stop = std::chrono::high_resolution_clock::now();
-                        auto reduction_duration = std::chrono::duration_cast<std::chrono::microseconds>(reduction_stop - reduction_start);
                     }
+                    auto reduction_stop = std::chrono::high_resolution_clock::now();
+                    auto reduction_duration = std::chrono::duration_cast<std::chrono::microseconds>(reduction_stop - reduction_start);
                     std::cout << "Conducted reductions in " << reduction_duration.count() << " microseconds";
 
                     auto algo_start = std::chrono::high_resolution_clock::now();
