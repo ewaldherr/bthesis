@@ -26,7 +26,7 @@ KOKKOS_FUNCTION void includeTriangle(Kokkos::View<int*>& degree, Kokkos::View<in
                 return;
             }
             bool triangular = false;
-            for(int u = xadj(v); u < xadj(v+1): ++u){
+            for(int u = xadj(v); u < xadj(v+1); ++u){
                 if(adjncy(u) == w){
                     triangular = true;
                 }
@@ -53,7 +53,7 @@ KOKKOS_FUNCTION void lowDegree(Kokkos::View<int*>& degree, Kokkos::View<int*>& s
                 return;
             }
             bool triangular = false;
-            for(int u = xadj(v); u < xadj(v+1): ++u){
+            for(int u = xadj(v); u < xadj(v+1); ++u){
                 if(adjncy(u) == w){
                     triangular = true;
                 }
