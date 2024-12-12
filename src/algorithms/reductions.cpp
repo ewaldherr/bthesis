@@ -10,7 +10,6 @@ KOKKOS_FUNCTION void includeTrivial(Kokkos::View<int*>& degree, Kokkos::View<int
             state(i) = 1;
             for (int v = xadj(i); v < xadj(i+1); ++v) {
                 state(adjncy(v)) = 0;
-                degree(adjncy(v))--;
             }
         }
     });
