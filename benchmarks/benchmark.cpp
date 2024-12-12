@@ -79,10 +79,10 @@ int main(int argc, char* argv[]) {
                             includeTrivial(degree,state);
                         }
                         if(reduction.compare("LOWDEG") == 0){
-                            lowDegree(degree,state);
+                            lowDegree(degree,state,xadj,adjncy);
                         }
                         if(reduction.compare("TRIANGLE") == 0){
-                            includeTriangle(degree,state);
+                            includeTriangle(degree,state,xadj,adjncy);
                         }
                         auto reduction_stop = std::chrono::high_resolution_clock::now();
                         auto reduction_duration = std::chrono::duration_cast<std::chrono::microseconds>(reduction_stop - reduction_start);
