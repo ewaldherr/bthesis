@@ -76,7 +76,7 @@ int main(int argc, char* argv[]) {
                     if(reduction.compare("NONE") != 0){
                         auto reduction_start = std::chrono::high_resolution_clock::now();
                         if(reduction.compare("TRIVIAL") == 0){
-                            includeTrivial(degree,state);
+                            includeTrivial(degree,state,xadj,adjncy);
                         }
                         if(reduction.compare("LOWDEG") == 0){
                             lowDegree(degree,state,xadj,adjncy);
