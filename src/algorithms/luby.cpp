@@ -1,12 +1,3 @@
-#include <Kokkos_Core.hpp>
-#include <Kokkos_Random.hpp>
-#include <iostream>
-#include <vector>
-#include <random>
-#include <unordered_set>
-#include <string>
-#include <ctime>
-#include <chrono>
 #include "reductions.cpp"
 
 // Function to initialize random priorities on the GPU

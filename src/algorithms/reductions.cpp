@@ -1,8 +1,12 @@
+#include <Kokkos_Core.hpp>
+#include <Kokkos_Random.hpp>
 #include <iostream>
 #include <vector>
 #include <random>
 #include <unordered_set>
 #include <string>
+#include <ctime>
+#include <chrono>
 
 KOKKOS_FUNCTION void includeTrivial(Kokkos::View<int*>& degree, Kokkos::View<int*>& state){
     Kokkos::parallel_for("include_trivial", degree.extent(0), KOKKOS_LAMBDA(int i) {
