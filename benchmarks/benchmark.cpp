@@ -85,8 +85,8 @@ int main(int argc, char* argv[]) {
                     }
                 }
 
-                std::cout << "Avarage solution size is " << commulativeSize / 5 << std::endl;
-                std::cout << "Avarage execution time is " << commulativeTime / 5 << std::endl;
+                std::cout << "Average solution size is " << commulativeSize / 5 << std::endl;
+                std::cout << "Average execution time is " << commulativeTime / 5 << std::endl;
             }
         }
     }
