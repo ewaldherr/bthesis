@@ -100,7 +100,7 @@ int main(int argc, char* argv[]) {
                     auto algo_stop = std::chrono::high_resolution_clock::now();
                     auto algo_duration = std::chrono::duration_cast<std::chrono::microseconds>(algo_stop - algo_start);
                     commulativeTime += algo_duration.count() + reduction_duration.count();
-                    std::cout << "Determined MIS in " << algo_duration.count() << " microseconds" << std::endl;
+                    std::cout << "Determined MIS in " << algo_duration.count() + reduction_duration.count() << " microseconds" << std::endl;
                     commulativeSize += getSize(result_mis);
                     std::cout << "Verifying solution..." << std::endl;
                     bool valid = verifyResult(result_mis, xadj, adjncy);
