@@ -14,3 +14,55 @@ KOKKOS_FUNCTION void includeTrivial(Kokkos::View<int*>& degree, Kokkos::View<int
         }
     });
 }
+
+KOKKOS_FUNCTION void removeTriangle(Kokkos::View<int*>& degree, Kokkos::View<int*>& state){
+    Kokkos::parallel_for("include_trivial", degree.extent(0), KOKKOS_LAMBDA(int i) {
+        if (degree(i) == 2) {
+            int v = adjncy(xadj(i));
+            int w = adjncy(xadj(i)+1);
+            if(degree(v) == 2 || degree(w) == 2){
+                return;
+            }
+            bool triangular = false;
+            for(int u = xadj(v); u < xadj(v+1): ++u){
+                if(adjncy(u) == w){
+                    triangular = true;
+                }
+            }
+            if(triangular){
+                state(i) = 1;
+                state(v) = 0;
+                state(w) = 0;
+            }
+        }
+    });
+}
+
+KOKKOS_FUNCTION void lowDegree(Kokkos::View<int*>& degree, Kokkos::View<int*>& state){
+    Kokkos::parallel_for("include_trivial", degree.extent(0), KOKKOS_LAMBDA(int i) {
+        if (degree(i) < 2) {
+            state(i) = 1;
+            for (int v = xadj(i); v < xadj(i+1); ++v) {
+                state(adjncy(v)) = 0;
+            }
+        }
+        if (degree(i) == 2) {
+            int v = adjncy(xadj(i));
+            int w = adjncy(xadj(i)+1);
+            if(degree(v) == 2 || degree(w) == 2){
+                return;
+            }
+            bool triangular = false;
+            for(int u = xadj(v); u < xadj(v+1): ++u){
+                if(adjncy(u) == w){
+                    triangular = true;
+                }
+            }
+            if(triangular){
+                state(i) = 1;
+                state(v) = 0;
+                state(w) = 0;
+            }
+        }
+    });
+}
