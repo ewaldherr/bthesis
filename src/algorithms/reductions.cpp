@@ -86,7 +86,7 @@ KOKKOS_FUNCTION void includeIsolated(Kokkos::View<int*>& degree, Kokkos::View<in
 }
 
 KOKKOS_FUNCTION void lowDegree(Kokkos::View<int*>& degree, Kokkos::View<int*>& state, Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy){
-    Kokkos::parallel_for("low_degree", degree.extent(0), KOKKOS_LAMBDA(const int i, int& changes) {
+    Kokkos::parallel_for("low_degree", degree.extent(0), KOKKOS_LAMBDA(int i) {
         // Include trivial vertices
         if (degree(i) == 1 && degree(adjncy(xadj(i))) > 1) {
             state(i) = 1;
