@@ -10,7 +10,7 @@
 
 KOKKOS_FUNCTION void includeTrivial(Kokkos::View<int*>& degree, Kokkos::View<int*>& state, Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy){
     Kokkos::parallel_for("include_trivial", degree.extent(0), KOKKOS_LAMBDA(int i) {
-        if (degree(i) == 1) {
+        if (degree(i) == 1  && degree(adjncy(xadj(i))) > 1) {
             state(i) = 1;
             state(adjncy(xadj(i))) = 0;
         }
@@ -43,10 +43,16 @@ KOKKOS_FUNCTION void includeTriangle(Kokkos::View<int*>& degree, Kokkos::View<in
 KOKKOS_FUNCTION int lowDegree(Kokkos::View<int*>& degree, Kokkos::View<int*>& state, Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy){
     int changes = 0;
     Kokkos::parallel_reduce("low_degree", degree.extent(0), KOKKOS_LAMBDA(const int i, int& changes) {
-        if (degree(i) == 1) {
+        if (degree(i) == 1 && degree(adjncy(xadj(i))) > 1) {
             state(i) = 1;
-            state(adjncy(xadj(i))) = 0;
-            changes+=2;
+            if(state(adjncy(xadj(i))) == 0){
+                changes++;
+            } else {
+                state(adjncy(xadj(i))) = 0;
+                changes += 2;
+            }
+
+            
         }
         if (degree(i) == 2) {
             int v = adjncy(xadj(i));
@@ -62,9 +68,18 @@ KOKKOS_FUNCTION int lowDegree(Kokkos::View<int*>& degree, Kokkos::View<int*>& st
             }
             if(triangular){
                 state(i) = 1;
-                state(v) = 0;
-                state(w) = 0;
-                changes+=3;
+                if(state(v) != 0 && state(w)!= 0){
+                    state(v) = 0;
+                    state(w) = 0;
+                    changes+=3;
+                } else if(state(v) == 0 || state(w) == 0){
+                    state(v) = 0;
+                    state(w) = 0;
+                    changes += 2;
+                } else {
+                    changes ++;
+                }
+
             }
         }
     }, changes);
