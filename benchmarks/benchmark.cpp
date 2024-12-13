@@ -82,7 +82,8 @@ int main(int argc, char* argv[]) {
                             includeTrivial(degree,state,xadj,adjncy);
                         }
                         if(reduction.compare("LOWDEG") == 0){
-                            reductions = lowDegree(degree,state,xadj,adjncy);
+                            lowDegree(degree,state,xadj,adjncy);
+                            reductions = countAffected(state);
                             std::cout << "The reduction was conducted on " << reductions << " vertices" << std::endl;
                         }
                         if(reduction.compare("TRIANGLE") == 0){

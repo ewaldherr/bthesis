@@ -10,7 +10,7 @@
 
 KOKKOS_FUNCTION int countAffected(Kokkos::View<int*>& state){
     int sum = 0;
-    Kokkos::parallel_for("count_affected", state.extent(0), KOKKOS_LAMBDA(int i) {
+    Kokkos::parallel_reduce("count_affected", state.extent(0), KOKKOS_LAMBDA(int i) {
         if(state(i) != -1){
             sum++;
         }
