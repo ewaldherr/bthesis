@@ -59,7 +59,7 @@ KOKKOS_FUNCTION void includeIsolated(Kokkos::View<int*>& degree, Kokkos::View<in
             int neighbor = adjncy(j);
 
             // Check if `neighbor` is connected to all other neighbors of `i`
-            for (int k = xadj(i); k < xadj(i + 1); ++k) {
+            for (int k = j + 1; k < xadj(i + 1); ++k) {
                 int other_neighbor = adjncy(k);
                 if (neighbor == other_neighbor) {
                     continue;
