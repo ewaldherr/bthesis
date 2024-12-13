@@ -75,13 +75,15 @@ int main(int argc, char* argv[]) {
                     Kokkos::deep_copy(state, -1);
 
                     // Execute reductions
+                    int reductions = 0;
                     auto reduction_start = std::chrono::high_resolution_clock::now();
                     if(reduction.compare("NONE") != 0){
                         if(reduction.compare("TRIVIAL") == 0){
                             includeTrivial(degree,state,xadj,adjncy);
                         }
                         if(reduction.compare("LOWDEG") == 0){
-                            lowDegree(degree,state,xadj,adjncy);
+                            reductions = lowDegree(degree,state,xadj,adjncy);
+                            std::cout << "The reduction was conducted on " << reduction << " vertices";
                         }
                         if(reduction.compare("TRIANGLE") == 0){
                             includeTriangle(degree,state,xadj,adjncy);
