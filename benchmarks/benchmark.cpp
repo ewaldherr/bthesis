@@ -83,7 +83,7 @@ int main(int argc, char* argv[]) {
                         }
                         if(reduction.compare("LOWDEG") == 0){
                             reductions = lowDegree(degree,state,xadj,adjncy);
-                            std::cout << "The reduction was conducted on " << reduction << " vertices";
+                            std::cout << "The reduction was conducted on " << reductions << " vertices";
                         }
                         if(reduction.compare("TRIANGLE") == 0){
                             includeTriangle(degree,state,xadj,adjncy);
