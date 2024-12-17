@@ -81,13 +81,13 @@ int main(int argc, char* argv[]) {
                         if(reduction.compare("TRIVIAL") == 0){
                             includeTrivial(degree,state,xadj,adjncy);
                         }
-                        if(reduction.compare("ALL") == 0){
-                            allReductions(degree,state,xadj,adjncy);
+                        if(reduction.compare("LOWDEG") == 0){
+                            lowDegree(degree,state,xadj,adjncy);
                             reductions = countAffected(state);
                             std::cout << "The reduction was conducted on " << reductions << " vertices" << std::endl;
                         }
-                        if(reduction.compare("DOMINATION") == 0){
-                            checkDominatedVertices(degree,state,xadj,adjncy);
+                        if(reduction.compare("TRIANGLE") == 0){
+                            includeTriangle(degree,state,xadj,adjncy);
                         }
                     }
                     auto reduction_stop = std::chrono::high_resolution_clock::now();
