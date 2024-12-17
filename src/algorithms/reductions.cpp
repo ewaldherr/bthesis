@@ -50,75 +50,99 @@ KOKKOS_FUNCTION void includeTriangle(Kokkos::View<int*>& degree, Kokkos::View<in
     });
 }
 
-KOKKOS_FUNCTION void includeIsolated(Kokkos::View<int*>& degree, Kokkos::View<int*>& state, Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy) {
-    Kokkos::parallel_for("find_isolated_clique_vertices", degree.extent(0), KOKKOS_LAMBDA(int i) {
-        if (degree(i) < 2) {
-            return; 
-        }
-        for (int j = xadj(i); j < xadj(i + 1); ++j) {
-            int neighbor = adjncy(j);
+KOKKOS_FUNCTION void checkDominatedVertices(Kokkos::View<int*>& degree, Kokkos::View<int*>& state, Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy) {
+    Kokkos::parallel_for("check_dominated_vertices", degree.extent(0), KOKKOS_LAMBDA(const int i) {
+        if (state(i) == 0) return; // Skip already removed vertices
 
-            // Check if `neighbor` is connected to all other neighbors of `i`
-            for (int k = j + 1; k < xadj(i + 1); ++k) {
-                int other_neighbor = adjncy(k);
-                if (neighbor == other_neighbor) {
-                    continue;
-                }
+        bool allNeighborsDominate = true; 
+        // Iterate through neighbors of vertex i
+        for (int j_idx = xadj(i); j_idx < xadj(i + 1); ++j_idx) {
+            int j = adjncy(j_idx);  // Neighbor vertex j
+            if (state(j) == 0) continue; // Skip already removed vertices
 
-                // Check if `neighbor` is connected to `other_neighbor`
-                bool connected = false;
-                for (int l = xadj(neighbor); l < xadj(neighbor + 1); ++l) {
-                    if (adjncy(l) == other_neighbor) {
-                        connected = true;
+            // Check if j dominates i
+            bool jDominatesI = true;
+            for (int k_idx = xadj(i); k_idx < xadj(i + 1); ++k_idx) {
+                int neighbor_of_i = adjncy(k_idx);
+                if (neighbor_of_i == j) continue; // Skip self-check
+
+                // Check if neighbor_of_i is in j's neighborhood
+                bool found = false;
+                for (int l_idx = xadj(j); l_idx < xadj(j + 1); ++l_idx) {
+                    if (adjncy(l_idx) == neighbor_of_i) {
+                        found = true;
                         break;
                     }
                 }
-                if (!connected) {
-                    return;
+                if (!found) {
+                    jDominatesI = false; // j does not dominate i
+                    break;
                 }
             }
+
+            // If j dominates i, mark j for removal
+            if (jDominatesI) {
+                state(j) = 0; // Neighbor j dominates vertex i
+            } else {
+                allNeighborsDominate = false; // Not all neighbors dominate i
+            }
         }
-        state(i) = 1;
-        for(int v = xadj(i); v < xadj(i+1); ++v){
-            state(v) = 0;
+
+        // If all neighbors dominate i, mark i as 1 (dominated by all)
+        if (allNeighborsDominate) {
+            state(i) = 1;
         }
     });
 }
 
-KOKKOS_FUNCTION void lowDegree(Kokkos::View<int*>& degree, Kokkos::View<int*>& state, Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy){
+
+KOKKOS_FUNCTION void allReductions(Kokkos::View<int*>& degree, Kokkos::View<int*>& state, Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy){
     Kokkos::parallel_for("low_degree", degree.extent(0), KOKKOS_LAMBDA(int i) {
         // Include trivial vertices
+        if (state(i) == 0) return; // Skip already removed vertices
+
         if (degree(i) == 1 && degree(adjncy(xadj(i))) > 1) {
             state(i) = 1;
             state(adjncy(xadj(i))) = 0;       
         }
-        if (degree(i) < 2) {
-            return; 
-        }
-        // Include isolated vertices
-        for (int j = xadj(i); j < xadj(i + 1); ++j) {
-            int neighbor = adjncy(j);
 
-            // Check if neighbor is connected to all other neighbors of `i`
-            for (int k = j + 1; k < xadj(i + 1); ++k) {
-                int other_neighbor = adjncy(k);
+        bool allNeighborsDominate = true; 
+        // Iterate through neighbors of vertex i
+        for (int j_idx = xadj(i); j_idx < xadj(i + 1); ++j_idx) {
+            int j = adjncy(j_idx);  // Neighbor vertex j
+            if (state(j) == 0) continue; // Skip already removed vertices
 
-                // Check if neighbor is connected to other_neighbor
-                bool connected = false;
-                for (int l = xadj(neighbor); l < xadj(neighbor + 1); ++l) {
-                    if (adjncy(l) == other_neighbor) {
-                        connected = true;
+            // Check if j dominates i
+            bool jDominatesI = true;
+            for (int k_idx = xadj(i); k_idx < xadj(i + 1); ++k_idx) {
+                int neighbor_of_i = adjncy(k_idx);
+                if (neighbor_of_i == j) continue; // Skip self-check
+
+                // Check if neighbor_of_i is in j's neighborhood
+                bool found = false;
+                for (int l_idx = xadj(j); l_idx < xadj(j + 1); ++l_idx) {
+                    if (adjncy(l_idx) == neighbor_of_i) {
+                        found = true;
                         break;
                     }
                 }
-                if (!connected) {
-                    return;
+                if (!found) {
+                    jDominatesI = false; // j does not dominate i
+                    break;
                 }
             }
+
+            // If j dominates i, mark j for removal
+            if (jDominatesI) {
+                state(j) = 0; // Neighbor j dominates vertex i
+            } else {
+                allNeighborsDominate = false; // Not all neighbors dominate i
+            }
         }
-        state(i) = 1;
-        for(int v = xadj(i); v < xadj(i+1); ++v){
-            state(v) = 0;
+
+        // If all neighbors dominate i, mark i as 1 (dominated by all)
+        if (allNeighborsDominate) {
+            state(i) = 1;
         }
     });
 }

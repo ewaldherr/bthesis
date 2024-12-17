@@ -5,7 +5,7 @@ This application is a optimization algorithm. It is developed as part of a bache
 ## Dependencies
 
 Kokkos (https://github.com/kokkos/kokkos): Enables performance portable parallelism. Used for running the algorithms on GPUs. \
-Cuda (https://developer.nvidia.com/cuda-toolkit): Required to build project. 
+Cuda (https://developer.nvidia.com/cuda-toolkit): Required to build project for GPUs. 
 
 ## Usage
 
@@ -16,7 +16,7 @@ Use `git clone https://github.com/ewaldherr/bthesis` to clone the repository
 ### Building
 
 Use `-mkdir build` followed by `cd build` to set up the building process. \
-Use `cmake .. -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=~/kokkos -DKokkos_ENABLE_CUDA=ON`followed by `make` to finish the building process. 
+Use `cmake .. -DKokkos_ROOT=${kokkos_install_prefix}`followed by `make` to finish the building process. 
 
 ### Algorithms
 
