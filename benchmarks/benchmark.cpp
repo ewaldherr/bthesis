@@ -48,13 +48,6 @@ int main(int argc, char* argv[]) {
             }
             std::cout << "Using seed " << seed << std::endl;
 
-            // Set up reduction
-            std::string reduction;
-            if(argc > 3){
-                reduction = argv[3];
-            } else{
-                reduction = "NONE";
-            }
             // Determining which algorithm to use
             std::string algorithms[3] = {"LUBY", "DEGREE", "DEGREEUD"};
 
@@ -74,22 +67,6 @@ int main(int argc, char* argv[]) {
                     Kokkos::View<int*> state("state", xadj.extent(0)-1);
                     Kokkos::deep_copy(state, -1);
 
-                    // Execute reductions
-                    int reductions = 0;
-                    auto reduction_start = std::chrono::high_resolution_clock::now();
-                    if(reduction.compare("NONE") != 0){
-                        if(reduction.compare("TRIVIAL") == 0){
-                            includeTrivial(degree,state,xadj,adjncy);
-                        }
-                        if(reduction.compare("LOWDEG") == 0){
-                            lowDegree(degree,state,xadj,adjncy);
-                            reductions = countAffected(state);
-                            std::cout << "The reduction was conducted on " << reductions << " vertices" << std::endl;
-                        }
-                        if(reduction.compare("TRIANGLE") == 0){
-                            includeTriangle(degree,state,xadj,adjncy);
-                        }
-                    }
                     auto reduction_stop = std::chrono::high_resolution_clock::now();
                     auto reduction_duration = std::chrono::duration_cast<std::chrono::microseconds>(reduction_stop - reduction_start);
                     std::cout << "Conducted reductions in " << reduction_duration.count() << " microseconds" << std::endl;
