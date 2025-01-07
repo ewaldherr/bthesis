@@ -4,10 +4,9 @@
 KOKKOS_FUNCTION void initializePriorities(Kokkos::View<double*>& priorities, unsigned int seed) {
     Kokkos::Random_XorShift64_Pool<> random_pool(seed);
     Kokkos::parallel_for("init_priorities", priorities.extent(0), KOKKOS_LAMBDA(int i) {
-        // Create a generator explicitly based on the index and seed
-        auto generator = random_pool.get_state(i + seed);
-        priorities(i) = generator.drand(0., 1.);
-        // No need to call free_state since we are not dynamically acquiring states
+        auto generator = random_pool.get_state();
+        priorities(i) = generator.drand(0.,1.);
+        random_pool.free_state(generator);
     });
 }
 
