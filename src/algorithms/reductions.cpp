@@ -80,7 +80,7 @@ KOKKOS_FUNCTION void includeIsolated(Kokkos::View<int*>& degree, Kokkos::View<in
         }
         state(i) = 1;
         for(int v = xadj(i); v < xadj(i+1); ++v){
-            state(v) = 0;
+            state(adjncy(v)) = 0;
         }
     });
 }
