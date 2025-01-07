@@ -67,10 +67,6 @@ int main(int argc, char* argv[]) {
                     Kokkos::View<int*> state("state", xadj.extent(0)-1);
                     Kokkos::deep_copy(state, -1);
 
-                    auto reduction_stop = std::chrono::high_resolution_clock::now();
-                    auto reduction_duration = std::chrono::duration_cast<std::chrono::microseconds>(reduction_stop - reduction_start);
-                    std::cout << "Conducted reductions in " << reduction_duration.count() << " microseconds" << std::endl;
-
                     auto algo_start = std::chrono::high_resolution_clock::now();
                     if(algo.compare("DEGREE") == 0 || algo.compare("DEGREEUD") == 0){
                         result_mis = degreeBasedAlgorithm(xadj, adjncy, degree, state, seed + 100 * i, algo, 1);
