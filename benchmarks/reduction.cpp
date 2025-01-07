@@ -85,7 +85,7 @@ int main(int argc, char* argv[]) {
                                 lowDegree(degree,state,xadj,adjncy);
                             }
                             reduced = countAffected(state);
-                            std::cout << "The reduction was conducted on " << reductions << " vertices" << std::endl;
+                            std::cout << "The reduction was conducted on " << reduced << " vertices" << std::endl;
                         }
                         auto reduction_stop = std::chrono::high_resolution_clock::now();
                         auto reduction_duration = std::chrono::duration_cast<std::chrono::microseconds>(reduction_stop - reduction_start);
