@@ -4,7 +4,7 @@
 KOKKOS_FUNCTION void initializePriorities(Kokkos::View<double*>& priorities, unsigned int seed) {
     Kokkos::parallel_for("init_priorities", priorities.extent(0), KOKKOS_LAMBDA(int i) {
         // Directly create a random number generator for each thread
-        Kokkos::Random_XorShift64<> generator(seed + i);
+        Kokkos::Random_XorShift64<Kokkos::DefaultExecutionSpace> generator(seed + i);
         // Generate a random number and assign it to the priorities view
         priorities(i) = generator.drand(0., 1.);
     });
