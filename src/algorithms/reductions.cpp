@@ -93,7 +93,7 @@ KOKKOS_FUNCTION void removeDominating(Kokkos::View<int*>& degree, Kokkos::View<i
                 if (i == other_neighbor) {
                     continue;
                 }
-                bool connected == false;
+                bool connected = false;
                 // Check if i is connected to other_neighbor
                 for (int l = xadj(i); l < xadj(i + 1); ++l) {
                     if (adjncy(l) == other_neighbor) {
