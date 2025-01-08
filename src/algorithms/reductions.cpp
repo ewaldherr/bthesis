@@ -43,14 +43,14 @@ KOKKOS_FUNCTION void includeIsolated(Kokkos::View<int*>& degree, Kokkos::View<in
                     return;
                 }
             }
-            // Check if `neighbor` is connected to all other neighbors of `i`
+            // Check if neighbor is connected to all other neighbors of i
             for (int k = j + 1; k < xadj(i + 1); ++k) {
                 int other_neighbor = adjncy(k);
                 if (neighbor == other_neighbor) {
                     continue;
                 }
 
-                // Check if `neighbor` is connected to `other_neighbor`
+                // Check if neighbor is connected to other_neighbor
                 bool connected = false;
                 for (int l = xadj(neighbor); l < xadj(neighbor + 1); ++l) {
                     if (adjncy(l) == other_neighbor) {
@@ -66,6 +66,49 @@ KOKKOS_FUNCTION void includeIsolated(Kokkos::View<int*>& degree, Kokkos::View<in
         state(i) = 1;
         for(int v = xadj(i); v < xadj(i+1); ++v){
             state(adjncy(v)) = 0;
+        }
+    });
+}
+
+KOKKOS_FUNCTION void removeDominating(Kokkos::View<int*>& degree, Kokkos::View<int*>& state, Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy) {
+    Kokkos::parallel_for("remove_dominating", degree.extent(0), KOKKOS_LAMBDA(int i) {
+        if (degree(i) < 2) {
+            return; 
+        }
+        for (int j = xadj(i); j < xadj(i + 1); ++j) {
+            bool dominating = true;
+            int neighbor = adjncy(j);
+            // Abort search early if degree is not fitting
+            if(degree(neighbor) > degree(i)){
+                continue;
+            }
+            if(degree(neighbor) == degree(i)){
+                if(neighbor < i){
+                    continue;
+                }
+            }
+            // Check if neighbor is connected to all other neighbors of i
+            for (int k = xadj(neighbor); k < xadj(neighbor + 1); ++k) {
+                int other_neighbor = adjncy(k);
+                if (i == other_neighbor) {
+                    continue;
+                }
+                bool connected == false;
+                // Check if i is connected to other_neighbor
+                for (int l = xadj(i); l < xadj(i + 1); ++l) {
+                    if (adjncy(l) == other_neighbor) {
+                        connected = true;
+                        break;
+                    }
+                }
+                if (!connected) {
+                    dominating = false;
+                }
+            }
+            if(dominating){
+                state(i) = 0;
+                return;
+            }
         }
     });
 }

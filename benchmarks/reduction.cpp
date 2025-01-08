@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
             std::cout << "Using seed " << seed << std::endl;
 
             // Set up reduction
-            std::string reductions[4] = {"NONE", "TRIVIAL", "ISOLATED", "ALL"};
+            std::string reductions[5] = {"NONE", "TRIVIAL", "ISOLATED", "DOMINATING", "ALL"};
 
             // Determining which algorithm to use
             std::string algorithms[3] = {"LUBY", "DEGREE", "DEGREEUD"};
@@ -83,6 +83,9 @@ int main(int argc, char* argv[]) {
                             }
                             if(reduction.compare("ALL") == 0){
                                 allRed(degree,state,xadj,adjncy);
+                            }
+                            if(reduction.compare("DOMINATING") == 0){
+                                removeDominating(degree,state,xadj,adjncy);
                             }
                             reduced = countAffected(state);
                             std::cout << "The reduction was conducted on " << reduced << " vertices" << std::endl;
