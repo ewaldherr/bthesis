@@ -98,11 +98,11 @@ KOKKOS_FUNCTION void removeDominating(Kokkos::View<int*>& degree, Kokkos::View<i
                 for (int l = xadj(i); l < xadj(i + 1); ++l) {
                     if (adjncy(l) == other_neighbor) {
                         connected = true;
-                        break;
                     }
                 }
                 if (!connected) {
                     dominating = false;
+                    break;
                 }
             }
             if(dominating){
