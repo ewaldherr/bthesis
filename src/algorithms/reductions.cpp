@@ -57,7 +57,15 @@ KOKKOS_FUNCTION void includeIsolated(Kokkos::View<int*>& degree, Kokkos::View<in
         }
         for (int j = xadj(i); j < xadj(i + 1); ++j) {
             int neighbor = adjncy(j);
-
+            // Abort search early if degree is not fitting
+            if(degree(neighbor) < degree(i)){
+                return;
+            }
+            if(degree(neighbor) == degree(i)){
+                if(neighbor < i){
+                    return;
+                }
+            }
             // Check if `neighbor` is connected to all other neighbors of `i`
             for (int k = j + 1; k < xadj(i + 1); ++k) {
                 int other_neighbor = adjncy(k);
@@ -96,7 +104,15 @@ KOKKOS_FUNCTION void allRed(Kokkos::View<int*>& degree, Kokkos::View<int*>& stat
             // Include isolated vertices
             for (int j = xadj(i); j < xadj(i + 1); ++j) {
                 int neighbor = adjncy(j);
-
+                // Abort search early if degree is not fitting
+                if(degree(neighbor) < degree(i)){
+                    return;
+                }
+                if(degree(neighbor) == degree(i)){
+                    if(neighbor < i){
+                        return;
+                    }
+                }
                 // Check if neighbor is connected to all other neighbors of `i`
                 for (int k = j + 1; k < xadj(i + 1); ++k) {
                     int other_neighbor = adjncy(k);
