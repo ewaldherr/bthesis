@@ -85,40 +85,39 @@ KOKKOS_FUNCTION void includeIsolated(Kokkos::View<int*>& degree, Kokkos::View<in
     });
 }
 
-KOKKOS_FUNCTION void lowDegree(Kokkos::View<int*>& degree, Kokkos::View<int*>& state, Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy){
+KOKKOS_FUNCTION void allRed(Kokkos::View<int*>& degree, Kokkos::View<int*>& state, Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy){
     Kokkos::parallel_for("low_degree", degree.extent(0), KOKKOS_LAMBDA(int i) {
         // Include trivial vertices
         if (degree(i) == 1 && degree(adjncy(xadj(i))) > 1) {
             state(i) = 1;
             state(adjncy(xadj(i))) = 0;       
         }
-        if (degree(i) < 2) {
-            return; 
-        }
-        // Include isolated vertices
-        for (int j = xadj(i); j < xadj(i + 1); ++j) {
-            int neighbor = adjncy(j);
+        else{
+            // Include isolated vertices
+            for (int j = xadj(i); j < xadj(i + 1); ++j) {
+                int neighbor = adjncy(j);
 
-            // Check if neighbor is connected to all other neighbors of `i`
-            for (int k = j + 1; k < xadj(i + 1); ++k) {
-                int other_neighbor = adjncy(k);
+                // Check if neighbor is connected to all other neighbors of `i`
+                for (int k = j + 1; k < xadj(i + 1); ++k) {
+                    int other_neighbor = adjncy(k);
 
-                // Check if neighbor is connected to other_neighbor
-                bool connected = false;
-                for (int l = xadj(neighbor); l < xadj(neighbor + 1); ++l) {
-                    if (adjncy(l) == other_neighbor) {
-                        connected = true;
-                        break;
+                    // Check if neighbor is connected to other_neighbor
+                    bool connected = false;
+                    for (int l = xadj(neighbor); l < xadj(neighbor + 1); ++l) {
+                        if (adjncy(l) == other_neighbor) {
+                            connected = true;
+                            break;
+                        }
+                    }
+                    if (!connected) {
+                        return;
                     }
                 }
-                if (!connected) {
-                    return;
-                }
             }
-        }
-        state(i) = 1;
-        for(int v = xadj(i); v < xadj(i+1); ++v){
-            state(v) = 0;
+            state(i) = 1;
+            for(int v = xadj(i); v < xadj(i+1); ++v){
+                state(adjncy(v)) = 0;
+            }
         }
     });
 }

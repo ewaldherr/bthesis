@@ -82,7 +82,7 @@ int main(int argc, char* argv[]) {
                                 includeIsolated(degree,state,xadj,adjncy);
                             }
                             if(reduction.compare("ALL") == 0){
-                                lowDegree(degree,state,xadj,adjncy);
+                                allRed(degree,state,xadj,adjncy);
                             }
                             reduced = countAffected(state);
                             std::cout << "The reduction was conducted on " << reduced << " vertices" << std::endl;
