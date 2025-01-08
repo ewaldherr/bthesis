@@ -27,29 +27,6 @@ KOKKOS_FUNCTION void includeTrivial(Kokkos::View<int*>& degree, Kokkos::View<int
     });
 }
 
-KOKKOS_FUNCTION void includeTriangle(Kokkos::View<int*>& degree, Kokkos::View<int*>& state, Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy){
-    Kokkos::parallel_for("include_triangle", degree.extent(0), KOKKOS_LAMBDA(int i) {
-        if (degree(i) == 2) {
-            int v = adjncy(xadj(i));
-            int w = adjncy(xadj(i)+1);
-            if(degree(v) == 2 || degree(w) == 2){
-                return;
-            }
-            bool triangular = false;
-            for(int u = xadj(v); u < xadj(v+1); ++u){
-                if(adjncy(u) == w){
-                    triangular = true;
-                }
-            }
-            if(triangular){
-                state(i) = 1;
-                state(v) = 0;
-                state(w) = 0;
-            }
-        }
-    });
-}
-
 KOKKOS_FUNCTION void includeIsolated(Kokkos::View<int*>& degree, Kokkos::View<int*>& state, Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy) {
     Kokkos::parallel_for("find_isolated_clique_vertices", degree.extent(0), KOKKOS_LAMBDA(int i) {
         if (degree(i) < 2) {
