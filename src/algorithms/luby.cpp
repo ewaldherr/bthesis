@@ -1,22 +1,15 @@
-#include <Kokkos_Core.hpp>
-#include <Kokkos_Random.hpp>
-#include <iostream>
-#include <vector>
-#include <random>
-#include <unordered_set>
-#include <string>
-#include <ctime>
-#include <chrono>
+#include "reductions.cpp"
 
 // Function to initialize random priorities on the GPU
 KOKKOS_FUNCTION void initializePriorities(Kokkos::View<double*>& priorities, unsigned int seed) {
-    Kokkos::Random_XorShift64_Pool<> random_pool(seed);
     Kokkos::parallel_for("init_priorities", priorities.extent(0), KOKKOS_LAMBDA(int i) {
-        auto generator = random_pool.get_state();
-        priorities(i) = generator.drand(0.,1.);
-        random_pool.free_state(generator);
+        // Directly create a random number generator for each thread
+        Kokkos::Random_XorShift64<Kokkos::DefaultExecutionSpace> generator(seed + i);
+        // Generate a random number and assign it to the priorities view
+        priorities(i) = generator.drand(0., 1.);
     });
 }
+
 
 // Function that checks for each vertex if it has the max priority of its neighborhood
 KOKKOS_FUNCTION void checkMax(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy, Kokkos::View<double*>& priorities, Kokkos::View<int*>& state){
@@ -53,13 +46,12 @@ KOKKOS_FUNCTION void removeVertices(Kokkos::View<int*>& xadj, Kokkos::View<int*>
 Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy, Kokkos::View<int*> state, unsigned int seed) {
     Kokkos::View<double*> priorities("priorities", xadj.extent(0)-1);
 
-    auto h_priorities = Kokkos::create_mirror_view(priorities);
     auto h_state = Kokkos::create_mirror_view(state);
-    Kokkos::deep_copy(state, -1);
 
     // Assign random priorities to remaining vertices
     initializePriorities(priorities, seed);
-    
+    int totalIterations = 0;
+
     bool changes;
     do {
 
@@ -75,11 +67,14 @@ Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> ad
                 break;
             }
         }
+
         // Add selected vertices to MIS and remove them and their neighbors
         removeVertices(xadj,adjncy,state);
-
+        
+        totalIterations++;
     } while (changes);
 
+    std::cout << "The algorithm run a total of " << totalIterations << " total iterations" << std::endl;
     return state;
 }
 

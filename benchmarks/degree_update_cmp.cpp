@@ -14,7 +14,7 @@ Kokkos::View<int*> initializeDegrees(Kokkos::View<int*> xadj){
     return degree;
 }
 
-void getSize(Kokkos::View<int*> mis){
+int getSize(Kokkos::View<int*> mis){
     auto h_mis = Kokkos::create_mirror_view(mis);
     Kokkos::deep_copy(h_mis, mis);
     int size = 0;
@@ -22,6 +22,7 @@ void getSize(Kokkos::View<int*> mis){
         if(h_mis(i) == 1) size++;
     }
     std::cout << size << " vertices are inside of the MIS."  << std::endl;
+    return size;
 }
 
 int main(int argc, char* argv[]) {
@@ -37,6 +38,7 @@ int main(int argc, char* argv[]) {
         else{
             readGraphFromFile(argv[1], xadj,adjncy);
             std::cout << "Code running on " << Kokkos::DefaultExecutionSpace::name() << std::endl;
+
             // Set up seed for RNG
             unsigned int seed;
             if(argc > 2){
@@ -45,14 +47,19 @@ int main(int argc, char* argv[]) {
             } else{
                 seed = (unsigned int)time(NULL);
             }
-            // Determining which algorithm to use
-            std::string algorithms[2] = {"DEGREE","DEGREEUD"};
 
-            for(auto algo: algorithms){
+            // Determining which algorithm to use
+            std::string algo = "DEGREEUD";
+
+            for(int j = 0; j < 6; ++j){
                 Kokkos::View<int*> result_mis("mis",xadj.extent(0)-1);
                 std::cout << "Determining MIS of " << argv[1] << " with " << xadj.extent(0)-1 << " nodes and " << adjncy.extent(0) << " edges using " << algo << "."<< std::endl;
+                std::cout << "Current update frequency is " << j*2 << std::endl;
 
-                for(int i = 0; i < 1; ++i){
+                int commulativeTime = 0;                  
+                int commulativeSize = 0;
+
+                for(int i = 0; i < 5; ++i){
                     // Set up degrees
                     Kokkos::View<int*> degree("degree", xadj.extent(0)-1);
                     degree = initializeDegrees(xadj);
@@ -60,11 +67,12 @@ int main(int argc, char* argv[]) {
                     // Run algorithm with Kokkos
                     Kokkos::View<int*> state("state", xadj.extent(0)-1);
                     auto algo_start = std::chrono::high_resolution_clock::now();
-                    result_mis = degreeBasedAlgorithm(xadj, adjncy, degree, state, seed + 100 * i, algo);
+                    result_mis = degreeBasedAlgorithm(xadj, adjncy, degree, state, seed + 100 * i, algo, j*2);
                     auto algo_stop = std::chrono::high_resolution_clock::now();
-                    auto algo_duration = std::chrono::duration_cast<std::chrono::milliseconds>(algo_stop - algo_start);
-                    std::cout << "Determined MIS in " << algo_duration.count() << " milliseconds" << std::endl;
-                    getSize(result_mis);
+                    auto algo_duration = std::chrono::duration_cast<std::chrono::microseconds>(algo_stop - algo_start);
+                    commulativeTime += algo_duration.count();
+                    std::cout << "Determined MIS in " << algo_duration.count() << " microseconds" << std::endl;
+                    commulativeSize += getSize(result_mis);
                     std::cout << "Verifying solution..." << std::endl;
                     bool valid = verifyResult(result_mis, xadj, adjncy);
                     if(valid){
@@ -73,6 +81,9 @@ int main(int argc, char* argv[]) {
                         std::cout << "Solution is NOT valid" << std::endl;
                     }
                 }
+       
+                std::cout << "Avarage solution size is " << commulativeSize / 5 << std::endl;
+                std::cout << "Avarage execution time is " << commulativeTime / 5 << std::endl;
             }
         }
     }
