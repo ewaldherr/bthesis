@@ -28,7 +28,6 @@ KOKKOS_FUNCTION void removeAtRandom(Kokkos::View<int*>& xadj, Kokkos::View<int*>
                 current_solution(adjncy(v)) = -1;
             }
         }
-        random_pool.free_state(generator);
     });
 }
 
