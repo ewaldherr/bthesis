@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
             std::cout << "Using seed " << seed << std::endl;
 
             Kokkos::View<int*> result_mis("mis",xadj.extent(0)-1);
-            std::cout << "Determining MIS of " << argv[1] << " with " << xadj.extent(0)-1 << " nodes and " << adjncy.extent(0)/2 << " edges using " << algo << "."<< std::endl;
+            std::cout << "Determining MIS of " << argv[1] << " with " << xadj.extent(0)-1 << " nodes and " << adjncy.extent(0)/2 << " edges using DegreeUpdateIter." << std::endl;
 
             // Set up degrees
             Kokkos::View<int*> degree("degree", xadj.extent(0)-1);
@@ -60,11 +60,11 @@ int main(int argc, char* argv[]) {
             Kokkos::deep_copy(state, -1);
 
             auto algo_start = std::chrono::high_resolution_clock::now();
-            result_mis = iterAlgorithm(xadj, adjncy, degree, "DEGREEITER", seed + 100 * i);
+            result_mis = iterAlgorithm(xadj, adjncy, degree, "DEGREEITER", seed);
             auto algo_stop = std::chrono::high_resolution_clock::now();
             auto algo_duration = std::chrono::duration_cast<std::chrono::seconds>(algo_stop - algo_start);
             std::cout << "Total runtime was " << algo_duration.count() << "seconds" << std::endl;
-            
+
             std::cout << "Verifying solution..." << std::endl;
             bool valid = verifyResult(result_mis, xadj, adjncy);
             if(valid){
