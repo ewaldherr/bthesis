@@ -67,11 +67,11 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adj
         ensureIndependency(xadj, adjncy, current_solution);
         //updateDegrees(xadj, adjncy, current_solution, degree);
         ++totalIterations;
-        std::cout << "Size found is " << newSize << std::endl;
         algo_stop = std::chrono::high_resolution_clock::now();
         algo_duration = std::chrono::duration_cast<std::chrono::seconds>(algo_stop - algo_start);
     }
 
     std::cout << "Iterative approach lasted a total of " << totalIterations << " iterations." << std::endl;
+    std::cout << "The found solotuin has size " << size << std::endl;
     return best_solution;
 }

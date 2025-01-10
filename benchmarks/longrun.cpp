@@ -63,7 +63,7 @@ int main(int argc, char* argv[]) {
             result_mis = iterAlgorithm(xadj, adjncy, degree, "DEGREEITER", seed);
             auto algo_stop = std::chrono::high_resolution_clock::now();
             auto algo_duration = std::chrono::duration_cast<std::chrono::seconds>(algo_stop - algo_start);
-            std::cout << "Total runtime was " << algo_duration.count() << "seconds" << std::endl;
+            std::cout << "Total runtime was " << algo_duration.count() << " seconds" << std::endl;
 
             std::cout << "Verifying solution..." << std::endl;
             bool valid = verifyResult(result_mis, xadj, adjncy);
