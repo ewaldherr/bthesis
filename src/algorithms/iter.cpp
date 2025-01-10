@@ -52,7 +52,7 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adj
         removeAtRandom(xadj, adjncy, current_solution, 0.5, seed + 1000 * totalIterations);
         //updateDegrees(xadj, adjncy, current_solution, degree);
         ++totalIterations;
-        std::cout << "Size found is " << size << std::endl;
+        std::cout << "Size found is " << newSize << std::endl;
         algo_stop = std::chrono::high_resolution_clock::now();
         algo_duration = std::chrono::duration_cast<std::chrono::seconds>(algo_stop - algo_start);
     }
