@@ -1,6 +1,5 @@
 #include "degree_based.cpp"
 
-//TODO: parallize with Kokkos parallel_reduce
 KOKKOS_FUNCTION int checkSize(Kokkos::View<int*>& best_solution, Kokkos::View<int*>& current_solution, int& best_size){
     int size = 0;
     Kokkos::parallel_reduce ("Reduction", current_solution.extent(0), KOKKOS_LAMBDA (const int i, int& sum) {
@@ -10,9 +9,6 @@ KOKKOS_FUNCTION int checkSize(Kokkos::View<int*>& best_solution, Kokkos::View<in
         best_size = size;
         Kokkos::deep_copy(best_solution,current_solution);
         return best_size;
-    }
-    if(size == best_size){
-        return -1;
     }
     return 0;
 }
@@ -54,8 +50,8 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adj
             algo_duration = std::chrono::duration_cast<std::chrono::seconds>(algo_stop - algo_start);
             std::cout << "New best solution found of size " << newBest << " [" << algo_duration.count() << "]" << std::endl;
         }
-        removeAtRandom(xadj, adjncy, current_solution, 0.5, seed + 10 * totalIterations);
-        updateDegrees(xadj, adjncy, current_solution, degree);
+        removeAtRandom(xadj, adjncy, current_solution, 0.75, seed + 1000 * totalIterations);
+        //updateDegrees(xadj, adjncy, current_solution, degree);
         ++totalIterations;
         algo_stop = std::chrono::high_resolution_clock::now();
         algo_duration = std::chrono::duration_cast<std::chrono::seconds>(algo_stop - algo_start);
