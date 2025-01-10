@@ -1,11 +1,12 @@
 #include "degree_based.cpp"
 
-KOKKOS_FUNCTION int checkSize(Kokkos::View<int*>& best_solution, Kokkos::View<int*>& current_solution, int& best_size){
+KOKKOS_FUNCTION int checkSize(Kokkos::View<int*>& best_solution, Kokkos::View<int*>& current_solution, int& best_size, bool& newBest){
     int size = 0;
     Kokkos::parallel_reduce ("Reduction", current_solution.extent(0), KOKKOS_LAMBDA (const int i, int& sum) {
         if (current_solution(i) == 1) sum++;
     }, size);
     if(size > best_size){
+        newBest = true;
         best_size = size;
         Kokkos::deep_copy(best_solution,current_solution);
     }
@@ -21,6 +22,11 @@ KOKKOS_FUNCTION void removeAtRandom(Kokkos::View<int*>& xadj, Kokkos::View<int*>
             current_solution(i) = -1;
             for (int v = xadj(i); v < xadj(i+1); ++v) {
                 current_solution(adjncy(v)) = -1;
+                for(int u = xadj(adjncy(v)); u < xadj(adjncy(v)+1);++u){
+                    if(current_solution(adjncy(u)) == 1){
+                        current_solution(adjncy(v)) = 0;
+                    }
+                }
             }
         }
     });
@@ -33,6 +39,8 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adj
     auto algo_duration = std::chrono::duration_cast<std::chrono::seconds>(algo_stop - algo_start);
     int size = 0;
     int& best_size = size;
+    bool best = false;
+    bool& newBest = best;
     Kokkos::View<int*> current_solution("current_solution", xadj.extent(0)-1);
     Kokkos::View<int*> best_solution("best_solution", xadj.extent(0)-1);
     auto h_current = Kokkos::create_mirror_view(current_solution);
@@ -43,8 +51,9 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adj
     algorithm = "DEGREEUD";
     while(algo_duration.count() < 120){
         current_solution = degreeBasedAlgorithm(xadj, adjncy, degree, current_solution, seed + 1000 * totalIterations, algorithm, 1);
-        int newSize = checkSize(best_solution, current_solution, best_size);
-        if(newSize > size){
+        int newSize = checkSize(best_solution, current_solution, best_size, newBest);
+        if(newBest){
+            newBest = false;
             algo_stop = std::chrono::high_resolution_clock::now();
             algo_duration = std::chrono::duration_cast<std::chrono::seconds>(algo_stop - algo_start);
             std::cout << "New best solution found of size " << newSize << " [" << algo_duration.count() << "]" << std::endl;
