@@ -30,9 +30,8 @@ KOKKOS_FUNCTION void removeAtRandom(Kokkos::View<int*>& xadj, Kokkos::View<int*>
 KOKKOS_FUNCTION void ensureIndependency(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy, Kokkos::View<int*>& current_solution){
     Kokkos::parallel_for("ensure_independency", current_solution.extent(0), KOKKOS_LAMBDA(int i) {
         if(current_solution(i)!=1) return;
-            for (int v = xadj(i); v < xadj(i+1); ++v) {
-                current_solution(adjncy(v)) = 0;
-            }
+        for (int v = xadj(i); v < xadj(i+1); ++v) {
+            current_solution(adjncy(v)) = 0;
         }
     });
 }
