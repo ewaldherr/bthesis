@@ -22,11 +22,16 @@ KOKKOS_FUNCTION void removeAtRandom(Kokkos::View<int*>& xadj, Kokkos::View<int*>
             current_solution(i) = -1;
             for (int v = xadj(i); v < xadj(i+1); ++v) {
                 current_solution(adjncy(v)) = -1;
-                for(int u = xadj(adjncy(v)); u < xadj(adjncy(v)+1);++u){
-                    if(current_solution(adjncy(u)) == 1){
-                        current_solution(adjncy(v)) = 0;
-                    }
-                }
+            }
+        }
+    });
+}
+
+KOKKOS_FUNCTION void ensureIndependency(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy, Kokkos::View<int*>& current_solution){
+    Kokkos::parallel_for("ensure_independency", current_solution.extent(0), KOKKOS_LAMBDA(int i) {
+        if(current_solution(i)!=1) return;
+            for (int v = xadj(i); v < xadj(i+1); ++v) {
+                current_solution(adjncy(v)) = 0;
             }
         }
     });
@@ -59,6 +64,7 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adj
             std::cout << "New best solution found of size " << newSize << " [" << algo_duration.count() << "]" << std::endl;
         }
         removeAtRandom(xadj, adjncy, current_solution, 0.5, seed + 1000 * totalIterations);
+        ensureIndependency(xadj, adjncy, current_solution);
         //updateDegrees(xadj, adjncy, current_solution, degree);
         ++totalIterations;
         std::cout << "Size found is " << newSize << std::endl;
