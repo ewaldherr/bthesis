@@ -1,20 +1,16 @@
 #include "degree_based.cpp"
 
-//TODO: parallize with Kokkos parallel_reduce
-KOKKOS_FUNCTION int checkSize(Kokkos::View<int*>& best_solution, Kokkos::View<int*>& current_solution, int& best_size){
+KOKKOS_FUNCTION int checkSize(Kokkos::View<int*>& best_solution, Kokkos::View<int*>& current_solution, int& best_size, bool& newBest){
     int size = 0;
     Kokkos::parallel_reduce ("Reduction", current_solution.extent(0), KOKKOS_LAMBDA (const int i, int& sum) {
         if (current_solution(i) == 1) sum++;
     }, size);
     if(size > best_size){
+        newBest = true;
         best_size = size;
         Kokkos::deep_copy(best_solution,current_solution);
-        return best_size;
     }
-    if(size == best_size){
-        return -1;
-    }
-    return 0;
+    return size;
 }
 
 KOKKOS_FUNCTION void removeAtRandom(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy, Kokkos::View<int*>& current_solution, double probability, unsigned int seed){
@@ -31,6 +27,15 @@ KOKKOS_FUNCTION void removeAtRandom(Kokkos::View<int*>& xadj, Kokkos::View<int*>
     });
 }
 
+KOKKOS_FUNCTION void ensureIndependency(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy, Kokkos::View<int*>& current_solution){
+    Kokkos::parallel_for("ensure_independency", current_solution.extent(0), KOKKOS_LAMBDA(int i) {
+        if(current_solution(i)!=1) return;
+        for (int v = xadj(i); v < xadj(i+1); ++v) {
+            current_solution(adjncy(v)) = 0;
+        }
+    });
+}
+
 // Iterative Algorithm with removing vertices from the solution 
 Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy, Kokkos::View<int*> degree, std::string algorithm, unsigned int seed) {
     auto algo_start = std::chrono::high_resolution_clock::now();
@@ -38,6 +43,8 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adj
     auto algo_duration = std::chrono::duration_cast<std::chrono::seconds>(algo_stop - algo_start);
     int size = 0;
     int& best_size = size;
+    bool best = false;
+    bool& newBest = best;
     Kokkos::View<int*> current_solution("current_solution", xadj.extent(0)-1);
     Kokkos::View<int*> best_solution("best_solution", xadj.extent(0)-1);
     auto h_current = Kokkos::create_mirror_view(current_solution);
@@ -46,21 +53,25 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adj
     int totalIterations = 0;
 
     algorithm = "DEGREEUD";
-    while(algo_duration.count() < 3600){
-        current_solution = degreeBasedAlgorithm(xadj, adjncy, degree, current_solution, seed + totalIterations, algorithm, 1);
-        int newBest = checkSize(best_solution, current_solution, best_size);
-        if(newBest > 0){
+    while(algo_duration.count() < 120){
+        current_solution = degreeBasedAlgorithm(xadj, adjncy, degree, current_solution, seed + 1000 * totalIterations, algorithm, 1);
+        int newSize = checkSize(best_solution, current_solution, best_size, newBest);
+        if(newBest){
+            newBest = false;
             algo_stop = std::chrono::high_resolution_clock::now();
             algo_duration = std::chrono::duration_cast<std::chrono::seconds>(algo_stop - algo_start);
-            std::cout << "New best solution found of size " << newBest << " [" << algo_duration.count() << "]" << std::endl;
+            std::cout << "New best solution found of size " << newSize << " [" << algo_duration.count() << "]" << std::endl;
         }
-        removeAtRandom(xadj, adjncy, current_solution, 0.5, seed + 10 * totalIterations);
-        updateDegrees(xadj, adjncy, current_solution, degree);
+        Kokkos::deep_copy(current_solution, best_solution);
+        removeAtRandom(xadj, adjncy, current_solution, 0.75, seed + 1000 * totalIterations);
+        ensureIndependency(xadj, adjncy, current_solution);
+        //updateDegrees(xadj, adjncy, current_solution, degree);
         ++totalIterations;
         algo_stop = std::chrono::high_resolution_clock::now();
         algo_duration = std::chrono::duration_cast<std::chrono::seconds>(algo_stop - algo_start);
     }
 
     std::cout << "Iterative approach lasted a total of " << totalIterations << " iterations." << std::endl;
+    std::cout << "The found solotuin has size " << size << std::endl;
     return best_solution;
 }
