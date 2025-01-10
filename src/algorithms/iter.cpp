@@ -8,9 +8,8 @@ KOKKOS_FUNCTION int checkSize(Kokkos::View<int*>& best_solution, Kokkos::View<in
     if(size > best_size){
         best_size = size;
         Kokkos::deep_copy(best_solution,current_solution);
-        return best_size;
     }
-    return 0;
+    return size;
 }
 
 KOKKOS_FUNCTION void removeAtRandom(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy, Kokkos::View<int*>& current_solution, double probability, unsigned int seed){
@@ -44,15 +43,16 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adj
     algorithm = "DEGREEUD";
     while(algo_duration.count() < 120){
         current_solution = degreeBasedAlgorithm(xadj, adjncy, degree, current_solution, seed + totalIterations, algorithm, 1);
-        int newBest = checkSize(best_solution, current_solution, best_size);
-        if(newBest > 0){
+        int newSize = checkSize(best_solution, current_solution, best_size);
+        if(newSize > size){
             algo_stop = std::chrono::high_resolution_clock::now();
             algo_duration = std::chrono::duration_cast<std::chrono::seconds>(algo_stop - algo_start);
             std::cout << "New best solution found of size " << newBest << " [" << algo_duration.count() << "]" << std::endl;
         }
-        removeAtRandom(xadj, adjncy, current_solution, 0.75, seed + 1000 * totalIterations);
+        removeAtRandom(xadj, adjncy, current_solution, 0.5, seed + 1000 * totalIterations);
         //updateDegrees(xadj, adjncy, current_solution, degree);
         ++totalIterations;
+        std::cout << "Size found is " << size << std::endl;
         algo_stop = std::chrono::high_resolution_clock::now();
         algo_duration = std::chrono::duration_cast<std::chrono::seconds>(algo_stop - algo_start);
     }
