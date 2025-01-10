@@ -42,7 +42,7 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adj
 
     algorithm = "DEGREEUD";
     while(algo_duration.count() < 120){
-        current_solution = degreeBasedAlgorithm(xadj, adjncy, degree, current_solution, seed + totalIterations, algorithm, 1);
+        current_solution = degreeBasedAlgorithm(xadj, adjncy, degree, current_solution, seed + 1000 * totalIterations, algorithm, 1);
         int newSize = checkSize(best_solution, current_solution, best_size);
         if(newSize > size){
             algo_stop = std::chrono::high_resolution_clock::now();
