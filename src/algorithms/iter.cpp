@@ -53,14 +53,14 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adj
     int totalIterations = 0;
 
     algorithm = "DEGREEUD";
-    while(algo_duration.count() < 3600){
+    while(algo_duration.count()/1000 < 3600){
         current_solution = degreeBasedAlgorithm(xadj, adjncy, degree, current_solution, seed + 1000 * totalIterations, algorithm, 1);
         int newSize = checkSize(best_solution, current_solution, best_size, newBest);
         if(newBest){
             newBest = false;
             algo_stop = std::chrono::high_resolution_clock::now();
-            algo_duration = std::chrono::duration_cast<std::chrono::seconds>(algo_stop - algo_start);
-            std::cout << "New best solution found of size " << newSize << " [" << algo_duration.count() << "]" << std::endl;
+            algo_duration = std::chrono::duration_cast<std::chrono::milliseconds>(algo_stop - algo_start);
+            std::cout << "New best solution found of size " << newSize << " [" << algo_duration.count()/1000 << "]" << std::endl;
         }
         Kokkos::deep_copy(current_solution, best_solution);
         removeAtRandom(xadj, adjncy, current_solution, 0.75, seed + 1000 * totalIterations);
@@ -68,7 +68,7 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adj
         //updateDegrees(xadj, adjncy, current_solution, degree);
         ++totalIterations;
         algo_stop = std::chrono::high_resolution_clock::now();
-        algo_duration = std::chrono::duration_cast<std::chrono::seconds>(algo_stop - algo_start);
+        algo_duration = std::chrono::duration_cast<std::chrono::milliseconds>(algo_stop - algo_start);
     }
 
     std::cout << "Iterative approach lasted a total of " << totalIterations << " iterations." << std::endl;
