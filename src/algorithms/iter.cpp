@@ -40,7 +40,7 @@ KOKKOS_FUNCTION void ensureIndependency(Kokkos::View<int*>& xadj, Kokkos::View<i
 Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy, Kokkos::View<int*> degree, std::string algorithm, unsigned int seed) {
     auto algo_start = std::chrono::high_resolution_clock::now();
     auto algo_stop = std::chrono::high_resolution_clock::now();
-    auto algo_duration = std::chrono::duration_cast<std::chrono::seconds>(algo_stop - algo_start);
+    auto algo_duration = std::chrono::duration_cast<std::chrono::milliseconds>(algo_stop - algo_start);
     int size = 0;
     int& best_size = size;
     bool best = false;
