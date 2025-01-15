@@ -15,7 +15,7 @@ KOKKOS_FUNCTION int checkSize(Kokkos::View<int*>& best_solution, Kokkos::View<in
 
 KOKKOS_FUNCTION void removeAtRandom(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy, Kokkos::View<int*>& current_solution, double probability, unsigned int seed){
     Kokkos::parallel_for("remove_vertices", current_solution.extent(0), KOKKOS_LAMBDA(int i) {
-        if(current_solution(i)==0) return;
+        if(current_solution(i)!=1) return;
 
         Kokkos::Random_XorShift64<Kokkos::DefaultExecutionSpace> generator(seed + i);
         if(generator.drand(0.,1.)<= probability){
@@ -29,9 +29,9 @@ KOKKOS_FUNCTION void removeAtRandom(Kokkos::View<int*>& xadj, Kokkos::View<int*>
 
 KOKKOS_FUNCTION void ensureIndependency(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy, Kokkos::View<int*>& current_solution){
     Kokkos::parallel_for("ensure_independency", current_solution.extent(0), KOKKOS_LAMBDA(int i) {
-        if(current_solution(i)!=-1) return;
+        if(current_solution(i)!=1) return;
         for (int v = xadj(i); v < xadj(i+1); ++v) {
-            if(current_solution(adjncy(v)) == 1) current_solution(i) = 0;
+            current_solution(adjncy(v)) = 0;
         }
     });
 }
