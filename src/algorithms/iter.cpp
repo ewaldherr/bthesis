@@ -29,9 +29,9 @@ KOKKOS_FUNCTION void removeAtRandom(Kokkos::View<int*>& xadj, Kokkos::View<int*>
 
 KOKKOS_FUNCTION void ensureIndependency(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy, Kokkos::View<int*>& current_solution){
     Kokkos::parallel_for("ensure_independency", current_solution.extent(0), KOKKOS_LAMBDA(int i) {
-        if(current_solution(i)!=1) return;
+        if(current_solution(i)!=-1) return;
         for (int v = xadj(i); v < xadj(i+1); ++v) {
-            current_solution(adjncy(v)) = 0;
+            if(current_solution(adjncy(v)) == 1) current_solution(i) = 0;
         }
     });
 }
@@ -74,6 +74,6 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*>& xadj, Kokkos::View<int*>& a
     }
 
     std::cout << "Iterative approach lasted a total of " << totalIterations << " iterations." << std::endl;
-    std::cout << "The found solotuin has size " << size << std::endl;
+    std::cout << "The found solution has size " << size << std::endl;
     return best_solution;
 }
