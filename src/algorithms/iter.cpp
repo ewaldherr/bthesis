@@ -65,6 +65,7 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*>& xadj, Kokkos::View<int*>& a
         }
         //Kokkos::deep_copy(current_solution, best_solution);
         removeAtRandom(xadj, adjncy, current_solution, 0.5, seed + 1000 * totalIterations);
+        Kokkos::fence();
         ensureIndependency(xadj,adjncy,current_solution);
         //updateDegrees(xadj, adjncy, current_solution, degree);
         ++totalIterations;
