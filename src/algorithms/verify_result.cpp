@@ -6,7 +6,8 @@ void checkVertices(Kokkos::View<int*> result_mis, Kokkos::View<bool*> valid, Kok
     Kokkos::parallel_for("check_vertices", valid.extent(0), KOKKOS_LAMBDA(int u) {
         valid(u) = true;
         if(result_mis(u) != 0 && result_mis(u) != 1){
-            throw std::runtime_error("Solution is not complete");
+            valid(u) = false;
+            printf("Solution is incomplete\n", i);
         }
         // Check for maximality
         if(result_mis(u) == 0){
