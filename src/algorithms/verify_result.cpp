@@ -5,6 +5,10 @@
 void checkVertices(Kokkos::View<int*> result_mis, Kokkos::View<bool*> valid, Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy){
     Kokkos::parallel_for("check_vertices", valid.extent(0), KOKKOS_LAMBDA(int u) {
         valid(u) = true;
+        if(result_mis(u) != 0 && result_mis(u) != 1){
+            valid(u) = false;
+            printf("Solution is incomplete\n", u);
+        }
         // Check for maximality
         if(result_mis(u) == 0){
             for (int v = xadj(u); v < xadj(u+1); ++v) {

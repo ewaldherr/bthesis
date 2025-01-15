@@ -43,7 +43,7 @@ KOKKOS_FUNCTION void removeVertices(Kokkos::View<int*>& xadj, Kokkos::View<int*>
 }
 
 // Luby's Algorithm
-Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adjncy, Kokkos::View<int*> state, unsigned int seed) {
+Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy, Kokkos::View<int*>& state, unsigned int seed) {
     Kokkos::View<double*> priorities("priorities", xadj.extent(0)-1);
 
     auto h_state = Kokkos::create_mirror_view(state);
