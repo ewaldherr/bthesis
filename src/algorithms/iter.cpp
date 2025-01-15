@@ -25,7 +25,9 @@ KOKKOS_FUNCTION void removeAtRandom(Kokkos::View<int*>& xadj, Kokkos::View<int*>
             }
         }
     });
+}
 
+KOKKOS_FUNCTION void ensureIndependency(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy, Kokkos::View<int*>& current_solution){
     Kokkos::parallel_for("ensure_independency", current_solution.extent(0), KOKKOS_LAMBDA(int i) {
         if(current_solution(i)!=1) return;
         for (int v = xadj(i); v < xadj(i+1); ++v) {
@@ -63,6 +65,7 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*> xadj, Kokkos::View<int*> adj
         }
         //Kokkos::deep_copy(current_solution, best_solution);
         removeAtRandom(xadj, adjncy, current_solution, 0.5, seed + 1000 * totalIterations);
+        ensureIndependency(xadj,adjncy,current_solution);
         //updateDegrees(xadj, adjncy, current_solution, degree);
         ++totalIterations;
         algo_stop = std::chrono::high_resolution_clock::now();
