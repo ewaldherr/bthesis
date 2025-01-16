@@ -50,9 +50,9 @@ KOKKOS_FUNCTION bool isDone(Kokkos::View<int*>& state){
         }
     }, sum);
     if(sum > 0){
-        return false;
+        return true;
     }
-    return true;
+    return false;
 }
 
 // Luby's Algorithm
