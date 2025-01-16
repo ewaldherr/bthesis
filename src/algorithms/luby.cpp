@@ -26,6 +26,9 @@ KOKKOS_FUNCTION void checkMax(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjn
 
             if (isMaxPriority) {
                 state(u) = 2;
+                for (int v = xadj(u); v < xadj(u+1); ++v) {
+                    state(adjncy(v)) = 0;
+                }
             }
         });
 }
@@ -75,7 +78,7 @@ Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int*>& xadj, Kokkos::View<int*>& 
 
 
         // Add selected vertices to MIS and remove them and their neighbors
-        removeVertices(xadj,adjncy,state);
+        //removeVertices(xadj,adjncy,state);
         changes = isDone(state);
 
         totalIterations++;
