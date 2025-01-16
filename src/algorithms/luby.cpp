@@ -36,31 +36,6 @@ KOKKOS_FUNCTION int checkMax(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjnc
     return changes;
 }
 
-// Function to remove vertices of vertices added to MIS
-KOKKOS_FUNCTION void removeVertices(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy, Kokkos::View<int*>& state){
-    Kokkos::parallel_for("update_sets", xadj.extent(0)-1, KOKKOS_LAMBDA(int u) {
-        if (state(u) == 2) {
-            state(u) = 1;
-            for (int v = xadj(u); v < xadj(u+1); ++v) {
-                state(adjncy(v)) = 0;
-            }
-        }
-    });
-}
-
-KOKKOS_FUNCTION bool isDone(Kokkos::View<int*>& state){
-    int sum = 0;
-    Kokkos::parallel_reduce("count_unassigned", state.extent(0), KOKKOS_LAMBDA(const int i, int& vertices) {
-        if(state(i) == -1){
-            vertices++;
-        }
-    }, sum);
-    if(sum > 0){
-        return true;
-    }
-    return false;
-}
-
 // Luby's Algorithm
 Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy, Kokkos::View<int*>& state, unsigned int seed) {
     Kokkos::View<double*> priorities("priorities", xadj.extent(0)-1);
@@ -73,17 +48,8 @@ Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int*>& xadj, Kokkos::View<int*>& 
 
     bool changes;
     do {
-
-        // Select vertices with highest priority in their neighborhood
         changes = (checkMax(xadj,adjncy,priorities,state) > 0);
-
-        // Check if changes occured during last step
-
-
-        // Add selected vertices to MIS and remove them and their neighbors
-        //removeVertices(xadj,adjncy,state);
-
-        totalIterations++;
+        ++totalIterations;
     } while (changes);
 
     std::cout << "The algorithm run a total of " << totalIterations << " total iterations" << std::endl;
