@@ -19,7 +19,7 @@ KOKKOS_FUNCTION int checkMax(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjnc
 
             bool isMaxPriority = true;
             for (int v = xadj(u); v < xadj(u+1); ++v) {
-                if ((state(adjncy(v)) == -1 && priorities(adjncy(v)) >= priorities(u)) || state(adjncy(v)) == 2) {
+                if ((state(adjncy(v)) == -1 && priorities(adjncy(v)) >= priorities(u)) || state(adjncy(v)) == 1) {
                     isMaxPriority = false;
                     break;
                 }
