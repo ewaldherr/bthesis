@@ -12,34 +12,28 @@ KOKKOS_FUNCTION void initializePriorities(Kokkos::View<double*>& priorities, uns
 
 
 // Function that checks for each vertex if it has the max priority of its neighborhood
-KOKKOS_FUNCTION void checkMax(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy, Kokkos::View<double*>& priorities, Kokkos::View<int*>& state){
-    Kokkos::parallel_for("select_max_priority", xadj.extent(0)-1, KOKKOS_LAMBDA(int u) {
+KOKKOS_FUNCTION int checkMax(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy, Kokkos::View<double*>& priorities, Kokkos::View<int*>& state){
+    int changes = 0;
+    Kokkos::parallel_reduce("select_max_priority", xadj.extent(0)-1, KOKKOS_LAMBDA(int u, int& vertices) {
             if (state(u) != -1) return;
 
             bool isMaxPriority = true;
             for (int v = xadj(u); v < xadj(u+1); ++v) {
-                if ((state(adjncy(v)) == -1 && priorities(adjncy(v)) >= priorities(u)) || state(adjncy(v)) == 2) {
+                if ((state(adjncy(v)) == -1 && priorities(adjncy(v)) >= priorities(u)) || state(adjncy(v)) == 1) {
                     isMaxPriority = false;
                     break;
                 }
             }
 
             if (isMaxPriority) {
-                state(u) = 2;
+                state(u) = 1;
+                for (int v = xadj(u); v < xadj(u+1); ++v) {
+                    state(adjncy(v)) = 0;
+                    vertices++;
+                }
             }
-        });
-}
-
-// Function to remove vertices of vertices added to MIS
-KOKKOS_FUNCTION void removeVertices(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy, Kokkos::View<int*>& state){
-    Kokkos::parallel_for("update_sets", xadj.extent(0)-1, KOKKOS_LAMBDA(int u) {
-        if (state(u) == 2) {
-            state(u) = 1;
-            for (int v = xadj(u); v < xadj(u+1); ++v) {
-                state(adjncy(v)) = 0;
-            }
-        }
-    });
+        }, changes);
+    return changes;
 }
 
 // Luby's Algorithm
@@ -54,24 +48,8 @@ Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int*>& xadj, Kokkos::View<int*>& 
 
     bool changes;
     do {
-
-        // Select vertices with highest priority in their neighborhood
-        checkMax(xadj,adjncy,priorities,state);
-
-        // Check if changes occured during last step
-        Kokkos::deep_copy(h_state,state);
-        changes = false;
-        for(int i = 0; i < state.extent(0);++i){
-            if(h_state(i)==2){
-                changes = true;
-                break;
-            }
-        }
-
-        // Add selected vertices to MIS and remove them and their neighbors
-        removeVertices(xadj,adjncy,state);
-        
-        totalIterations++;
+        changes = (checkMax(xadj,adjncy,priorities,state) > 0);
+        ++totalIterations;
     } while (changes);
 
     std::cout << "The algorithm run a total of " << totalIterations << " total iterations" << std::endl;

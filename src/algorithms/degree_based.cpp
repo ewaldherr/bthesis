@@ -14,8 +14,9 @@ KOKKOS_FUNCTION void updateDegrees(Kokkos::View<int*>& xadj, Kokkos::View<int*>&
 }
 
 // Function that checks for each vertex if it has the max priority of its neighborhood
-KOKKOS_FUNCTION void checkMaxDegreePrio(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy, Kokkos::View<int*>& degree, Kokkos::View<double*>& priorities, Kokkos::View<int*>& state){
-    Kokkos::parallel_for("select_max_priority", xadj.extent(0)-1, KOKKOS_LAMBDA(int u) {
+KOKKOS_FUNCTION int checkMaxDegreePrio(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy, Kokkos::View<int*>& degree, Kokkos::View<double*>& priorities, Kokkos::View<int*>& state){
+    int changes = 0;
+    Kokkos::parallel_reduce("select_max_priority", xadj.extent(0)-1, KOKKOS_LAMBDA(int u, int& vertices) {
             if (state(u) != -1) return;
 
             bool isMaxPriority = true;
@@ -25,16 +26,21 @@ KOKKOS_FUNCTION void checkMaxDegreePrio(Kokkos::View<int*>& xadj, Kokkos::View<i
                 if(degree(u) == degree(adjncy(v))){
                     if(priorities(u) > priorities(adjncy(v))) isSmaller = false;
                 }
-                if ((state(adjncy(v)) == -1 && isSmaller) || state(adjncy(v)) == 2) {
+                if ((state(adjncy(v)) == -1 && isSmaller) || state(adjncy(v)) == 1) {
                     isMaxPriority = false;
                     break;
                 }
             }
 
             if (isMaxPriority) {
-                state(u) = 2;
+                state(u) = 1;
+                for (int v = xadj(u); v < xadj(u+1); ++v) {
+                    state(adjncy(v)) = 0;
+                    vertices++;
+                }
             }
-        });
+        }, changes);
+    return changes;
 }
 
 // Degree-based version of Luby's Algorithm
@@ -52,7 +58,7 @@ Kokkos::View<int*> degreeBasedAlgorithm(Kokkos::View<int*>& xadj, Kokkos::View<i
     if(updateFrequency == 0){
         ++updateFrequency;
     }
-    if(updateFrequency == 10){
+    if(updateFrequency >= 10){
         updateFrequency = 1000000;
     }
     bool changes;
@@ -61,22 +67,7 @@ Kokkos::View<int*> degreeBasedAlgorithm(Kokkos::View<int*>& xadj, Kokkos::View<i
             updateDegrees(xadj, adjncy, state, degree);
             iter = 0;
         }
-
-        // Select vertices with highest priority in their neighborhood
-        checkMaxDegreePrio(xadj,adjncy, degree, priorities, state);
-
-        // Check if changes occured during last step
-        Kokkos::deep_copy(h_state,state);
-        changes = false;
-        for(int i = 0; i < state.extent(0);++i){
-            if(h_state(i)==2){
-                changes = true;
-                break;
-            }
-        }
-
-        // Add selected vertices to MIS and remove them and their neighbors
-        removeVertices(xadj,adjncy,state);
+        changes = (checkMaxDegreePrio(xadj,adjncy,degree,priorities,state) > 0);
         ++iter;
         ++totalIterations;
     } while (changes);
