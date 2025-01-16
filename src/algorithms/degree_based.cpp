@@ -67,7 +67,7 @@ Kokkos::View<int*> degreeBasedAlgorithm(Kokkos::View<int*>& xadj, Kokkos::View<i
             updateDegrees(xadj, adjncy, state, degree);
             iter = 0;
         }
-        changes = (checkMaxDegreePrio(xadj,adjncy,priorities,state) > 0);
+        changes = (checkMaxDegreePrio(xadj,adjncy,degree,priorities,state) > 0);
         ++iter;
         ++totalIterations;
     } while (changes);
