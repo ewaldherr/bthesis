@@ -63,7 +63,7 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*>& xadj, Kokkos::View<int*>& a
             double time = algo_duration.count();
             std::cout << "New best solution found of size " << newSize << " [" << time/1000 << "]" << std::endl;
         }
-        //Kokkos::deep_copy(current_solution, best_solution);
+        Kokkos::deep_copy(current_solution, best_solution);
         removeAtRandom(xadj, adjncy, current_solution, 0.5, seed + 1000 * totalIterations);
         Kokkos::fence();
         ensureIndependency(xadj,adjncy,current_solution);
