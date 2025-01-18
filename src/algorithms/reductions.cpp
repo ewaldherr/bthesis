@@ -150,12 +150,12 @@ KOKKOS_FUNCTION void allRed(Kokkos::View<int*>& degree, Kokkos::View<int*>& stat
                         }
                     }
                     if (!connected) {
-                        dominating = false;
-                        isolated = false
+                        dominated = false;
+                        isolated = false;
                         break;
                     }
                 }
-                if(dominating){
+                if(dominated){
                     state(neighbor) = 0;
                     return;
                 }
