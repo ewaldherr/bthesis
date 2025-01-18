@@ -56,7 +56,7 @@ int main(int argc, char* argv[]) {
                 std::cout << "Determining MIS of " << argv[1] << " with " << xadj.extent(0)-1 << " nodes and " << adjncy.extent(0)/2 << " edges using " << algo << "."<< std::endl;
 
                 int commulativeTime = 0;                  
-                int commulativeSize = 0;
+                double commulativeSize = 0;
 
                 for(int i = 0; i < 5; ++i){
                     // Set up degrees

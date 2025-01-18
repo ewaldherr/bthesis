@@ -60,7 +60,7 @@ int main(int argc, char* argv[]) {
 
                 for(auto reduction: reductions){
                     int commulativeTime = 0;                  
-                    int commulativeSize = 0;
+                    double commulativeSize = 0;
                     for(int i = 0; i < 5; ++i){
                         // Set up degrees
                         Kokkos::View<int*> degree("degree", xadj.extent(0)-1);
