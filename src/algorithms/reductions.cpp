@@ -122,8 +122,10 @@ KOKKOS_FUNCTION void allRed(Kokkos::View<int*>& degree, Kokkos::View<int*>& stat
         }
         else{
             // Include isolated vertices
+            bool isolated = true;
             for (int j = xadj(i); j < xadj(i + 1); ++j) {
                 int neighbor = adjncy(j);
+                bool dominated = true;
                 // Abort search early if degree is not fitting
                 if(degree(neighbor) < degree(i)){
                     return;
@@ -146,13 +148,16 @@ KOKKOS_FUNCTION void allRed(Kokkos::View<int*>& degree, Kokkos::View<int*>& stat
                         }
                     }
                     if (!connected) {
-                        return;
+                        dominated = false;
+                        isolated = false;
                     }
                 }
+                if(dominated){
+                    state(neighbor) = 0;
+                }
             }
-            state(i) = 1;
-            for(int v = xadj(i); v < xadj(i+1); ++v){
-                state(adjncy(v)) = 0;
+            if(isolated){
+                state(i) = 1;
             }
         }
     });
