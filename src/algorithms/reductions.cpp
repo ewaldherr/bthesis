@@ -121,39 +121,43 @@ KOKKOS_FUNCTION void allRed(Kokkos::View<int*>& degree, Kokkos::View<int*>& stat
             state(adjncy(xadj(i))) = 0;       
         }
         else{
-            // Include isolated vertices
             bool isolated = true;
             for (int j = xadj(i); j < xadj(i + 1); ++j) {
-                int neighbor = adjncy(j);
                 bool dominated = true;
+                int neighbor = adjncy(j);
                 // Abort search early if degree is not fitting
                 if(degree(neighbor) < degree(i)){
-                    return;
+                    isolated = false;
+                    continue;
                 }
                 if(degree(neighbor) == degree(i)){
                     if(neighbor < i){
-                        return;
+                        isolated = false;
+                        continue;
                     }
                 }
-                // Check if neighbor is connected to all other neighbors of `i`
-                for (int k = j + 1; k < xadj(i + 1); ++k) {
+                // Check if neighbor is connected to all other neighbors of i
+                for (int k = xadj(i); k < xadj(i + 1); ++k) {
                     int other_neighbor = adjncy(k);
-
-                    // Check if neighbor is connected to other_neighbor
+                    if (neighbor == other_neighbor) {
+                        continue;
+                    }
                     bool connected = false;
+                    // Check if i is connected to other_neighbor
                     for (int l = xadj(neighbor); l < xadj(neighbor + 1); ++l) {
                         if (adjncy(l) == other_neighbor) {
                             connected = true;
-                            break;
                         }
                     }
                     if (!connected) {
-                        dominated = false;
-                        isolated = false;
+                        dominating = false;
+                        isolated = false
+                        break;
                     }
                 }
-                if(dominated){
+                if(dominating){
                     state(neighbor) = 0;
+                    return;
                 }
             }
             if(isolated){
