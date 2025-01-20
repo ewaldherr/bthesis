@@ -115,33 +115,29 @@ KOKKOS_FUNCTION void removeDominating(Kokkos::View<int*>& degree, Kokkos::View<i
 
 KOKKOS_FUNCTION void allRed(Kokkos::View<int*>& degree, Kokkos::View<int*>& state, Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy){
         Kokkos::parallel_for("remove_dominating", degree.extent(0), KOKKOS_LAMBDA(int i) {
-        bool isolated = true;
         for (int j = xadj(i); j < xadj(i + 1); ++j) {
             bool dominating = true;
             int neighbor = adjncy(j);
             // Abort search early if degree is not fitting
-            if(degree(neighbor) < degree(i)){
-                isolated = false;
+            if(degree(neighbor) > degree(i)){
                 continue;
             }
             if(degree(neighbor) == degree(i)){
                 if(neighbor < i){
-                    isolated = false;
                     continue;
                 }
             }
-            // Check if neighbor is connected to all other neighbors of i
-            for (int k = xadj(i); k < xadj(i + 1); ++k) {
+            // Check if i is connected to all neighbors of neighbor
+            for (int k = xadj(neighbor); k < xadj(neighbor + 1); ++k) {
                 int other_neighbor = adjncy(k);
-                if (neighbor == other_neighbor) {
+                if (i == other_neighbor) {
                     continue;
                 }
                 bool connected = false;
                 // Check if i is connected to other_neighbor
-                for (int l = xadj(neighbor); l < xadj(neighbor + 1); ++l) {
+                for (int l = xadj(i); l < xadj(i + 1); ++l) {
                     if (adjncy(l) == other_neighbor) {
                         connected = true;
-                        break;
                     }
                 }
                 if (!connected) {
@@ -150,11 +146,9 @@ KOKKOS_FUNCTION void allRed(Kokkos::View<int*>& degree, Kokkos::View<int*>& stat
                 }
             }
             if(dominating){
-                state(neighbor) = 0;
+                state(i) = 0;
+                return;
             }
-        }
-        if(isolated){
-            state(i) = 1;
         }
     });
 }
