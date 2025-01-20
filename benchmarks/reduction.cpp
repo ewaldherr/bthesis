@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
             std::cout << "Using seed " << seed << std::endl;
 
             // Set up reduction
-            std::string reductions[5] = {"NONE", "TRIVIAL", "ISOLATED", "DOMINATING", "ALL"};
+            std::string reductions[5] = {"NONE", "ALL"};
 
             // Determining which algorithm to use
             std::string algorithms[3] = {"LUBY", "DEGREE", "DEGREEUD"};
@@ -75,17 +75,8 @@ int main(int argc, char* argv[]) {
                         int reduced = 0;
                         auto reduction_start = std::chrono::high_resolution_clock::now();
                         if(reduction.compare("NONE") != 0){
-                            if(reduction.compare("TRIVIAL") == 0){
-                                includeTrivial(degree,state,xadj,adjncy);
-                            }
-                            if(reduction.compare("ISOLATED") == 0){
-                                includeIsolated(degree,state,xadj,adjncy);
-                            }
                             if(reduction.compare("ALL") == 0){
                                 allRed(degree,state,xadj,adjncy);
-                            }
-                            if(reduction.compare("DOMINATING") == 0){
-                                removeDominating(degree,state,xadj,adjncy);
                             }
                             reduced = countAffected(state);
                             std::cout << "The reduction was conducted on " << reduced << " vertices" << std::endl;
