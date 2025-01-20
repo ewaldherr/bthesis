@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
             std::string reductions[2] = {"NONE", "ALL"};
 
             // Determining which algorithm to use
-            std::string algorithms[3] = {"LUBY", "DEGREE", "DEGREEUD"};
+            std::string algorithms[1] = {"LUBY"};
 
             for(auto algo: algorithms){
                 Kokkos::View<int*> result_mis("mis",xadj.extent(0)-1);
