@@ -46,6 +46,14 @@ int main(int argc, char* argv[]) {
             } else{
                 seed = (unsigned int)time(NULL);
             }
+            // Set up time for longrun
+            int time;
+            if(argc > 3){
+                std::string str_time = argv[3];
+                time = std::stoi(str_time);
+            } else{
+                time = 120;
+            }
             std::cout << "Using seed " << seed << std::endl;
 
             Kokkos::View<int*> result_mis("mis",xadj.extent(0)-1);
@@ -60,7 +68,7 @@ int main(int argc, char* argv[]) {
             Kokkos::deep_copy(state, -1);
 
             auto algo_start = std::chrono::high_resolution_clock::now();
-            result_mis = iterAlgorithm(xadj, adjncy, degree, "DEGREEITER", seed);
+            result_mis = iterAlgorithm(xadj, adjncy, degree, "DEGREEITER", seed, time);
             auto algo_stop = std::chrono::high_resolution_clock::now();
             auto algo_duration = std::chrono::duration_cast<std::chrono::seconds>(algo_stop - algo_start);
             std::cout << "Total runtime was " << algo_duration.count() << " seconds" << std::endl;
