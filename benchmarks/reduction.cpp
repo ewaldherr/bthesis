@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
             std::cout << "Using seed " << seed << std::endl;
 
             // Set up reduction
-            std::string reductions[5] = {"NONE", "ALL"};
+            std::string reductions[2] = {"NONE", "ALL"};
 
             // Determining which algorithm to use
             std::string algorithms[3] = {"LUBY", "DEGREE", "DEGREEUD"};
