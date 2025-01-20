@@ -115,6 +115,7 @@ KOKKOS_FUNCTION void removeDominating(Kokkos::View<int*>& degree, Kokkos::View<i
 
 KOKKOS_FUNCTION void allRed(Kokkos::View<int*>& degree, Kokkos::View<int*>& state, Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy){
         Kokkos::parallel_for("remove_dominating", degree.extent(0), KOKKOS_LAMBDA(int i) {
+        bool isolated = true;
         for (int j = xadj(i); j < xadj(i + 1); ++j) {
             bool dominating = true;
             int neighbor = adjncy(j);
@@ -142,6 +143,7 @@ KOKKOS_FUNCTION void allRed(Kokkos::View<int*>& degree, Kokkos::View<int*>& stat
                 }
                 if (!connected) {
                     dominating = false;
+                    isolated = false;
                     break;
                 }
             }
@@ -149,6 +151,9 @@ KOKKOS_FUNCTION void allRed(Kokkos::View<int*>& degree, Kokkos::View<int*>& stat
                 state(i) = 0;
                 return;
             }
+        }
+        if(isolated){
+            state(i) = 1;
         }
     });
 }
