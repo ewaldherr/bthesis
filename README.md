@@ -16,7 +16,7 @@ Use `git clone https://github.com/ewaldherr/bthesis` to clone the repository
 ### Building
 
 Use `-mkdir build` followed by `cd build` to set up the building process. \
-Use `cmake .. -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=~/kokkos -DKokkos_ENABLE_CUDA=ON`followed by `make` to finish the building process. 
+Use `cmake .. -DKokkos_ROOT=<your-kokkos-root-directory>`followed by `make` to finish the building process. 
 
 ### Algorithms
 
@@ -38,8 +38,7 @@ Solves the problem similiar to Luby's algorithm, while including vertices with t
 
 ### Input Format
 
-Input graph needs to be provided as a edge list: \
-<id_source> <id_destination>
+Input graph needs to be provided in the METIS graph format
 
 ### Output Format
 
