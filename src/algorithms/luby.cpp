@@ -40,8 +40,6 @@ KOKKOS_FUNCTION int checkMax(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjnc
 Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy, Kokkos::View<int*>& state, unsigned int seed) {
     Kokkos::View<double*> priorities("priorities", xadj.extent(0)-1);
 
-    auto h_state = Kokkos::create_mirror_view(state);
-
     // Assign random priorities to remaining vertices
     initializePriorities(priorities, seed);
     //int totalIterations = 0;

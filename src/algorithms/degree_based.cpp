@@ -48,8 +48,6 @@ Kokkos::View<int*> degreeBasedAlgorithm(Kokkos::View<int*>& xadj, Kokkos::View<i
     unsigned int seed, std::string algorithm, int updateFrequency) {
     Kokkos::View<double*> priorities("priorities", xadj.extent(0)-1);
 
-    auto h_state = Kokkos::create_mirror_view(state);
-
     // Assign random priorities to remaining vertices
     initializePriorities(priorities, seed);
 
