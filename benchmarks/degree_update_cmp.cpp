@@ -51,10 +51,13 @@ int main(int argc, char* argv[]) {
             // Determining which algorithm to use
             std::string algo = "DEGREEUD";
 
-            for(int j = 0; j < 6; ++j){
+            for(int j = 1; j < 6; ++j){
                 Kokkos::View<int*> result_mis("mis",xadj.extent(0)-1);
+                if(j==5){
+                    j *= 2;
+                }
                 std::cout << "Determining MIS of " << argv[1] << " with " << xadj.extent(0)-1 << " nodes and " << adjncy.extent(0) << " edges using " << algo << "."<< std::endl;
-                std::cout << "Current update frequency is " << j*2 << std::endl;
+                std::cout << "Current update frequency is " << j << std::endl;
 
                 int commulativeTime = 0;                  
                 int commulativeSize = 0;
@@ -67,7 +70,7 @@ int main(int argc, char* argv[]) {
                     // Run algorithm with Kokkos
                     Kokkos::View<int*> state("state", xadj.extent(0)-1);
                     auto algo_start = std::chrono::high_resolution_clock::now();
-                    result_mis = degreeBasedAlgorithm(xadj, adjncy, degree, state, seed + 1000 * i, algo, j*2);
+                    result_mis = degreeBasedAlgorithm(xadj, adjncy, degree, state, seed + 1000 * i, algo, j);
                     auto algo_stop = std::chrono::high_resolution_clock::now();
                     auto algo_duration = std::chrono::duration_cast<std::chrono::microseconds>(algo_stop - algo_start);
                     commulativeTime += algo_duration.count();

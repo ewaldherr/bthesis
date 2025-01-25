@@ -44,15 +44,15 @@ Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int*>& xadj, Kokkos::View<int*>& 
 
     // Assign random priorities to remaining vertices
     initializePriorities(priorities, seed);
-    int totalIterations = 0;
+    //int totalIterations = 0;
 
     bool changes;
     do {
         changes = (checkMax(xadj,adjncy,priorities,state) > 0);
-        ++totalIterations;
+        //++totalIterations;
     } while (changes);
 
-    std::cout << "The algorithm run a total of " << totalIterations << " total iterations" << std::endl;
+    //std::cout << "The algorithm run a total of " << totalIterations << " total iterations" << std::endl;
     return state;
 }
 
