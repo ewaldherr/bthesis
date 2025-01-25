@@ -43,10 +43,14 @@ Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int*>& xadj, Kokkos::View<int*>& 
     // Assign random priorities to remaining vertices
     initializePriorities(priorities, seed);
     //int totalIterations = 0;
-
+    int pool = xadj.extent(0) - 1;
+    int changed;
     bool changes;
     do {
-        changes = (checkMax(xadj,adjncy,priorities,state) > 0);
+        changed = checkMax(xadj,adjncy,priorities,state);
+        pool -= changed;
+        std::cout << pool << " vertices are left" << std::endl; 
+        changes = (changed > 0);
         //++totalIterations;
     } while (changes);
 
