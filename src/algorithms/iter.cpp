@@ -47,7 +47,6 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*>& xadj, Kokkos::View<int*>& a
     bool& newBest = best;
     Kokkos::View<int*> current_solution("current_solution", xadj.extent(0)-1);
     Kokkos::View<int*> best_solution("best_solution", xadj.extent(0)-1);
-    auto h_current = Kokkos::create_mirror_view(current_solution);
     Kokkos::deep_copy(current_solution, -1);
     Kokkos::deep_copy(best_solution, -1);
     int totalIterations = 0;
@@ -65,7 +64,6 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*>& xadj, Kokkos::View<int*>& a
         }
         //Kokkos::deep_copy(current_solution, best_solution);
         removeAtRandom(xadj, adjncy, current_solution, 0.5, seed + 1000 * totalIterations);
-        Kokkos::fence();
         ensureIndependency(xadj,adjncy,current_solution);
         //updateDegrees(xadj, adjncy, current_solution, degree);
         ++totalIterations;
