@@ -3,7 +3,7 @@
 KOKKOS_FUNCTION int countRemaining(Kokkos::View<int*>& state){
     int sum = 0;
     Kokkos::parallel_reduce("count_ramaining", state.extent(0), KOKKOS_LAMBDA(int i, int& vertices) {
-            if (state(u) == -1) vertices++;
+            if (state(i) == -1) vertices++;
         }, sum);
     return sum;
 }
