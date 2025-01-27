@@ -1,13 +1,5 @@
 #include "reductions.cpp"
 
-KOKKOS_FUNCTION int countRemaining(Kokkos::View<int*>& state){
-    int sum = 0
-    Kokkos::parallel_reduce("count_ramaining", state.extent(0), KOKKOS_LAMBDA(int i, int& vertices) {
-            if (state(u) == -1) vertices++;
-        }, sum);
-    return sum;
-}
-
 // Function to initialize random priorities on the GPU
 KOKKOS_FUNCTION void initializePriorities(Kokkos::View<double*>& priorities, unsigned int seed) {
     Kokkos::parallel_for("init_priorities", priorities.extent(0), KOKKOS_LAMBDA(int i) {
@@ -50,13 +42,12 @@ Kokkos::View<int*> lubysAlgorithm(Kokkos::View<int*>& xadj, Kokkos::View<int*>& 
 
     // Assign random priorities to remaining vertices
     initializePriorities(priorities, seed);
-    int totalIterations = 1;
+    //int totalIterations = 0;
 
     bool changes;
     do {
-        std::cout << countRemaining(state) << " vertices are remaining in iteration " << totalIterations << std::endl;
         changes = (checkMax(xadj,adjncy,priorities,state) > 0);
-        ++totalIterations;
+        //++totalIterations;
     } while (changes);
 
     //std::cout << "The algorithm run a total of " << totalIterations << " total iterations" << std::endl;
