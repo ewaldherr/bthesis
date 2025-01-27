@@ -51,7 +51,7 @@ Kokkos::View<int*> degreeBasedAlgorithm(Kokkos::View<int*>& xadj, Kokkos::View<i
     // Assign random priorities to remaining vertices
     initializePriorities(priorities, seed);
 
-    int totalIterations = 0;
+    //int totalIterations = 0;
     int iter = 1;
     if(updateFrequency == 0){
         ++updateFrequency;
@@ -65,10 +65,9 @@ Kokkos::View<int*> degreeBasedAlgorithm(Kokkos::View<int*>& xadj, Kokkos::View<i
             updateDegrees(xadj, adjncy, state, degree);
             iter = 0;
         }
-        std::cout << countRemaining(state) << " vertices are remaining in iteration " << totalIterations << std::endl;
         changes = (checkMaxDegreePrio(xadj,adjncy,degree,priorities,state) > 0);
         ++iter;
-        ++totalIterations;
+        //++totalIterations;
     } while (changes);
 
     //std::cout << "The algorithm run a total of " << totalIterations << " total iterations" << std::endl;

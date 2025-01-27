@@ -69,6 +69,7 @@ int main(int argc, char* argv[]) {
                     
                     // Run algorithm with Kokkos
                     Kokkos::View<int*> state("state", xadj.extent(0)-1);
+                    Kokkos::deep_copy(state, -1);
                     auto algo_start = std::chrono::high_resolution_clock::now();
                     result_mis = degreeBasedAlgorithm(xadj, adjncy, degree, state, seed + 1000 * i, algo, j);
                     auto algo_stop = std::chrono::high_resolution_clock::now();
