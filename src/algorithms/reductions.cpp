@@ -154,7 +154,7 @@ KOKKOS_FUNCTION void allRed(Kokkos::View<int*>& degree, Kokkos::View<int*>& stat
                     continue;
                 }
             }
-            if(own == xadj(neighbor + 1) && other != xadj(neighbor+1)){
+            if(own == xadj(i + 1) && other != xadj(neighbor+1)){
                 dominating = false;
             }
             if(dominating){
