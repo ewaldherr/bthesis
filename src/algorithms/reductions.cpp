@@ -127,23 +127,35 @@ KOKKOS_FUNCTION void allRed(Kokkos::View<int*>& degree, Kokkos::View<int*>& stat
                     continue;
                 }
             }
+            if(state(neighbor)==0){
+                continue;
+            }
             // Check if i is connected to all neighbors of neighbor
-            for (int k = xadj(neighbor); k < xadj(neighbor + 1); ++k) {
-                int other_neighbor = adjncy(k);
-                if (i == other_neighbor) {
+            int other = xadj(neighbor);
+            int own = xadj(i);
+            while(other < xadj(neighbor+1) && own < xadj(i+1)){
+                int own_neighbor = adjncy(own);
+                int other_neighbor = adjncy(other);
+                if(other_neighbor == i){
+                    ++other;
                     continue;
                 }
-                bool connected = false;
-                // Check if i is connected to other_neighbor
-                for (int l = xadj(i); l < xadj(i + 1); ++l) {
-                    if (adjncy(l) == other_neighbor) {
-                        connected = true;
-                    }
-                }
-                if (!connected) {
+                if(own_neighbor > other_neighbor){
                     dominating = false;
                     break;
                 }
+                if(own_neighbor == other_neighbor){
+                    ++own;
+                    ++other;
+                    continue;
+                }
+                if(own_neighbor < other_neighbor){
+                    ++own;
+                    continue;
+                }
+            }
+            if(own == xadj(neighbor + 1) && other != xadj(neighbor+1)){
+                dominating = false;
             }
             if(dominating){
                 state(i) = 0;
