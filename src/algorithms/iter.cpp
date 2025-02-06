@@ -40,7 +40,7 @@ KOKKOS_FUNCTION void ensureIndependency(Kokkos::View<int*>& xadj, Kokkos::View<i
 Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*>& xadj, Kokkos::View<int*>& adjncy, Kokkos::View<int*>& degree, std::string algorithm, unsigned int seed, int time) {
     auto algo_start = std::chrono::high_resolution_clock::now();
     auto algo_stop = std::chrono::high_resolution_clock::now();
-    auto algo_duration = std::chrono::duration_cast<std::chrono::microseconds>(algo_stop - algo_start);
+    auto algo_duration = std::chrono::duration_cast<std::chrono::milliseconds>(algo_stop - algo_start);
     int size = 0;
     int& best_size = size;
     bool best = false;
@@ -52,13 +52,13 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*>& xadj, Kokkos::View<int*>& a
     int totalIterations = 0;
 
     algorithm = "DEGREEUD";
-    while(algo_duration.count()/1000000 < time){
+    while(algo_duration.count()/1000 < time){
         current_solution = degreeBasedAlgorithm(xadj, adjncy, degree, current_solution, seed + 1000 * totalIterations, algorithm, 1);
         int newSize = checkSize(best_solution, current_solution, best_size, newBest);
         if(newBest){
             newBest = false;
             algo_stop = std::chrono::high_resolution_clock::now();
-            algo_duration = std::chrono::duration_cast<std::chrono::microseconds>(algo_stop - algo_start);
+            algo_duration = std::chrono::duration_cast<std::chrono::milliseconds>(algo_stop - algo_start);
             double time = algo_duration.count();
             std::cout << "New best solution found of size " << newSize << " [" << time/1000 << "]" << std::endl;
         }
@@ -68,7 +68,7 @@ Kokkos::View<int*> iterAlgorithm(Kokkos::View<int*>& xadj, Kokkos::View<int*>& a
         //updateDegrees(xadj, adjncy, current_solution, degree);
         ++totalIterations;
         algo_stop = std::chrono::high_resolution_clock::now();
-        algo_duration = std::chrono::duration_cast<std::chrono::microseconds>(algo_stop - algo_start);
+        algo_duration = std::chrono::duration_cast<std::chrono::milliseconds>(algo_stop - algo_start);
     }
 
     std::cout << "Iterative approach lasted a total of " << totalIterations << " iterations." << std::endl;
